@@ -23,3 +23,6 @@ The only other official distribution channels for this plugin are:
 
 **WARNING!** The [Edgegap plugin published on Unity Asset Store](https://assetstore.unity.com/packages/tools/network/edgegap-game-server-hosting-212563) is outdated and not supported anymore. If you've previously installed our plugin by another method than described above, please remove any Edgegap files or dependencies related before updating your plugin using the git URL.
 
+## Update the Plugin in Unity
+
+In order to update our plugin, locate it in Unity's **Package Manager** window and click **Update**. Wait for the process to complete and you're good to go!
