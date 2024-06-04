@@ -7,6 +7,8 @@ This plugin is intended to help you:
 - make your server build iteration as fast as possible,
 - make multiplayer development 10x easier by removing the need to learn Linux, Docker, or Cloud concepts.
 
+This plugin does not need to be included in your builds, as it's only a development tool and does not have any runtime features.
+
 ## Install the plugin in Unity
 
 1. Open your Unity project,
@@ -14,6 +16,10 @@ This plugin is intended to help you:
 3. Click the **+** icon and select **Add package from git URL...**,
 4. Input the following URL `https://github.com/edgegap/edgegap-unity-plugin.git`,
 5. Click **Add** and wait for the Unity Package Manager to complete the installation.
+
+Once you have it, check for **Edgegap** -> **Edgegap Hosting** in Unity's top menu.
+
+From here, we recommend following our [Unity Plugin Guide](https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide) to get your first dedicated server deployed.
 
 ## Other sources
 
