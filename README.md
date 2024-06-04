@@ -9,8 +9,11 @@ This plugin is intended to help you:
 
 ## Install the plugin in Unity
 
-Once you have your Unity project open, select toolbar option **Window** -> **Package Manager**. Click the **+** icon and select **Add package from git URL...**.
-Input the following URL and click **Add**: `https://github.com/edgegap/edgegap-unity-plugin.git`. Wait for the Unity Package Manager to complete the installation.
+1. Open your Unity project,
+2. Select toolbar option **Window** -> **Package Manager**,
+3. Click the **+** icon and select **Add package from git URL...**,
+4. Input the following URL `https://github.com/edgegap/edgegap-unity-plugin.git`,
+5. Click **Add** and wait for the Unity Package Manager to complete the installation.
 
 ## Other sources
 
