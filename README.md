@@ -1,6 +1,6 @@
 # Edgegap Unity plugin for Dedicated Servers quickstart
 
-This plugin has been tested, and supports Unity versions 2019+, including all LTS releases, Unity 2023, and Unity 6.
+This plugin has been tested, and supports Unity versions 2020+, including all LTS releases, Unity 2023, and Unity 6.
 
 This plugin is intended to help you:
 - get started quickly with Dedicated Servers on Edgegap,
