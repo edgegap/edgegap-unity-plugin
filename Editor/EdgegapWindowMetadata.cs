@@ -48,7 +48,6 @@ namespace Edgegap.Editor
         public static readonly bool SKIP_DOCKER_IMAGE_BUILD_WHEN_PUSHING = false; // MIRROR CHANGE: 'const' changed to 'static readonly' to avoid 'unreachable code detected' warning
         #endregion // Debug
 
-        
         /// <summary>Interval at which the server status is updated</summary>
         public const int SERVER_STATUS_CRON_JOB_INTERVAL_MS = 10000;
         public const int PORT_DEFAULT = 7770;
