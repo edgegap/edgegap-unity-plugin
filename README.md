@@ -9,6 +9,9 @@ This plugin is intended to help you:
 
 This plugin does not need to be included in your builds, as it's only a development tool and does not have any runtime features.
 
+## Requirements
+- functioning git client installed, for example [git-scm](https://git-scm.com/)
+
 ## Install the plugin in Unity
 
 1. Open your Unity project,
