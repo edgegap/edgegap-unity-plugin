@@ -51,7 +51,7 @@ The only other official distribution channels for this plugin are:
 
 ## Next Steps
 
-Once you have it, check for **Edgegap** -> **Edgegap Hosting** in Unity's top menu.
+Once you have it, check for **Tools** -> **Edgegap Hosting** in Unity's top menu.
 
 From here, we recommend following our [Unity Plugin Guide](https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide) to get your first dedicated server deployed.
 
