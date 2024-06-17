@@ -98,7 +98,7 @@ namespace Edgegap.Editor
 
         private Button _footerDocumentationBtn;
         private Button _footerNeedMoreGameServersBtn;
-        #endregion // Vars
+        #endregion // Vars\
 
         // MIRROR CHANGE
         // get the path of this .cs file so we don't need to hardcode paths to
@@ -108,8 +108,10 @@ namespace Edgegap.Editor
         internal string StylesheetPath =>
             Path.GetDirectoryName(AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)));
         // END MIRROR CHANGE
+        internal string DockerFilePath => $"{Directory.GetParent(Directory.GetFiles(Application.dataPath, GetType().Name + ".cs", SearchOption.AllDirectories)[0]).FullName}{Path.DirectorySeparatorChar}Dockerfile";
+        internal string ProjectRootPath => Directory.GetCurrentDirectory();
 
-        [MenuItem("Edgegap/Edgegap Hosting")] // MIRROR CHANGE: more obvious title
+        [MenuItem("Tools/Edgegap Hosting")] // MIRROR CHANGE: more obvious title
         public static void ShowEdgegapToolWindow()
         {
             EdgegapWindowV2 window = GetWindow<EdgegapWindowV2>();
@@ -118,14 +120,13 @@ namespace Edgegap.Editor
             window.minSize = window.maxSize;
         }
 
-
         #region Unity Funcs
         protected void OnEnable()
         {
             // Set root VisualElement and style: V2 still uses EdgegapWindow.[uxml|uss]
             // BEGIN MIRROR CHANGE
-            _visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>($"{StylesheetPath}/EdgegapWindow.uxml");
-            StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"{StylesheetPath}/EdgegapWindow.uss");
+            _visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>($"{StylesheetPath}{Path.DirectorySeparatorChar}EdgegapWindow.uxml");
+            StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"{StylesheetPath}{Path.DirectorySeparatorChar}EdgegapWindow.uss");
             // END MIRROR CHANGE
             rootVisualElement.styleSheets.Add(styleSheet);
         }
@@ -595,7 +596,6 @@ namespace Edgegap.Editor
         private void onDeploymentCreateBtnClick() => _ = createDeploymentStartServerAsync();
         #endregion // Init -> /Button Clicks
         #endregion // Init
-
 
         /// <summary>Throw if !appName val</summary>
         private void assertAppNameExists() =>
@@ -1472,7 +1472,7 @@ namespace Edgegap.Editor
             try
             {
                 // check for installation and setup docker file
-                if (!await EdgegapBuildUtils.DockerSetupAndInstallationCheck())
+                if (!await EdgegapBuildUtils.DockerSetupAndInstallationCheck(DockerFilePath))
                 {
                     onBuildPushError("Docker installation not found. " +
                         "Docker can be downloaded from:\n\nhttps://www.docker.com/");
@@ -1546,7 +1546,7 @@ namespace Edgegap.Editor
                     //     tag,
                     //     ShowBuildWorkInProgress);
 
-                    await EdgegapBuildUtils.RunCommand_DockerBuild(registry, imageName, tag, status => ShowBuildWorkInProgress("Building Docker Image", status));
+                    await EdgegapBuildUtils.RunCommand_DockerBuild(DockerFilePath, registry, imageName, tag, ProjectRootPath, status => ShowBuildWorkInProgress("Building Docker Image", status));
 
                 }
                 else
