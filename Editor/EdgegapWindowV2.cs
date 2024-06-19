@@ -123,16 +123,26 @@ namespace Edgegap.Editor
         #region Unity Funcs
         protected void OnEnable()
         {
+#if UNITY_2021_3_OR_NEWER // only load stylesheet in supported Unity versions, otherwise it shows errors in U2020
             // Set root VisualElement and style: V2 still uses EdgegapWindow.[uxml|uss]
             // BEGIN MIRROR CHANGE
             _visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>($"{StylesheetPath}{Path.DirectorySeparatorChar}EdgegapWindow.uxml");
             StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"{StylesheetPath}{Path.DirectorySeparatorChar}EdgegapWindow.uss");
             // END MIRROR CHANGE
             rootVisualElement.styleSheets.Add(styleSheet);
+#endif
         }
 
+#pragma warning disable CS1998 // disable async warning in U2020
         public async void CreateGUI()
+#pragma warning restore CS1998
         {
+            // the UI requires 'GroupBox', which is not available in Unity 2019/2020.
+            // showing it will break all of Unity's Editor UIs, not just this one.
+            // instead, show a warning that the Edgegap plugin only works on Unity 2021+
+#if !UNITY_2021_3_OR_NEWER
+            Debug.LogWarning("The Edgegap Hosting plugin requires UIToolkit in Unity 2021.3 or newer. Please upgrade your Unity version to use this.");
+#else
             // Get UI elements from UI Builder
             rootVisualElement.Clear();
             _visualTree.CloneTree(rootVisualElement);
@@ -143,14 +153,20 @@ namespace Edgegap.Editor
             await syncFormWithObjectDynamicAsync(); // API calls
 
             IsInitd = true;
+#endif
         }
 
         /// <summary>The user closed the window. Save the data.</summary>
         protected void OnDisable()
         {
+#if UNITY_2021_3_OR_NEWER // only load stylesheet in supported Unity versions, otherwise it shows errors in U2020
+            // sometimes this is called without having been registered, throwing NRE
+            if (_debugBtn == null) return;
+
             unregisterClickEvents();
             unregisterFieldCallbacks();
             SyncObjectWithForm();
+#endif
         }
         #endregion // Unity Funcs
 
@@ -1309,7 +1325,7 @@ namespace Edgegap.Editor
             Debug.Log("(!) Check your deployments here: https://app.edgegap.com/deployment-management/deployments/list");
 
             // Shake "need more servers" btn on 403
-            bool reachedNumDeploymentsHardcap = result is { IsResultCode403: true };
+            bool reachedNumDeploymentsHardcap = result != null && result.IsResultCode403;
             if (reachedNumDeploymentsHardcap)
                 shakeNeedMoreGameServersBtn();
         }
