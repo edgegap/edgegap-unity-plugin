@@ -108,7 +108,7 @@ namespace Edgegap.Editor
         internal string StylesheetPath =>
             Path.GetDirectoryName(AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)));
         // END MIRROR CHANGE
-        internal string DockerFilePath => $"{Directory.GetParent(Directory.GetFiles(Application.dataPath, GetType().Name + ".cs", SearchOption.AllDirectories)[0]).FullName}{Path.DirectorySeparatorChar}Dockerfile";
+        internal string DockerFilePath => $"{StylesheetPath}{Path.DirectorySeparatorChar}Dockerfile";
         internal string ProjectRootPath => Directory.GetCurrentDirectory();
 
         [MenuItem("Tools/Edgegap Hosting")] // MIRROR CHANGE: more obvious title
@@ -998,7 +998,7 @@ namespace Edgegap.Editor
         private void openGetApiTokenWebsite()
         {
             if (IsLogLevelDebug) Debug.Log("openGetApiTokenWebsite");
-            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_GET_A_TOKEN_URL + "&" + 
+            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_GET_A_TOKEN_URL + "&" +
                                 EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
         }
 
@@ -1118,12 +1118,12 @@ namespace Edgegap.Editor
 
         /// <summary>Open contact form in desired locale</summary>
         private void openNeedMoreGameServersWebsite() =>
-            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_ADD_MORE_GAME_SERVERS_URL + "?" + 
+            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_ADD_MORE_GAME_SERVERS_URL + "?" +
                                 EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
 
         private void openDocumentationWebsite()
         {
-            string documentationUrl = _apiEnvironment.GetDocumentationUrl() + "?" + 
+            string documentationUrl = _apiEnvironment.GetDocumentationUrl() + "?" +
                                       EdgegapWindowMetadata.DEFAULT_UTM_TAGS;
 
             if (!string.IsNullOrEmpty(documentationUrl))
