@@ -108,8 +108,8 @@ namespace Edgegap.Editor
         internal string StylesheetPath =>
             Path.GetDirectoryName(AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(this)));
         // END MIRROR CHANGE
-        internal string DockerFilePath => $"{StylesheetPath}{Path.DirectorySeparatorChar}Dockerfile";
         internal string ProjectRootPath => Directory.GetCurrentDirectory();
+        internal string DockerFilePath => $"{Directory.GetParent(Directory.GetFiles(ProjectRootPath, GetType().Name + ".cs", SearchOption.AllDirectories)[0]).FullName}{Path.DirectorySeparatorChar}Dockerfile";
 
         [MenuItem("Tools/Edgegap Hosting")] // MIRROR CHANGE: more obvious title
         public static void ShowEdgegapToolWindow()
