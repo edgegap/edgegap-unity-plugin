@@ -9,31 +9,29 @@ This plugin is intended to help you:
 
 This plugin does not need to be included in your builds, as it's only a development tool and does not have any runtime features.
 
-## Requirements
-
-### Install using git (recommended)
-Benefits:
+## Install using git (recommended)
+### Benefits
 - Installing our plugin this way will ensure you get the freshest updates the moment they come out, see [the update guide](#update-the-plugin-in-unity).
 
-Caveats:
+### Caveats
 - Requirement: functioning git client installed, for example [git-scm](https://git-scm.com/).
 
-Instructions:
+### Instructions
 1. Open your Unity project,
 2. Select toolbar option **Window** -> **Package Manager**,
 3. Click the **+** icon and select **Add package from git URL...**,
 4. Input the following URL `https://github.com/edgegap/edgegap-unity-plugin.git`,
 5. Click **Add** and wait for the Unity Package Manager to complete the installation.
 
-### Install via ZIP archive
-Benefits:
+## Install via ZIP archive
+### Benefits
 - Slightly easier as no git client is required.
 
-Caveats:
+### Caveats
 - Installing our plugin this way will require you to manually replace plugin contents if you [wish to update it](#update-the-plugin-in-unity),
 - The newtonsoft package (dependency) version required may not be compatible with your project if you're already using an older version of this package.
 
-Instructions:
+### Instructions
 1. Select toolbar option **Window** -> **Package Manager**,
 2. Click the **+** icon and select **Add package by name...**,
 3. Input the name `com.unity.nuget.newtonsoft-json` and wait for the Unity Package Manager to complete the installation.,
