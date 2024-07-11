@@ -1,7 +1,5 @@
 #if UNITY_EDITOR
 
-#define EDGEGAP_PLUGIN_SERVERS
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -126,6 +124,27 @@ namespace Edgegap.Editor
         #region Unity Funcs
         protected void OnEnable()
         {
+            // Get data about current target group
+            bool standaloneAndServer = false;
+            BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
+            BuildTargetGroup buildTargetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget);
+            if (buildTargetGroup == BuildTargetGroup.Standalone)
+            {
+                StandaloneBuildSubtarget standaloneSubTarget = EditorUserBuildSettings.standaloneBuildSubtarget;
+                if (standaloneSubTarget == StandaloneBuildSubtarget.Server)
+                    standaloneAndServer = true;
+            }
+
+            // Prepare named target, depending on above stuff
+            NamedBuildTarget namedBuildTarget;
+            if (standaloneAndServer)
+                namedBuildTarget = NamedBuildTarget.Server;
+            else
+                namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
+
+            // Set universal compiler macro
+            PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, $"{PlayerSettings.GetScriptingDefineSymbols};EDGEGAP_PLUGIN_SERVERS");
+
 #if UNITY_2021_3_OR_NEWER // only load stylesheet in supported Unity versions, otherwise it shows errors in U2020
             // Set root VisualElement and style: V2 still uses EdgegapWindow.[uxml|uss]
             // BEGIN MIRROR CHANGE
