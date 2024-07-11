@@ -72,6 +72,7 @@ namespace Edgegap.Editor
         public const string LOADING_RICH_STR = "<i>Loading...</i>";
         public const string PROCESSING_RICH_STR = "<i>Processing...</i>";
         public const string DEPLOY_REQUEST_RICH_STR = "<i>Requesting Deploy...</i>";
+        public const string KEY_COMPILER_MACRO = "EDGEGAP_PLUGIN_SERVERS";
 
         #region Colors
         /// <summary>Earthy lime green</summary>
