@@ -13,6 +13,7 @@ using Edgegap.Editor.Api.Models;
 using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -124,6 +125,8 @@ namespace Edgegap.Editor
         #region Unity Funcs
         protected void OnEnable()
         {
+// check if defined first, otherwise adding the symbol causes an infinite loop of recompilation
+#if !EDGEGAP_PLUGIN_SERVERS
             // Get data about current target group
             bool standaloneAndServer = false;
             BuildTarget buildTarget = EditorUserBuildSettings.activeBuildTarget;
@@ -143,7 +146,8 @@ namespace Edgegap.Editor
                 namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup);
 
             // Set universal compiler macro
-            PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, $"{PlayerSettings.GetScriptingDefineSymbols};EDGEGAP_PLUGIN_SERVERS");
+            PlayerSettings.SetScriptingDefineSymbols(namedBuildTarget, $"{PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget)};{EdgegapWindowMetadata.KEY_COMPILER_MACRO}");
+#endif
 
 #if UNITY_2021_3_OR_NEWER // only load stylesheet in supported Unity versions, otherwise it shows errors in U2020
             // Set root VisualElement and style: V2 still uses EdgegapWindow.[uxml|uss]
