@@ -1,4 +1,7 @@
 #if UNITY_EDITOR
+
+#define EDGEGAP_PLUGIN_SERVERS
+
 using System;
 using System.Collections.Generic;
 using System.IO;
