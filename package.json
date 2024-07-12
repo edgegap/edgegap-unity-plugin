@@ -1,6 +1,6 @@
 {
     "name": "com.edgegap.unity-servers-plugin",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "displayName": "Edgegap Servers Quickstart",
     "description": "Get started quickly with Edgegap Dedicated Server hosting.",
     "unity": "2021.3",
