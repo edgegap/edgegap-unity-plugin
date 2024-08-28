@@ -1,8 +1,9 @@
 FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG SERVER_BUILD_PATH=Builds/EdgegapServer
 
-COPY Builds/EdgegapServer /root/build/
+COPY ${SERVER_BUILD_PATH} /root/build/
 
 WORKDIR /root/
 
