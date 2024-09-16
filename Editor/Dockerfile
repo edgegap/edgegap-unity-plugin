@@ -13,4 +13,4 @@ RUN apt-get update && \
     apt-get clean && \
     update-ca-certificates
 
-ENTRYPOINT [ "/root/build/ServerBuild", "-batchmode", "-nographics"]
+CMD [ "/root/build/ServerBuild", "-batchmode", "-nographics"]
