@@ -1,0 +1,63 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace Edgegap.Editor
+{
+    public class CustomPopupContent : PopupWindowContent
+    {
+        private Vector2 scrollPos;
+        private List<string> _btnNames;
+        private Action<string> _onBtnClick;
+
+        private float _minHeight = 25;
+        private float _maxHeight = 100;
+        private float _width = 200;
+
+        public CustomPopupContent(List<string> btnNames, Action<string> btnCallback)
+        {
+            _btnNames = btnNames;
+            _onBtnClick = btnCallback;
+        }
+
+        public override Vector2 GetWindowSize()
+        {
+            float height = _minHeight;
+
+            if (_btnNames.Count > 0)
+            {
+                height *= _btnNames.Count;
+            }
+
+            return new Vector2(_width, height <= _maxHeight? height: _maxHeight);
+        }
+
+        public override void OnGUI(Rect rect)
+        {
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+            foreach (string name in _btnNames)
+            {
+                if (GUILayout.Button(name))
+                {
+                    if (name == "Create New Application")
+                    {
+                        _onBtnClick(Application.productName);
+                    }
+                    else
+                    {
+                        _onBtnClick(name);
+                    }
+                    
+                    editorWindow.Close();
+                }
+            }
+
+            EditorGUILayout.EndScrollView();
+        }
+    }
+}

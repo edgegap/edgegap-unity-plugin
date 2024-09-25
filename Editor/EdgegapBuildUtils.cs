@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
-
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace Edgegap
@@ -21,7 +21,7 @@ namespace Edgegap
             RuntimeInformation.ProcessArchitecture == Architecture.Arm ||
             RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
 
-        public static BuildReport BuildServer()
+        public static BuildReport BuildServer(string folderName)
         {
             IEnumerable<string> scenes = EditorBuildSettings.scenes
                 .Where(s => s.enabled)
@@ -37,13 +37,13 @@ namespace Edgegap
                 options = BuildOptions.EnableHeadlessMode, // obsolete and missing UNITY_SERVER define
 #endif
                 // END MIRROR CHANGE
-                locationPathName = "Builds/EdgegapServer/ServerBuild"
+                locationPathName = $"Builds/{folderName}/ServerBuild"
             };
 
             return BuildPipeline.BuildPlayer(options);
         }
 
-        public static async Task<bool> DockerSetupAndInstallationCheck(string path)
+        public static async Task<(bool, string)> DockerSetupAndInstallationCheck(string path)
         {
             if (!File.Exists(path))
             {
@@ -52,14 +52,91 @@ namespace Edgegap
 
             string output = null;
             string error = null;
-            await RunCommand_DockerVersion(msg => output = msg, msg => error = msg); // MIRROR CHANGE
-            if (!string.IsNullOrEmpty(error))
+            await RunCommand_DockerVersion(msg => output = msg,
+                (msg) =>
+                {
+                    if (msg.Contains("ERROR"))
+                    {
+                        error = msg;
+                    }
+                });
+
+            if (!string.IsNullOrEmpty(error) && error.Contains("ERROR"))
             {
                 Debug.LogError(error);
-                return false;
+                return (false, error);
             }
+
             Debug.Log($"[Edgegap] Docker version detected: {output}"); // MIRROR CHANGE
-            return true;
+
+            await RunCommand_DockerInfo(null,
+                (msg) =>
+                {
+                    if (msg.Contains("ERROR"))
+                    {
+                        error = msg;
+                    }
+                });
+
+            if (!string.IsNullOrEmpty(error) && error.Contains("ERROR"))
+            {
+                Debug.LogError(error);
+                return (false, error);
+            }
+
+            return (true, null);
+        }
+
+        public static async Task InstallLinuxModules(string unityVersion, Action<string> outputReciever = null, Action<string> errorReciever = null)
+        {
+            await RunCommand_InstallLinuxRequirements("linux-mono", unityVersion, outputReciever);
+            await RunCommand_InstallLinuxRequirements("linux-il2cpp", unityVersion, outputReciever);
+        }
+
+        static async Task RunCommand_InstallLinuxRequirements(string module, string unityVersion, Action<string> outputReciever = null, Action<string> errorReciever = null)
+        {
+            string error = null;
+#if UNITY_EDITOR_WIN
+            await RunCommand("cmd.exe",
+                $"\"C:\\Program Files\\Unity Hub\\Unity Hub.exe\" -- --headless install-modules --version {unityVersion} -m {module}",
+                outputReciever,
+                (msg) =>
+                {
+                    if (msg.Contains("ERROR"))
+                    {
+                        error = msg;
+                    }
+                    outputReciever(msg);
+                });
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash",
+                $"/Applications/Unity/Hub.app/Contents/MacOS/Unity/Hub -- --headless install-modules --version {unityVersion} -m linux-mono linux-il2cpp",
+                outputReciever, errorReciever);
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash",
+                $"~/Applications/Unity/Hub.AppImage --headless install-modules --version {unityVersion} -m linux-mono linux-il2cpp",
+                outputReciever, errorReciever);
+#else
+            Debug.LogError("The platform is not supported yet.");
+#endif
+
+            if (error != null)
+            {
+                errorReciever(error);
+            }
+        }
+
+        static async Task RunCommand_DockerInfo(Action<string> outputReciever = null, Action<string> errorReciever = null)
+        {
+#if UNITY_EDITOR_WIN
+            await RunCommand("cmd.exe", "/c docker info", outputReciever, errorReciever);
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash", "-c \"docker info\"", outputReciever, errorReciever);
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash", "-c \"docker info\"", outputReciever, errorReciever);
+#else
+            Debug.LogError("The platform is not supported yet.");
+#endif
         }
 
         // MIRROR CHANGE
@@ -77,7 +154,7 @@ namespace Edgegap
         }
 
         // MIRROR CHANGE
-        public static async Task RunCommand_DockerBuild(string dockerfilePath, string registry, string imageRepo, string tag, string projectPath, Action<string> onStatusUpdate)
+        public static async Task RunCommand_DockerBuild(string dockerfilePath, string registry, string imageRepo, string tag, string projectPath, Action<string> onStatusUpdate, string extraParams = null)
         {
             string realErrorMessage = null;
 
@@ -87,6 +164,11 @@ namespace Edgegap
             // Edgegap's infrastructure is on x86. instead the deployment logs
             // would show an error in a linux .go file with 'not found'.
             string buildCommand = IsArmCPU() ? "buildx build --platform linux/amd64" : "build";
+
+            if (!string.IsNullOrEmpty(extraParams))
+            {
+                buildCommand += $" {extraParams}";
+            }
 
 #if UNITY_EDITOR_WIN
             await RunCommand("docker.exe", $"{buildCommand} -f \"{dockerfilePath}\" -t \"{registry}/{imageRepo}:{tag}\" \"{projectPath}\"", onStatusUpdate,
@@ -110,22 +192,25 @@ namespace Edgegap
             }
         }
 
-        public static async Task<(bool, string)> RunCommand_DockerPush(string registry, string imageRepo, string tag, Action<string> onStatusUpdate)
+        public static async Task<bool> RunCommand_DockerPush(string registry, string imageRepo, string tag, Action<string> onStatusUpdate)
         {
-            string error = string.Empty;
+            string error = null;
 #if UNITY_EDITOR_WIN
-            await RunCommand("docker.exe", $"push {registry}/{imageRepo}:{tag}", onStatusUpdate, (msg) => error += msg + "\n");
+            await RunCommand("docker.exe", $"push {registry}/{imageRepo}:{tag}", onStatusUpdate,
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker push {registry}/{imageRepo}:{tag}\"", onStatusUpdate, (msg) => error += msg + "\n");
+            await RunCommand("/bin/bash", $"-c \"docker push {registry}/{imageRepo}:{tag}\"", onStatusUpdate,
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker push {registry}/{imageRepo}:{tag}\"", onStatusUpdate, (msg) => error += msg + "\n");
+            await RunCommand("/bin/bash", $"-c \"docker push {registry}/{imageRepo}:{tag}\"", onStatusUpdate,
 #endif
+            (msg) => error += msg + "\n");
+
             if (!string.IsNullOrEmpty(error))
             {
                 Debug.LogError(error);
-                return (false, error);
+                return false;
             }
-            return (true, null);
+
+            return true;
         }
         // END MIRROR CHANGE
 
