@@ -77,8 +77,27 @@
                     <ui:Label tabindex="-1" text="{ContainerizeResultLabel}" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ContainerizeResultLabel" class="text-edgegap" style="color: rgb(138, 238, 140); align-items: stretch; justify-content: flex-start; align-self: center;" />
                 </ui:VisualElement>
             </ui:Foldout>
+            <ui:Foldout text="&lt;b&gt;4. Test your server locally&lt;/b&gt;" name="TestLocallyFoldout" class="text-edgegap container-row-parent" style="margin-left: 0; -unity-font-style: normal; min-height: auto;">
+                <ui:VisualElement name="Row" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;" />
+                <ui:VisualElement name="LocalImageNameTagRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
+                    <ui:TextField name="LocalTestImageTxt" label="Server Image Tag" password="false" view-data-key="LocalTestImageTxt" class="text-edgegap label-right-padding" />
+                    <ui:Button name="LocalImageTagDropdownBtn" text="▼" class="text-edgegap btn-show-dropdown" style="margin-left: 0; max-width: 250px; width: auto; min-width: auto;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="DockerfileParametersRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
+                    <ui:TextField name="DockerRunParamsTxt" label="Optional Docker Run Parameters" password="false" view-data-key="DockerRunParamsTxt" class="text-edgegap label-right-padding" />
+                </ui:VisualElement>
+                <ui:VisualElement name="TestLocallyBtnRow" style="flex-grow: 1; flex-direction: row;">
+                    <ui:Button name="DeployLocalBtn" text="Deploy local container" class="button-edgegap text-edgegap" style="flex-direction: row; -unity-text-align: middle-center; margin-left: 0; max-width: 250px; min-width: 150px;" />
+                    <ui:Button name="TerminateLocalBtn" text="Terminate" class="button-edgegap text-edgegap" style="flex-direction: row; -unity-text-align: middle-center; margin-left: 0; max-width: 250px; min-width: 75px;" />
+                    <ui:Button name="DiscordHelpBtn" text="Get help" class="button-edgegap text-edgegap" style="flex-grow: 0.5; max-width: 75px; min-width: 75px;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="TestLocallyResultRow" style="flex-grow: 1; flex-direction: row;">
+                    <ui:Label tabindex="-1" text="{LocalDeployResultLabel}" parse-escape-sequences="true" display-tooltip-when-elided="true" name="LocalDeployResultLabel" class="text-edgegap" style="color: rgb(138, 238, 140); align-items: stretch; justify-content: flex-start; align-self: center; padding-top: 10px; padding-bottom: 5px;" />
+                </ui:VisualElement>
+                <ui:Button name="LocalContainerConnectLink" text="Learn how to connect to your local container using a local IP address. ⓘ" class="text-edgegap btn-text-link" style="margin-left: 0; max-width: 390px; width: auto; min-width: 220px; padding-left: 0; left: 0;" />
+            </ui:Foldout>
             <ui:VisualElement name="EdgegapAppFoldoutHorizRow" class="container-row-parent" style="flex-grow: 1; flex-direction: row;">
-                <ui:Foldout text="&lt;b&gt;4. Create an Edgegap application&lt;/b&gt;" name="EdgegapAppFoldout" class="text-edgegap" style="flex-grow: 1; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0; min-width: auto;">
+                <ui:Foldout text="&lt;b&gt;5. Create an Edgegap application&lt;/b&gt;" name="EdgegapAppFoldout" class="text-edgegap" style="flex-grow: 1; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0; min-width: auto;">
                     <ui:VisualElement name="Row" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;" />
                     <ui:VisualElement name="ApplicationNameRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
                         <ui:TextField name="CreateAppNameTxt" label="Application Name" tooltip="Arbitrary name to call your app" password="false" view-data-key="ApplicationNameTxt" class="text-edgegap label-right-padding" />
@@ -97,7 +116,7 @@
                     </ui:VisualElement>
                 </ui:Foldout>
             </ui:VisualElement>
-            <ui:Foldout text="&lt;b&gt;5. Deploy a server on Edgegap&lt;/b&gt;" name="ServerDeploymentFoldout" class="text-edgegap container-row-parent">
+            <ui:Foldout text="&lt;b&gt;6. Deploy a server on Edgegap&lt;/b&gt;" name="ServerDeploymentFoldout" class="text-edgegap container-row-parent">
                 <ui:VisualElement name="Row" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;" />
                 <ui:VisualElement name="ApplicationNameRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
                     <ui:TextField name="DeployAppNameTxt" label="Application Name" password="false" view-data-key="DeployAppNameTxt" class="text-edgegap label-right-padding" />
@@ -115,7 +134,7 @@
                 </ui:GroupBox>
                 <ui:Label tabindex="-1" text="{DeploymentResultLabel}" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeploymentResultLabel" class="text-edgegap" style="color: rgb(138, 238, 140); align-items: stretch; justify-content: flex-start; align-self: flex-start;" />
             </ui:Foldout>
-            <ui:Foldout text="&lt;b&gt;6. Matchmaking and next steps&lt;/b&gt;" name="NextStepFoldout" class="text-edgegap container-row-parent">
+            <ui:Foldout text="&lt;b&gt;7. Matchmaking and next steps&lt;/b&gt;" name="NextStepFoldout" class="text-edgegap container-row-parent">
                 <ui:VisualElement name="Row" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;" />
                 <ui:VisualElement name="ServerConnectRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto; background-color: rgb(49, 49, 49); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;">
                     <ui:Label tabindex="-1" text="You may now" display-tooltip-when-elided="true" name="ServerConnectTxt" class="text-edgegap" style="justify-content: center; margin-left: 0; margin-right: 0; margin-top: 10px; margin-bottom: 10px;" />
