@@ -63,14 +63,19 @@ namespace Edgegap.Editor
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
         public const string EDGEGAP_LINUX_BUILD_REQUIREMENTS_INFO_URL = "https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide/";
         public const string EDGEGAP_DOCKER_REQUIREMENTS_INFO_URL = "https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide/";
+        //TODO define url
         public const string EDGEGAP_PORT_MAPPING_INFO_URL = "";
+        public const string LOCAL_TEST_CONNECT_INFO_URL = "";
         public const string EDGEGAP_APP_INFO_URL = "https://docs.edgegap.com/docs/application/version/";
         public const string EDGEGAP_CREATE_APP_BASE_URL = "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DEPLOY_APP_URL = "https://app.edgegap.com/deployment-management/deployments/list/";
+        //TODO define url
         public const string EDGEGAP_FREE_TIER_INFO_URL = "";
         public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/GYaHcKR9a5/";
-        public const string EDGEGAP_CONNECT_TO_SERVER_URL = "";
+        //TODO define url
+        public const string CONNECT_TO_SERVER_INFO_URL = "";
         public const string EDGEGAP_LOBBY_MATCHMAKER_INFO_URL = "https://docs.edgegap.com/docs/matchmaker/managed/";
+        //TODO define url
         public const string SCALING_LIFECYCLE_INFO_URL = "";
         public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/docs/";
         public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "tools-and-integrations/unity-plugin-guide/";
@@ -182,7 +187,16 @@ namespace Edgegap.Editor
         public const string CONTAINERIZE_SERVER_BTN_ID = "ContainerizeServerBtn";
         public const string CONTAINERIZE_SERVER_RESULT_LABEL_TXT = "ContainerizeResultLabel";
 
-        //4. Test your server locally TODO
+        //4. Test your server locally
+        public const string LOCAL_TEST_FOLDOUT_ID = "LocalTestFoldout";
+        public const string LOCAL_TEST_IMAGE_TXT_ID = "LocalTestImageTxt";
+        public const string LOCAL_TEST_IMAGE_SHOW_DROPDOWN_BTN_ID = "LocalTestImageDropdownBtn";
+        public const string LOCAL_TEST_DOCKER_RUN_TXT_ID = "DockerRunParamsTxt";
+        public const string LOCAL_TEST_DEPLOY_BTN_ID = "LocalTestDeployBtn";
+        public const string LOCAL_TEST_TERMINATE_BTN_ID = "LocalTestTerminateBtn";
+        public const string LOCAL_TEST_DISCORD_HELP_BTN_ID = "LocalTestDiscordHelpBtn";
+        public const string LOCAL_TEST_RESULT_LABEL_ID = "LocalDeployResultLabel";
+        public const string LOCAL_TEST_CONNECT_LABEL_LINK_ID = "LocalContainerConnectLink";
 
         //5. Create an Edgegap application
         public const string CREATE_APP_FOLDOUT_ID = "EdgegapAppFoldout";
@@ -203,7 +217,7 @@ namespace Edgegap.Editor
         public const string DEPLOY_LIMIT_LABEL_LINK_ID = "DeployLimitLink";
         public const string DEPLOY_START_BTN_ID = "DeploymentsCreateBtn";
         public const string DEPLOY_STOP_BTN_ID = "DeploymentsConnectionServerStopBtn";
-        public const string DEPLOY_DISCORD_HELP_BTN_ID = "DiscordHelpBtn";
+        public const string DEPLOY_DISCORD_HELP_BTN_ID = "DeployDiscordHelpBtn";
         public const string DEPLOY_RESULT_LABEL_TXT = "DeploymentResultLabel";
 
         //7. Matchmaking and next steps

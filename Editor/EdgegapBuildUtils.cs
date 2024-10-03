@@ -93,39 +93,6 @@ namespace Edgegap
             await RunCommand_InstallLinuxRequirements("linux-il2cpp", unityVersion, outputReciever);
         }
 
-        static async Task RunCommand_InstallLinuxRequirements(string module, string unityVersion, Action<string> outputReciever = null, Action<string> errorReciever = null)
-        {
-            string error = null;
-#if UNITY_EDITOR_WIN
-            await RunCommand("cmd.exe",
-                $"\"C:\\Program Files\\Unity Hub\\Unity Hub.exe\" -- --headless install-modules --version {unityVersion} -m {module}",
-                outputReciever,
-                (msg) =>
-                {
-                    if (msg.Contains("ERROR"))
-                    {
-                        error = msg;
-                    }
-                    outputReciever(msg);
-                });
-#elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash",
-                $"/Applications/Unity/Hub.app/Contents/MacOS/Unity/Hub -- --headless install-modules --version {unityVersion} -m linux-mono linux-il2cpp",
-                outputReciever, errorReciever);
-#elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash",
-                $"~/Applications/Unity/Hub.AppImage --headless install-modules --version {unityVersion} -m linux-mono linux-il2cpp",
-                outputReciever, errorReciever);
-#else
-            Debug.LogError("The platform is not supported yet.");
-#endif
-
-            if (error != null)
-            {
-                errorReciever(error);
-            }
-        }
-
         static async Task RunCommand_DockerInfo(Action<string> outputReciever = null, Action<string> errorReciever = null)
         {
 #if UNITY_EDITOR_WIN
@@ -151,6 +118,115 @@ namespace Edgegap
 #else
             Debug.LogError("The platform is not supported yet.");
 #endif
+        }
+
+        public static async Task RunCommand_DockerImage(Action<string> outputReciever, Action<string> errorReciever)
+        {
+#if UNITY_EDITOR_WIN
+            await RunCommand("cmd.exe", "/c docker image ls --format \"{{.Repository}}:{{.Tag}}\"", outputReciever,
+
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash", "-c \"docker image ls --format \"{{.Repository}}:{{.Tag}}\"\"", outputReciever, 
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash", "-c \"docker image ls --format \"{{.Repository}}:{{.Tag}}\"\"", outputReciever, 
+#endif
+                (msg) =>
+                {
+                    if (msg.Contains("ERROR"))
+                    {
+                        errorReciever(msg);
+                    }
+                });
+        }
+
+        public static async Task RunCommand_DockerRun(string image, string extraParams)
+        {
+            // ARM -> x86 support:
+            string runCommand = IsArmCPU() ? "run --platform linux/amd64" : "run";
+
+#if UNITY_EDITOR_WIN
+            await RunCommand("docker.exe", $"{runCommand} --name edgegap-server-test -d {extraParams} {image} ",
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash", $"-c \"docker {runCommand} {extraParams} {image} --name edgegap-server-test",
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash", $"-c \"docker {runCommand} {extraParams} {image} --name edgegap-server-test",
+#endif
+                null,
+                (msg) =>
+                {
+                    if (msg.Contains("Error"))
+                    {
+                        throw new Exception(msg);
+                    }
+                });
+        }
+
+        public static async Task RunCommand_DockerStop()
+        {
+            //Stopping running container
+#if UNITY_EDITOR_WIN
+            await RunCommand("docker.exe", $"stop edgegap-server-test",
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash", $"-c \"docker stop edgegap-server-test",
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash", $"-c \"docker stop edgegap-server-test",
+#endif
+                null,
+                (msg) =>
+                {
+                    if (msg.Contains("Error"))
+                    {
+                        throw new Exception(msg);
+                    }
+                });
+
+            //Deleting the stopped container
+#if UNITY_EDITOR_WIN
+            await RunCommand("docker.exe", $"rm edgegap-server-test",
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash", $"-c \"docker rm edgegap-server-test",
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash", $"-c \"docker rm edgegap-server-test",
+#endif
+                null,
+                (msg) =>
+                {
+                    if (msg.Contains("Error"))
+                    {
+                        throw new Exception(msg);
+                    }
+                });
+        }
+
+        static async Task RunCommand_InstallLinuxRequirements(string module, string unityVersion, Action<string> outputReciever = null, Action<string> errorReciever = null)
+        {
+            string error = null;
+#if UNITY_EDITOR_WIN
+            await RunCommand("cmd.exe",
+                $"\"C:\\Program Files\\Unity Hub\\Unity Hub.exe\" -- --headless install-modules --version {unityVersion} -m {module}",
+                outputReciever,
+#elif UNITY_EDITOR_OSX
+            await RunCommand("/bin/bash",
+                $"/Applications/Unity/Hub.app/Contents/MacOS/Unity/Hub -- --headless install-modules --version {unityVersion} -m linux-mono linux-il2cpp",
+                outputReciever,
+#elif UNITY_EDITOR_LINUX
+            await RunCommand("/bin/bash",
+                $"~/Applications/Unity/Hub.AppImage --headless install-modules --version {unityVersion} -m linux-mono linux-il2cpp",
+                outputReciever,
+#endif
+            (msg) =>
+            {
+                if (msg.Contains("ERROR"))
+                {
+                    error = msg;
+                }
+                outputReciever(msg);
+            });
+
+            if (error != null)
+            {
+                errorReciever(error);
+            }
         }
 
         // MIRROR CHANGE

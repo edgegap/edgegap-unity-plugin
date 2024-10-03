@@ -16,12 +16,13 @@ namespace Edgegap.Editor
 
         private float _minHeight = 25;
         private float _maxHeight = 100;
-        private float _width = 200;
+        private float _width;
 
-        public CustomPopupContent(List<string> btnNames, Action<string> btnCallback)
+        public CustomPopupContent(List<string> btnNames, Action<string> btnCallback, float width = 200)
         {
             _btnNames = btnNames;
             _onBtnClick = btnCallback;
+            _width = width;
         }
 
         public override Vector2 GetWindowSize()
@@ -42,7 +43,7 @@ namespace Edgegap.Editor
 
             foreach (string name in _btnNames)
             {
-                if (GUILayout.Button(name))
+                if (GUILayout.Button(name, GUILayout.Width(_width - 25)))
                 {
                     if (name == "Create New Application")
                     {
