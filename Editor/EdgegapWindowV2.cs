@@ -550,13 +550,13 @@ namespace Edgegap.Editor
 
         private void OnPortsMappingLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
 
-        private void OnYourAppLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_APP_INFO_URL);
+        private void OnYourAppLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_APP_INFO_PATH);
 
         private void OnDeployLimitLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_FREE_TIER_INFO_URL);
 
-        private void OnServerConnectLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.CONNECT_TO_SERVER_INFO_URL);
+        private void OnServerConnectLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.CONNECT_TO_DEPLOYMENT_INFO_URL);
 
-        private void OnLobbyMatchmakerLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_LOBBY_MATCHMAKER_INFO_URL);
+        private void OnLobbyMatchmakerLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_MATCHMAKER_INFO_PATH);
 
         private void OnScalingLifecycleLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.SCALING_LIFECYCLE_INFO_URL);
 
@@ -1719,7 +1719,7 @@ namespace Edgegap.Editor
             if (IsLogLevelDebug) Debug.Log("StopLocalImageAsync");
 
             await EdgegapBuildUtils.RunCommand_DockerStop();
-            OnLocalDeploymentSuccess("Container terminated successfully. See more in Docker Desktop or Docker CLI.");
+            OnLocalDeploymentSuccess("Container terminated successfully.");
         }
 
         private void OnLocalDeploymentSuccess(string msg)

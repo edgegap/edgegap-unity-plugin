@@ -61,25 +61,22 @@ namespace Edgegap.Editor
 
         public const string EDGEGAP_SIGN_IN_URL = "https://app.edgegap.com/";
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
-        public const string EDGEGAP_LINUX_BUILD_REQUIREMENTS_INFO_URL = "https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide/";
-        public const string EDGEGAP_DOCKER_REQUIREMENTS_INFO_URL = "https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide/";
         //TODO define url
-        public const string EDGEGAP_PORT_MAPPING_INFO_URL = "";
         public const string LOCAL_TEST_CONNECT_INFO_URL = "";
-        public const string EDGEGAP_APP_INFO_URL = "https://docs.edgegap.com/docs/application/version/";
+        public const string EDGEGAP_DOC_APP_INFO_PATH = "application/version/";
         public const string EDGEGAP_CREATE_APP_BASE_URL = "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DEPLOY_APP_URL = "https://app.edgegap.com/deployment-management/deployments/list/";
         //TODO define url
         public const string EDGEGAP_FREE_TIER_INFO_URL = "";
         public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/GYaHcKR9a5/";
         //TODO define url
-        public const string CONNECT_TO_SERVER_INFO_URL = "";
-        public const string EDGEGAP_LOBBY_MATCHMAKER_INFO_URL = "https://docs.edgegap.com/docs/matchmaker/managed/";
+        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "";
+        public const string EDGEGAP_DOC_MATCHMAKER_INFO_PATH = "matchmaker/managed/";
         //TODO define url
         public const string SCALING_LIFECYCLE_INFO_URL = "";
+
         public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/docs/";
         public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "tools-and-integrations/unity-plugin-guide/";
-        public const string EDGEGAP_DOC_BTN_HOW_TO_LOGIN_VIA_CLI_URL = "https://docs.edgegap.com/docs/container/edgegap-container-registry/#getting-your-credentials";
 
         private const string DEFAULT_UTM_SOURCE_TAG = "plugin_unity";
         private const string DEFAULT_UTM_MEDIUM_TAG = "servers_quickstart_plugin";
