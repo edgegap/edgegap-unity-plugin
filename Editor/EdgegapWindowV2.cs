@@ -1086,11 +1086,28 @@ namespace Edgegap.Editor
                 _signOutBtn.SetEnabled(true);
             }
 
-            // Was the API token verified + there are filled inputs in Deploy section? Check if we enable start/stop deployment btn
-            if (_isApiTokenVerified && CheckAnyDeployServerInput())
+            // Was the API token verified?
+            // enable either start/stop deployment btns based on stored deployment ID
+            if (_isApiTokenVerified)
             {
-                _deployAppBtn.SetEnabled(string.IsNullOrEmpty(_deploymentRequestId));
-                _stopLastDeployBtn.SetEnabled(!string.IsNullOrEmpty(_deploymentRequestId));
+                bool enableStopBtn = false;
+
+                if (!string.IsNullOrEmpty(_deploymentRequestId))
+                {
+                    if (IsLogLevelDebug) Debug.Log("syncFormWithObjectDynamicAsync: Found apiToken && _deploymentRequestId; " +
+                    "calling RefreshDeploymentsAsync =>");
+
+                    _apiTokenVerifyBtn.SetEnabled(false);
+                    _signOutBtn.SetEnabled(false);
+
+                    enableStopBtn = await RefreshDeploymentsAsync();
+
+                    _apiTokenVerifyBtn.SetEnabled(true);
+                    _signOutBtn.SetEnabled(true);
+                }
+
+                _deployAppBtn.SetEnabled(!enableStopBtn && CheckFilledDeployServerInputs());
+                _stopLastDeployBtn.SetEnabled(enableStopBtn);
             }
         }
 
@@ -1557,16 +1574,16 @@ namespace Edgegap.Editor
             // Process create deployment response
             bool isSuccess = getDeploymentStatusResponse.IsResultCode200;
             if (isSuccess)
-                OnCreateDeploymentOrRefreshSuccess(getDeploymentStatusResponse.Data);
+                OnCreateDeploymentSuccess(getDeploymentStatusResponse.Data);
             else
                 OnCreateDeploymentStartServerFail(getDeploymentStatusResponse.IsResultCode403, getDeploymentStatusResponse.Error.ErrorMessage); //403 = Maximum number of deployments reached
         }
 
         /// <summary>
-        /// CreateDeployment || RefreshDeployment success handler.
+        /// CreateDeployment success handler.
         /// </summary>
         /// <param name="getDeploymentStatusResult">Only pass from CreateDeployment</param>
-        private void OnCreateDeploymentOrRefreshSuccess(GetDeploymentStatusResult getDeploymentStatusResult)
+        private void OnCreateDeploymentSuccess(GetDeploymentStatusResult getDeploymentStatusResult)
         {
             // Success
             _deployResultLabel.text = EdgegapWindowMetadata.WrapRichTextInColor(
@@ -1579,6 +1596,11 @@ namespace Edgegap.Editor
             EditorPrefs.SetString(EdgegapWindowMetadata.DEPLOYMENT_REQUEST_ID_KEY_STR, _deploymentRequestId);
         }
 
+        /// <summary>
+        /// CreateDeployment fail handler.
+        /// </summary>
+        /// <param name="reachedNumDeploymentsHardcap">if maximum number of deployments was reached</param>
+        /// <param name="message">error message to log</param>
         private void OnCreateDeploymentStartServerFail(bool reachedNumDeploymentsHardcap, string message = null)
         {
             _deployResultLabel.text = EdgegapWindowMetadata.WrapRichTextInColor(
@@ -1593,6 +1615,40 @@ namespace Edgegap.Editor
             if (reachedNumDeploymentsHardcap)
                 shakeNeedMoreGameServersBtn();
         }
+
+        /// <summary>
+        /// Refreshes an existing deployment.
+        /// </summary>
+        /// <returns>If the refreshed deployment is still active</returns>
+        private async Task<bool> RefreshDeploymentsAsync()
+        {
+            if (IsLogLevelDebug) Debug.Log("refreshDeploymentsAsync");
+
+            EdgegapDeploymentsApi deployApi = getDeployApi();
+            EdgegapHttpResult<GetDeploymentStatusResult> getDeploymentStatusResponse =
+                await deployApi.GetDeploymentStatusAsync(_deploymentRequestId);
+
+            bool isActiveStatus = getDeploymentStatusResponse?.StatusCode != null &&
+                getDeploymentStatusResponse.Data.CurrentStatus == EdgegapWindowMetadata.READY_STATUS;
+
+            if (!isActiveStatus)
+            {
+                _deploymentRequestId = "";
+                EditorPrefs.DeleteKey(EdgegapWindowMetadata.DEPLOYMENT_REQUEST_ID_KEY_STR);
+
+                if (getDeploymentStatusResponse.HasErr)
+                {
+                    Debug.LogError($"Deployment error: {getDeploymentStatusResponse.Data.ErrorDetail}");
+                }
+
+                return false;
+            } 
+            else
+            {
+                return true;
+            }
+        }
+
 
         /// <summary>
         /// Stop currently stored deployment
@@ -1993,6 +2049,7 @@ namespace Edgegap.Editor
         {
             EditorPrefs.DeleteKey(EdgegapWindowMetadata.API_TOKEN_KEY_STR);
             EditorPrefs.DeleteKey(EdgegapWindowMetadata.DEPLOYMENT_REQUEST_ID_KEY_STR);
+            _deploymentRequestId = "";
         }
 
         /// <summary>
@@ -2012,8 +2069,6 @@ namespace Edgegap.Editor
             _serverImageTagInput.value = "";
             _deployAppNameInput.value = "";
             _deployAppVersionInput.value = "";
-
-            _deploymentRequestId = "";
         }
 #endregion // Persistence Helpers
     }
