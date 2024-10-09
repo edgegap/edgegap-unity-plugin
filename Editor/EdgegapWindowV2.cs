@@ -549,7 +549,7 @@ namespace Edgegap.Editor
             ToggleIsConnectedConatiners(false);
         }
 
-        private void OnLinuxInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
+        private void OnLinuxInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-unity-linux-build-support");
 
         private void OnDockerInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
 
@@ -1910,7 +1910,7 @@ namespace Edgegap.Editor
                     );
             }
 
-            string folderName = string.IsNullOrEmpty(_buildFolderNameInput.value) ?
+            string folderName = !string.IsNullOrEmpty(_buildFolderNameInput.value) ?
                 _buildFolderNameInput.value : DefaultFolderName;
 
             BuildReport buildResult = EdgegapBuildUtils.BuildServer(folderName);
