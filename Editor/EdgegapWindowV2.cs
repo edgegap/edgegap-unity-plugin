@@ -137,6 +137,7 @@ namespace Edgegap.Editor
         internal string ThisScriptPath => Directory.GetFiles(ProjectRootPath, GetType().Name + ".cs", SearchOption.AllDirectories)[0];
         internal string DefaultDockerFilePath => $"{Directory.GetParent(ThisScriptPath).FullName}{Path.DirectorySeparatorChar}Dockerfile";
         internal string DefaultFolderName => "EdgegapServer";
+        internal string DefaultDockerRunParams => "-p 7770/udp";
 
         [MenuItem("Tools/Edgegap Hosting")] // MIRROR CHANGE: more obvious title
         public static void ShowEdgegapToolWindow()
@@ -570,13 +571,10 @@ namespace Edgegap.Editor
 
         /// <summary>
         /// Linux server build requirements install btn click
-        /// Only manual module install is supported for now, so => open docs
         /// </summary>
-        private /*async*/ void OnInstallLinuxBtnClick() 
+        private async void OnInstallLinuxBtnClick() 
         {
-            //await InstallLinuxRequirements();
-
-            OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-unity-linux-build-support");
+            await InstallLinuxRequirements();   
         }
 
         /// <summary>
@@ -1780,12 +1778,12 @@ namespace Edgegap.Editor
                 }
                 else
                 {
-                    extraParams = _localTestDockerRunInput.value + " -p 7770/udp";
+                    extraParams = _localTestDockerRunInput.value + $" {DefaultDockerRunParams}";
                 }
             }
             else
             {
-                extraParams = "-p 7770/udp";
+                extraParams = DefaultDockerRunParams;
             }
 
             string img = $"{_containerRegistryUrl}/{_containerProject}/{_localTestImageInput.value}";
@@ -1848,21 +1846,25 @@ namespace Edgegap.Editor
 
         /// <summary>
         /// Install Linux build support modules via the command line
-        /// currently unused because of how Unity executes this command
+        /// Only manual module install is supported for now, so => open docs if not installed
         /// </summary>
         /// <returns></returns>
         private async Task InstallLinuxRequirements()
         {
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64))
             {
-                ProgressCounter = 0;
+                //ProgressCounter = 0;
 
-                await EdgegapBuildUtils.InstallLinuxModules(Application.unityVersion,
-                    outputReciever: status => ShowWorkInProgress("Installing linux support modules", status),
-                    errorReciever: (msg) => OnBuildContainerizeUploadError(msg, _linuxRequirementsResultLabel, "There was a problem.")
-                );
+                //await EdgegapBuildUtils.InstallLinuxModules(Application.unityVersion,
+                //    outputReciever: status => ShowWorkInProgress("Installing linux support modules", status),
+                //    errorReciever: (msg) => OnBuildContainerizeUploadError(msg, _linuxRequirementsResultLabel, "There was a problem.")
+                //);
 
-                OnBuildContainerizeUploadSuccess(_linuxRequirementsResultLabel, "Requirements installed. Don't forget to restart Unity.");
+                //OnBuildContainerizeUploadSuccess(_linuxRequirementsResultLabel, "Requirements installed. Don't forget to restart Unity.");
+
+                OnBuildContainerizeUploadError(null, _linuxRequirementsResultLabel, "Requirements not currently installed.");
+                await Task.Delay(1);
+                OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-unity-linux-build-support");
             }
             else
             {
@@ -1974,7 +1976,7 @@ namespace Edgegap.Editor
 
             string imageName = _serverImageNameInput.value.ToLowerInvariant();
             string imageRepo = $"{_containerProject}/{imageName}";
-            string tag = _containerizeImageTagInput.value;
+            string tag = _serverImageTagInput.value;
 
             bool isDockerLoginSuccess = await EdgegapBuildUtils.LoginContainerRegistry(
                     _containerRegistryUrl,
