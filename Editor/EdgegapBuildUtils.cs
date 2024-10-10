@@ -69,7 +69,7 @@ namespace Edgegap
 
             Debug.Log($"[Edgegap] Docker version detected: {output}"); // MIRROR CHANGE
 
-            await RunCommand_DockerInfo(null,
+            await RunCommand_DockerPS(null,
                 (msg) =>
                 {
                     if (msg.Contains("ERROR"))
@@ -93,14 +93,14 @@ namespace Edgegap
             await RunCommand_InstallLinuxRequirements("linux-il2cpp", unityVersion, outputReciever);
         }
 
-        static async Task RunCommand_DockerInfo(Action<string> outputReciever = null, Action<string> errorReciever = null)
+        static async Task RunCommand_DockerPS(Action<string> outputReciever = null, Action<string> errorReciever = null)
         {
 #if UNITY_EDITOR_WIN
-            await RunCommand("cmd.exe", "/c docker info", outputReciever, errorReciever);
+            await RunCommand("cmd.exe", "/c docker ps -q", outputReciever, errorReciever);
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", "-c \"docker info\"", outputReciever, errorReciever);
+            await RunCommand("/bin/bash", "-c \"docker ps -q\"", outputReciever, errorReciever);
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", "-c \"docker info\"", outputReciever, errorReciever);
+            await RunCommand("/bin/bash", "-c \"docker ps -q\"", outputReciever, errorReciever);
 #else
             Debug.LogError("The platform is not supported yet.");
 #endif
