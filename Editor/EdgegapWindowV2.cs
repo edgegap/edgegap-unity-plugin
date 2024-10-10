@@ -1407,6 +1407,7 @@ namespace Edgegap.Editor
             {
                 _serverBuildFoldout.value = false;
                 _containerizeFoldout.value = false;
+                _localTestFoldout.value = false;
                 _createAppFoldout.value = false;
                 _deployAppFoldout.value = false;
                 _nextStepsFoldout.value = false;
