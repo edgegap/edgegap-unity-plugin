@@ -11,8 +11,7 @@
     "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.toolchain.win-x86_64-linux-x86_64": "2.0.6",
-        "com.unity.modules.uielements": "1.0.0",
-	    "com.unity.vectorgraphics": "2.0.0-preview.24"
+        "com.unity.modules.uielements": "1.0.0"
     },
     "author": {
         "name": "Edgegap Technologies",

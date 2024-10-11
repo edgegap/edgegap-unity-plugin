@@ -66,12 +66,13 @@ namespace Edgegap.Editor
         public const string EDGEGAP_DOC_APP_INFO_PATH = "application/version/";
         public const string EDGEGAP_CREATE_APP_BASE_URL = "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DEPLOY_APP_URL = "https://app.edgegap.com/deployment-management/deployments/list/";
-        //TODO define url
-        public const string EDGEGAP_FREE_TIER_INFO_URL = "";
+        public const string EDGEGAP_FREE_TIER_INFO_URL = "https://app.edgegap.com/user-settings?tab=memberships";
         public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/GYaHcKR9a5/";
         //TODO define url
         public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "";
-        public const string EDGEGAP_DOC_MATCHMAKER_INFO_PATH = "matchmaker/managed/";
+        public const string EDGEGAP_DOC_LOBBY_PATH = "lobby/service/";
+        public const string EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH = "gen2-matchmaker/";
+        public const string EDGEGAP_DOC_ADV_MATCHMAKER_PATH = "matchmaker/advanced/";
         //TODO define url
         public const string SCALING_LIFECYCLE_INFO_URL = "";
 
@@ -220,7 +221,9 @@ namespace Edgegap.Editor
         //7. Matchmaking and next steps
         public const string NEXT_STEPS_FOLDOUT_ID = "NextStepFoldout";
         public const string NEXT_STEPS_SERVER_CONNECT_LINK_ID = "ServerConnectLinkTxt";
-        public const string NEXT_STEPS_LOBBY_MATCHMAKER_LABEL_LINK_ID = "LobbiesMatchmakerTxt";
+        public const string NEXT_STEPS_LOBBY_LABEL_LINK_ID = "LobbiesLinkTxt";
+        public const string NEXT_STEPS_MANAGED_MATCHMAKER_LABEL_LINK_ID = "ManagedMMLinkTxt";
+        public const string NEXT_STEPS_ADV_MATCHMAKER_LABEL_LINK_ID = "AdvMMLinkTxt";
         public const string NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID = "LifecycleManageTxt";
         #endregion // UI Element Ids
         

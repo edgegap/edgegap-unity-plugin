@@ -121,7 +121,9 @@ namespace Edgegap.Editor
 
         private Foldout _nextStepsFoldout;
         private Button _serverConnectLink;
-        private Button _lobbyMatchmakerLabelLink;
+        private Button _lobbyLabelLink;
+        private Button _managedMatchmakerLabelLink;
+        private Button _advMatchmakerLabelLink;
         private Button _lifecycleManageLabelLink;
         #endregion //Vars -> Interactable Elements
 
@@ -328,7 +330,9 @@ namespace Edgegap.Editor
 
             _nextStepsFoldout = rootVisualElement.Q<Foldout>(EdgegapWindowMetadata.NEXT_STEPS_FOLDOUT_ID);
             _serverConnectLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.NEXT_STEPS_SERVER_CONNECT_LINK_ID);
-            _lobbyMatchmakerLabelLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.NEXT_STEPS_LOBBY_MATCHMAKER_LABEL_LINK_ID);
+            _lobbyLabelLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.NEXT_STEPS_LOBBY_LABEL_LINK_ID);
+            _managedMatchmakerLabelLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.NEXT_STEPS_MANAGED_MATCHMAKER_LABEL_LINK_ID);
+            _advMatchmakerLabelLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.NEXT_STEPS_ADV_MATCHMAKER_LABEL_LINK_ID);
             _lifecycleManageLabelLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID);
 
             _apiEnvironment = EdgegapWindowMetadata.API_ENVIRONMENT; // (!) TODO: Hard-coded while unused in UI
@@ -342,6 +346,8 @@ namespace Edgegap.Editor
             _apiTokenInput.RegisterValueChangedCallback(onApiTokenInputChanged);
             _apiTokenInput.RegisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
 
+            _buildFolderNameInput.RegisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
+
             _buildPathInput.RegisterCallback<FocusEvent>(OnBuildPathInputFocus);
 
             _dockerfilePathInput.RegisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
@@ -349,7 +355,7 @@ namespace Edgegap.Editor
             _containerizeImageTagInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
 
             _localTestImageInput.RegisterValueChangedCallback(OnLocalTestInputsChanged);
-            _localTestDockerRunInput.RegisterValueChangedCallback(OnLocalTestInputsChanged);
+            _localTestDockerRunInput.RegisterCallback<FocusOutEvent>(OnLocalTestDockerRunFocusOut);
 
             _createAppNameInput.RegisterValueChangedCallback(OnCreateAppNameInputChanged);
             _serverImageNameInput.RegisterValueChangedCallback(OnCreateInputsChanged);
@@ -368,6 +374,8 @@ namespace Edgegap.Editor
             _apiTokenInput.UnregisterValueChangedCallback(onApiTokenInputChanged);
             _apiTokenInput.UnregisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
 
+            _buildFolderNameInput.UnregisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
+
             _buildPathInput.UnregisterCallback<FocusEvent>(OnBuildPathInputFocus);
 
             _dockerfilePathInput.UnregisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
@@ -375,7 +383,7 @@ namespace Edgegap.Editor
             _containerizeImageTagInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
 
             _localTestImageInput.UnregisterValueChangedCallback(OnLocalTestInputsChanged);
-            _localTestDockerRunInput.UnregisterValueChangedCallback(OnLocalTestInputsChanged);
+            _localTestDockerRunInput.UnregisterCallback<FocusOutEvent>(OnLocalTestDockerRunFocusOut);
 
             _createAppNameInput.UnregisterValueChangedCallback(OnCreateAppNameInputChanged);
             _serverImageNameInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
@@ -420,7 +428,7 @@ namespace Edgegap.Editor
             _portMappingLabelLink.clickable.clicked += OnPortsMappingLinkClick;
             _appInfoLabelLink.clickable.clicked += OnYourAppLinkClick;
 
-            //_deployLimitLabelLink.clickable.clicked += OnDeployLimitLinkClick;
+            _deployLimitLabelLink.clickable.clicked += OnDeployLimitLinkClick;
             _deployAppNameShowDropdownBtn.clickable.clicked += OnDeployAppNameDropdownClick;
             _deployAppVersionShowDropdownBtn.clickable.clicked += OnDeployAppVersionDropdownClick;
             _deployAppBtn.clickable.clicked += OnDeploymentCreateBtnClick;
@@ -428,7 +436,9 @@ namespace Edgegap.Editor
             _discordHelpBtn.clickable.clicked += OnDiscordBtnClick;
 
             //_serverConnectLink.clickable.clicked += OnServerConnectLinkClick;
-            _lobbyMatchmakerLabelLink.clickable.clicked += OnLobbyMatchmakerLinkClick;
+            _lobbyLabelLink.clickable.clicked += OnLobbyLinkClick;
+            _managedMatchmakerLabelLink.clickable.clicked += OnManagedMatchmakerLinkClick;
+            _advMatchmakerLabelLink.clickable.clicked += OnAdvMatchmakerLinkClick;
             //_lifecycleManageLabelLink.clickable.clicked += OnScalingLifecycleLinkClick;
         }
 
@@ -468,7 +478,7 @@ namespace Edgegap.Editor
             _portMappingLabelLink.clickable.clicked -= OnPortsMappingLinkClick;
             _appInfoLabelLink.clickable.clicked -= OnYourAppLinkClick;
 
-            //_deployLimitLabelLink.clickable.clicked -= OnDeployLimitLinkClick;
+            _deployLimitLabelLink.clickable.clicked -= OnDeployLimitLinkClick;
             _deployAppNameShowDropdownBtn.clickable.clicked -= OnDeployAppNameDropdownClick;
             _deployAppVersionShowDropdownBtn.clickable.clicked -= OnDeployAppVersionDropdownClick;
             _deployAppBtn.clickable.clicked -= OnDeploymentCreateBtnClick;
@@ -476,7 +486,9 @@ namespace Edgegap.Editor
             _discordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
 
             //_serverConnectLink.clickable.clicked -= OnServerConnectLinkClick;
-            _lobbyMatchmakerLabelLink.clickable.clicked -= OnLobbyMatchmakerLinkClick;
+            _lobbyLabelLink.clickable.clicked -= OnLobbyLinkClick;
+            _managedMatchmakerLabelLink.clickable.clicked -= OnManagedMatchmakerLinkClick;
+            _advMatchmakerLabelLink.clickable.clicked -= OnAdvMatchmakerLinkClick;
             //_lifecycleManageLabelLink.clickable.clicked -= OnScalingLifecycleLinkClick;
         }
 
@@ -486,7 +498,6 @@ namespace Edgegap.Editor
             loadPersistentDataFromEditorPrefs();
 
             _deployAppVersionShowDropdownBtn.SetEnabled(false);
-            _stopLastDeployBtn.SetEnabled(false);
             _debugBtn.visible = EdgegapWindowMetadata.SHOW_DEBUG_BTN;
         }
 
@@ -563,7 +574,11 @@ namespace Edgegap.Editor
 
         private void OnServerConnectLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.CONNECT_TO_DEPLOYMENT_INFO_URL);
 
-        private void OnLobbyMatchmakerLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_MATCHMAKER_INFO_PATH);
+        private void OnLobbyLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_LOBBY_PATH);
+
+        private void OnManagedMatchmakerLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH);
+
+        private void OnAdvMatchmakerLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_ADV_MATCHMAKER_PATH);
 
         private void OnScalingLifecycleLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.SCALING_LIFECYCLE_INFO_URL);
 
@@ -617,7 +632,7 @@ namespace Edgegap.Editor
         /// </summary>
         private void OnResetDockerfilePathBtnClick()
         {
-            _dockerfilePathInput.value = "";
+            _dockerfilePathInput.value = DefaultDockerFilePath;
         }
 
         /// <summary>
@@ -634,7 +649,7 @@ namespace Edgegap.Editor
                 BuildServer();
 
                 _containerizeFoldout.value = true;
-                _buildPathInput.value = ProjectRootPath + "/Builds/" + _buildFolderNameInput.value;
+                _buildPathInput.value = $"Builds/{_buildFolderNameInput.value}";
             }
             catch (Exception e)
             {
@@ -881,13 +896,13 @@ namespace Edgegap.Editor
             catch (Exception e)
             {
                 OnCreateDeploymentStartServerFail(false, e.Message);
-                _deployAppBtn.SetEnabled(CheckFilledDeployServerInputs());
             }
             finally
             {
                 _apiTokenVerifyBtn.SetEnabled(true);
                 _signOutBtn.SetEnabled(true);
-                _stopLastDeployBtn.SetEnabled(!string.IsNullOrEmpty(_deploymentRequestId));
+                _stopLastDeployBtn.SetEnabled(true);
+                _deployAppBtn.SetEnabled(CheckFilledDeployServerInputs());
             }
         }
 
@@ -920,7 +935,7 @@ namespace Edgegap.Editor
 
                 _apiTokenVerifyBtn.SetEnabled(true);
                 _signOutBtn.SetEnabled(true);
-                _stopLastDeployBtn.SetEnabled(false);
+                _stopLastDeployBtn.SetEnabled(true);
                 _deployAppBtn.SetEnabled(CheckFilledDeployServerInputs());
             }
         }
@@ -939,7 +954,7 @@ namespace Edgegap.Editor
             return _buildPathInput.value.Length > 0
                 || _containerizeImageNameInput.value.Length > 0
                 || _containerizeImageTagInput.value.Length > 0
-                || _dockerfilePathInput.value.Length > 0
+                || (_dockerfilePathInput.value.Length > 0 && _dockerfilePathInput.value != DefaultDockerFilePath)
                 || _optionalDockerParamsInput.value.Length > 0;
         }
 
@@ -951,7 +966,7 @@ namespace Edgegap.Editor
         private bool CheckAnyLocalTestInput()
         {
             return _localTestImageInput.value.Length > 0
-                || _localTestDockerRunInput.value.Length > 0;
+                || (_localTestDockerRunInput.value.Length > 0 && _localTestDockerRunInput.value != DefaultDockerRunParams);
         }
 
         private bool CheckFilledCreateAppInputs()
@@ -1090,28 +1105,20 @@ namespace Edgegap.Editor
                 _signOutBtn.SetEnabled(true);
             }
 
-            // Was the API token verified?
-            // enable either start/stop deployment btns based on stored deployment ID
-            if (_isApiTokenVerified)
+            // Was the API token verified + found stored deployment ID?
+            // refresh to see if it's still running
+            if (_isApiTokenVerified && !string.IsNullOrEmpty(_deploymentRequestId))
             {
-                bool enableStopBtn = false;
+                if (IsLogLevelDebug) Debug.Log("syncFormWithObjectDynamicAsync: Found apiToken && _deploymentRequestId; " +
+                "calling RefreshDeploymentsAsync =>");
 
-                if (!string.IsNullOrEmpty(_deploymentRequestId))
-                {
-                    if (IsLogLevelDebug) Debug.Log("syncFormWithObjectDynamicAsync: Found apiToken && _deploymentRequestId; " +
-                    "calling RefreshDeploymentsAsync =>");
+                _apiTokenVerifyBtn.SetEnabled(false);
+                _signOutBtn.SetEnabled(false);
 
-                    _apiTokenVerifyBtn.SetEnabled(false);
-                    _signOutBtn.SetEnabled(false);
+                await RefreshDeploymentsAsync();
 
-                    enableStopBtn = await RefreshDeploymentsAsync();
-
-                    _apiTokenVerifyBtn.SetEnabled(true);
-                    _signOutBtn.SetEnabled(true);
-                }
-
-                _deployAppBtn.SetEnabled(!enableStopBtn && CheckFilledDeployServerInputs());
-                _stopLastDeployBtn.SetEnabled(enableStopBtn);
+                _apiTokenVerifyBtn.SetEnabled(true);
+                _signOutBtn.SetEnabled(true);
             }
         }
 
@@ -1130,6 +1137,14 @@ namespace Edgegap.Editor
 
 
 #region Immediate non-button changes
+        private void OnFolderNameInputFocusOut(FocusOutEvent evt)
+        {
+            if (string.IsNullOrEmpty(_buildFolderNameInput.value))
+            {
+                _buildFolderNameInput.value = DefaultFolderName;
+            }
+        }
+
         /// <summary>
         /// When field gains focus, open File Explorer to select folder path
         /// </summary>
@@ -1178,6 +1193,17 @@ namespace Edgegap.Editor
 
         private void OnLocalTestInputsChanged(ChangeEvent<string> evt)
         {
+            bool requiredInputFilled = CheckFilledLocalTestInputs();
+            _localTestDeployBtn.SetEnabled(requiredInputFilled);
+        }
+
+        private void OnLocalTestDockerRunFocusOut(FocusOutEvent evt)
+        {
+            if (string.IsNullOrEmpty(_localTestDockerRunInput.value))
+            {
+                _localTestDockerRunInput.value = DefaultDockerRunParams;
+            }
+
             bool requiredInputFilled = CheckFilledLocalTestInputs();
             _localTestDeployBtn.SetEnabled(requiredInputFilled);
         }
@@ -1416,7 +1442,7 @@ namespace Edgegap.Editor
             {
                 _serverBuildFoldout.value = true;
 
-                //open other foldouts if persistent data is found in inputs
+                //open other foldouts if (non-default M_TODO) persistent data is found in inputs
                 if (CheckAnyContainerizeServerInput())
                     _containerizeFoldout.value = true;
 
@@ -1428,6 +1454,16 @@ namespace Edgegap.Editor
 
                 if (CheckAnyDeployServerInput())
                     _deployAppFoldout.value = true;
+
+                // Set default values if empty fields
+                if (string.IsNullOrEmpty(_buildFolderNameInput.value))
+                    _buildFolderNameInput.value = DefaultFolderName;
+
+                if (string.IsNullOrEmpty(_dockerfilePathInput.value))
+                    _dockerfilePathInput.value = DefaultDockerFilePath;
+
+                if (string.IsNullOrEmpty(_localTestDockerRunInput.value))
+                    _localTestDockerRunInput.value = DefaultDockerRunParams;
             }
         }
 
@@ -1643,7 +1679,7 @@ namespace Edgegap.Editor
         /// Refreshes an existing deployment.
         /// </summary>
         /// <returns>If the refreshed deployment is still active</returns>
-        private async Task<bool> RefreshDeploymentsAsync()
+        private async Task RefreshDeploymentsAsync()
         {
             if (IsLogLevelDebug) Debug.Log("refreshDeploymentsAsync");
 
@@ -1658,36 +1694,64 @@ namespace Edgegap.Editor
             {
                 _deploymentRequestId = "";
                 EditorPrefs.DeleteKey(EdgegapWindowMetadata.DEPLOYMENT_REQUEST_ID_KEY_STR);
-
-                if (getDeploymentStatusResponse.HasErr)
-                {
-                    Debug.LogError($"Deployment error: {getDeploymentStatusResponse.Data.ErrorDetail}");
-                }
-
-                return false;
             } 
+        }
+
+        private async Task<List<string>> GetQuickstartDeploymentsAsync()
+        {
+            if (IsLogLevelDebug) Debug.Log("GetQuickstartDeploymentsAsync");
+
+            EdgegapDeploymentsApi deployApi = getDeployApi();
+            EdgegapHttpResult<GetDeploymentsResult> getDeploymentsResponse = await deployApi.GetDeploymentsAsync();
+
+            if (getDeploymentsResponse.IsResultCode200)
+            {
+                List<GetDeploymentResult> quickstartDeploys = getDeploymentsResponse.Data.Data.Where(
+                        deploy => deploy.Ready && deploy.Tags.Contains(EdgegapWindowMetadata.DEFAULT_DEPLOYMENT_TAG)
+                    ).ToList();
+                List<string> quickstartRequestIds = quickstartDeploys.Select(deploy => deploy.RequestId).ToList();
+
+                return quickstartRequestIds;
+            }
             else
             {
-                return true;
+                throw new Exception(getDeploymentsResponse.Error.ErrorMessage);
             }
         }
 
 
         /// <summary>
-        /// Stop currently stored deployment
+        /// Stop currently stored deployment M_TODO if no stored, check for first ready quickstart
         /// </summary>
         /// <returns></returns>
         private async Task StopDeploymentAsync()
         {
             if (IsLogLevelDebug) Debug.Log("GetStopLastDeploymentAsync");
 
+            EdgegapDeploymentsApi deployApi = getDeployApi();
+
+            if (string.IsNullOrEmpty(_deploymentRequestId))
+            {
+                List<string> quickstartDeployIds = await GetQuickstartDeploymentsAsync();
+
+                if (quickstartDeployIds.Count > 0)
+                {
+                    _deploymentRequestId = quickstartDeployIds[0];
+                }
+                else
+                {
+                    OnGetStopLastDeploymentSuccess("No quickstart deployment found");
+                    return;
+                }
+            }
+
             _deployResultLabel.text = EdgegapWindowMetadata.WrapRichTextInColor(
                     "<i>Stopping...</i>", EdgegapWindowMetadata.StatusColors.Warn);
             _deployResultLabel.style.display = DisplayStyle.Flex;
 
             //Stop request
-            EdgegapDeploymentsApi deployApi = getDeployApi();
-            EdgegapHttpResult<StopActiveDeploymentResult> stopDeploymentResponse = await deployApi.StopActiveDeploymentAsync(_deploymentRequestId);
+            EdgegapHttpResult<StopActiveDeploymentResult> stopDeploymentResponse = 
+                await deployApi.StopActiveDeploymentAsync(_deploymentRequestId);
 
             if (!stopDeploymentResponse.IsResultCode200)
             {
@@ -1706,14 +1770,14 @@ namespace Edgegap.Editor
             }
             else
             {
-                OnGetStopLastDeploymentSuccess();
+                OnGetStopLastDeploymentSuccess("Deployment stopped successfully");
             }
         }
 
-        private void OnGetStopLastDeploymentSuccess()
+        private void OnGetStopLastDeploymentSuccess(string labelTxt)
         {
             _deployResultLabel.text = EdgegapWindowMetadata.WrapRichTextInColor(
-                "Deployment stopped successfully",
+                labelTxt,
                 EdgegapWindowMetadata.StatusColors.Success);
             _deployResultLabel.style.display = DisplayStyle.Flex;
         }
