@@ -16,6 +16,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.UIElements;
+using UnityEditor.VSAttribution.Edgegap;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements;
@@ -972,6 +973,9 @@ namespace Edgegap.Editor
                 _credentials = getRegistryCredentialsResult.Data;
                 persistUnmaskedApiToken(_apiTokenInput.value);
                 prefillContainerRegistryForm(_credentials);
+
+                // Unity Verified Solution Attribution
+                VSAttribution.SendAttributionEvent("verify", "Edgegap", _apiTokenInput.value);
             }
             else
             {
