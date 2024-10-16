@@ -721,8 +721,6 @@ namespace Edgegap.Editor
 
         private async void OnLocalTestDeployClick()
         {
-            //M_TODO
-
             try
             {
                 hideResultLabels();
@@ -749,8 +747,6 @@ namespace Edgegap.Editor
 
         private async void OnLocalTestTerminateCLick()
         {
-            //M_TODO
-
             try
             {
                 hideResultLabels();
@@ -1442,7 +1438,7 @@ namespace Edgegap.Editor
             {
                 _serverBuildFoldout.value = true;
 
-                //open other foldouts if (non-default M_TODO) persistent data is found in inputs
+                //open other foldouts if (non-default) persistent data is found in inputs
                 if (CheckAnyContainerizeServerInput())
                     _containerizeFoldout.value = true;
 
@@ -1721,7 +1717,8 @@ namespace Edgegap.Editor
 
 
         /// <summary>
-        /// Stop currently stored deployment M_TODO if no stored, check for first ready quickstart
+        /// Stop currently stored deployment
+        /// if none stored, check for first ready quickstart
         /// </summary>
         /// <returns></returns>
         private async Task StopDeploymentAsync()
