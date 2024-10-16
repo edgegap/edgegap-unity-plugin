@@ -61,13 +61,15 @@ namespace Edgegap.Editor
 
         public const string EDGEGAP_SIGN_IN_URL = "https://app.edgegap.com/";
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
+        public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/docs/";
+        public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "tools-and-integrations/unity-plugin-guide/";
         //TODO define url
         public const string LOCAL_TEST_CONNECT_INFO_URL = "";
         public const string EDGEGAP_DOC_APP_INFO_PATH = "application/version/";
         public const string EDGEGAP_CREATE_APP_BASE_URL = "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DEPLOY_APP_URL = "https://app.edgegap.com/deployment-management/deployments/list/";
         public const string EDGEGAP_FREE_TIER_INFO_URL = "https://app.edgegap.com/user-settings?tab=memberships";
-        public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/GYaHcKR9a5/";
+        public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/MmJf8fWjnt";
         //TODO define url
         public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "";
         public const string EDGEGAP_DOC_LOBBY_PATH = "lobby/service/";
@@ -75,9 +77,6 @@ namespace Edgegap.Editor
         public const string EDGEGAP_DOC_ADV_MATCHMAKER_PATH = "matchmaker/advanced/";
         //TODO define url
         public const string SCALING_LIFECYCLE_INFO_URL = "";
-
-        public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/docs/";
-        public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "tools-and-integrations/unity-plugin-guide/";
 
         private const string DEFAULT_UTM_SOURCE_TAG = "plugin_unity";
         private const string DEFAULT_UTM_MEDIUM_TAG = "servers_quickstart_plugin";
@@ -156,7 +155,6 @@ namespace Edgegap.Editor
         public const string CONNECTED_CONTAINER_ID = "ConnectedContainer";
         public const string SIGN_OUT_BTN_ID = "SignOutBtn";
         public const string JOIN_DISCORD_BTN_ID = "EdgegapDiscordBtn";
-        public const string TERMS_OF_SERVICES_LINK_ID = "TermsServicesLinkTxt";
 
         public const string POST_AUTH_CONTAINER_ID = "PostAuthContainer";
 

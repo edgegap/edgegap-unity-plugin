@@ -61,7 +61,6 @@ namespace Edgegap.Editor
         private VisualElement _connectedContainer;
         private Button _signOutBtn;
         private Button _joinEdgegapDiscordBtn;
-        private Button _termsOfServicesLink;
         private TextField _apiTokenInput;
         private Button _apiTokenVerifyBtn;
         private Button _apiTokenGetBtn;
@@ -270,7 +269,6 @@ namespace Edgegap.Editor
             _connectedContainer = rootVisualElement.Q<VisualElement>(EdgegapWindowMetadata.CONNECTED_CONTAINER_ID);
             _signOutBtn = rootVisualElement.Q<Button>(EdgegapWindowMetadata.SIGN_OUT_BTN_ID);
             _joinEdgegapDiscordBtn = rootVisualElement.Q<Button>(EdgegapWindowMetadata.JOIN_DISCORD_BTN_ID);
-            _termsOfServicesLink = rootVisualElement.Q<Button>(EdgegapWindowMetadata.TERMS_OF_SERVICES_LINK_ID);
             _apiTokenInput = rootVisualElement.Q<TextField>(EdgegapWindowMetadata.API_TOKEN_TXT_ID);
             _apiTokenVerifyBtn = rootVisualElement.Q<Button>(EdgegapWindowMetadata.API_TOKEN_VERIFY_BTN_ID);
             _apiTokenGetBtn = rootVisualElement.Q<Button>(EdgegapWindowMetadata.API_TOKEN_GET_BTN_ID);
@@ -421,7 +419,7 @@ namespace Edgegap.Editor
             _localTestDeployBtn.clickable.clicked += OnLocalTestDeployClick;
             _localTestTerminateBtn.clickable.clicked += OnLocalTestTerminateCLick;
             _localTestDiscordHelpBtn.clickable.clicked += OnDiscordBtnClick;
-            //_localTestInfoConnectBtn.clickable.clicked += OnLocalContainerConnecteLinkClick;
+            //_localTestInfoConnectBtn.clickable.clicked += OnLocalContainerConnectLinkClick;
 
             _createAppNameShowDropdownBtn.clickable.clicked += OnCreateAppNameDropdownClick;
             _uploadImageCreateAppBtn.clickable.clicked += OnUploadImageCreateAppBtnClickAsync;
@@ -471,7 +469,7 @@ namespace Edgegap.Editor
             _localTestDeployBtn.clickable.clicked -= OnLocalTestDeployClick;
             _localTestTerminateBtn.clickable.clicked -= OnLocalTestTerminateCLick;
             _localTestDiscordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
-            //_localTestInfoConnectBtn.clickable.clicked -= OnLocalContainerConnecteLinkClick;
+            //_localTestInfoConnectBtn.clickable.clicked -= OnLocalContainerConnectLinkClick;
 
             _createAppNameShowDropdownBtn.clickable.clicked -= OnCreateAppNameDropdownClick;
             _uploadImageCreateAppBtn.clickable.clicked -= OnUploadImageCreateAppBtnClickAsync;
@@ -562,9 +560,9 @@ namespace Edgegap.Editor
 
         private void OnLinuxInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-unity-linux-build-support");
 
-        private void OnDockerInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
+        private void OnDockerInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-docker-desktop");
 
-        private void OnLocalContainerConnecteLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.LOCAL_TEST_CONNECT_INFO_URL);
+        private void OnLocalContainerConnectLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.LOCAL_TEST_CONNECT_INFO_URL);
 
         private void OnPortsMappingLinkClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
 
@@ -582,7 +580,7 @@ namespace Edgegap.Editor
 
         private void OnScalingLifecycleLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.SCALING_LIFECYCLE_INFO_URL);
 
-        private void OnDiscordBtnClick() => OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_DISCORD_URL);
+        private void OnDiscordBtnClick() => OpenEdgegapDiscord();
 
         /// <summary>
         /// Linux server build requirements install btn click
@@ -1478,6 +1476,10 @@ namespace Edgegap.Editor
         {
             Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL + _createAppNameInput.value + 
                                 "/versions/create/?" + EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
+        }
+
+        private void OpenEdgegapDiscord() {
+            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_DISCORD_URL);
         }
 
         /// <summary>
