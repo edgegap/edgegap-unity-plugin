@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using Edgegap.Editor;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,6 +18,8 @@ namespace Edgegap
 {
     internal static class EdgegapBuildUtils
     {
+        public static bool IsLogLevelDebug =>
+            EdgegapWindowMetadata.LOG_LEVEL == EdgegapWindowMetadata.LogLevel.Debug;
         public static bool IsArmCPU() =>
             RuntimeInformation.ProcessArchitecture == Architecture.Arm ||
             RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
@@ -55,13 +58,13 @@ namespace Edgegap
             await RunCommand_DockerVersion(msg => output = msg,
                 (msg) =>
                 {
-                    if (msg.Contains("ERROR"))
+                    if (msg.ToLower().Contains("error"))
                     {
                         error = msg;
                     }
                 });
 
-            if (!string.IsNullOrEmpty(error) && error.Contains("ERROR"))
+            if (!string.IsNullOrEmpty(error))
             {
                 Debug.LogError(error);
                 return (false, error);
@@ -72,13 +75,13 @@ namespace Edgegap
             await RunCommand_DockerPS(null,
                 (msg) =>
                 {
-                    if (msg.Contains("ERROR"))
+                    if (msg.ToLower().Contains("error"))
                     {
                         error = msg;
                     }
                 });
 
-            if (!string.IsNullOrEmpty(error) && error.Contains("ERROR"))
+            if (!string.IsNullOrEmpty(error))
             {
                 Debug.LogError(error);
                 return (false, error);

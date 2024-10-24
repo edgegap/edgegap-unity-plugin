@@ -38,7 +38,6 @@ namespace Edgegap.Editor
         private ApiEnvironment _apiEnvironment; // TODO: Swap out hard-coding with UI element?
         private GetRegistryCredentialsResult _credentials;
         private static readonly Regex _appNameAllowedCharsRegex = new Regex(@"^[a-zA-Z0-9_\-+\.]*$"); // MIRROR CHANGE: 'new()' not supported in Unity 2020
-        private GetCreateAppResult _loadedApp;
         private string _deploymentRequestId;
         private string _userExternalIp;
 
@@ -542,8 +541,10 @@ namespace Edgegap.Editor
         /// </summary>
         private void OnEdgegapSignInBtnClick() 
         { 
-            OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_SIGN_IN_URL);
-            ToggleIsConnectedConatiners(true);
+            if (!_isApiTokenVerified) {
+                OpenGetTokenUrl();
+            }
+            ToggleIsConnectedContainers(true);
         }
 
         /// <summary>
@@ -555,12 +556,12 @@ namespace Edgegap.Editor
             ResetPluginValues();
             hideResultLabels();
             closeDisableGroups();
-            ToggleIsConnectedConatiners(false);
+            ToggleIsConnectedContainers(false);
         }
 
-        private void OnLinuxInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-unity-linux-build-support");
-
-        private void OnDockerInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#install-docker-desktop");
+        private void OnLinuxInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#usage-requirements");
+        
+        private void OnDockerInfoClick() => OpenEdgegapDocPageUrl(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH, "#usage-requirements");
 
         private void OnLocalContainerConnectLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.LOCAL_TEST_CONNECT_INFO_URL);
 
@@ -580,7 +581,7 @@ namespace Edgegap.Editor
 
         private void OnScalingLifecycleLinkClick() => OpenWebsiteUrl(EdgegapWindowMetadata.SCALING_LIFECYCLE_INFO_URL);
 
-        private void OnDiscordBtnClick() => OpenEdgegapDiscord();
+        private void OnDiscordBtnClick() => OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_DISCORD_URL);
 
         /// <summary>
         /// Linux server build requirements install btn click
@@ -610,7 +611,9 @@ namespace Edgegap.Editor
             _validateDockerRequirementsBtn.SetEnabled(false);
             hideResultLabels();
 
-            try { await ValidateDockerRequirementsAsync(); }
+            try {
+                await ValidateDockerRequirementsAsync();
+            }
             finally
             {
                 _validateDockerRequirementsBtn.SetEnabled(true);
@@ -841,7 +844,8 @@ namespace Edgegap.Editor
                 ShowWorkInProgress("Create Application", "Updating server info on Edgegap");
                 await CreateAppAsync();
 
-                OpenCreateAppVersionUrl();
+                OpenWebsiteUrl(EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL + _createAppNameInput.value +
+                                "/versions/create/?" + EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
                 
                 _deployAppFoldout.value = true;
                 _deployAppNameInput.value = _createAppNameInput.value;
@@ -1020,13 +1024,13 @@ namespace Edgegap.Editor
             if (string.IsNullOrEmpty(_apiTokenInput.value))
             {
                 //show Sign In btn
-                ToggleIsConnectedConatiners(false);
+                ToggleIsConnectedContainers(false);
                 return;
             }
             else
             {
                 //show API Token field/btns + Sign Out btn
-                ToggleIsConnectedConatiners(true);
+                ToggleIsConnectedContainers(true);
             }   
 
             // We found a cached api token: Verify =>
@@ -1120,7 +1124,7 @@ namespace Edgegap.Editor
         /// Change between the view when connected or the view when not connected
         /// </summary>
         /// <param name="isConnected"></param>
-        private void ToggleIsConnectedConatiners(bool isConnected)
+        private void ToggleIsConnectedContainers(bool isConnected)
         {
             _connectedContainer.style.display = isConnected ? DisplayStyle.Flex : DisplayStyle.None;
             _connectedContainer.SetEnabled(isConnected);
@@ -1302,7 +1306,10 @@ namespace Edgegap.Editor
             closeDisableGroups();
 
             // Toggle "Verify" btn on 1+ char entered
-            _apiTokenVerifyBtn.SetEnabled(evt.newValue.Length > 0);
+            if (evt.newValue.Length > 0) {
+                _apiTokenVerifyBtn.SetEnabled(true);
+                onApiTokenVerifyBtnClick();
+            }
         }
 
         /// <summary>Unmask while typing</summary>
@@ -1372,6 +1379,7 @@ namespace Edgegap.Editor
             }
             else
             {
+                Debug.LogWarning(getRegistryCredentialsResult.Data.ToString());
                 // Fail
             }
 
@@ -1470,16 +1478,6 @@ namespace Edgegap.Editor
         private void OpenGetTokenUrl()
         {
             Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_GET_A_TOKEN_URL + "&" + EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
-        }
-
-        private void OpenCreateAppVersionUrl()
-        {
-            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL + _createAppNameInput.value + 
-                                "/versions/create/?" + EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
-        }
-
-        private void OpenEdgegapDiscord() {
-            Application.OpenURL(EdgegapWindowMetadata.EDGEGAP_DISCORD_URL);
         }
 
         /// <summary>
@@ -1980,14 +1978,12 @@ namespace Edgegap.Editor
             BuildReport buildResult = EdgegapBuildUtils.BuildServer(folderName);
             if (buildResult.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
             {
-                throw new Exception();
+                Debug.LogWarning(buildResult.summary.result.ToString());
             }
             else
             {
                 OnBuildContainerizeUploadSuccess(_serverBuildResultLabel, "Build succeeded.");
             }
-
-            OnBuildContainerizeUploadSuccess(_serverBuildResultLabel, "Build succeeded.");
         }
 
         /// <summary>

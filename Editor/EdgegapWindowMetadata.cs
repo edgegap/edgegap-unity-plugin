@@ -28,7 +28,7 @@ namespace Edgegap.Editor
         /// - TODO: Move opt to UI?
         /// </summary>
         public const LogLevel LOG_LEVEL = LogLevel.Error;
-        
+
         /// <summary>
         /// Set to show a debug button at the top-right for arbitrary testing.
         /// Default enables groups. Default `false`.
@@ -61,8 +61,8 @@ namespace Edgegap.Editor
 
         public const string EDGEGAP_SIGN_IN_URL = "https://app.edgegap.com/";
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
-        public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/docs/";
-        public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "tools-and-integrations/unity-plugin-guide/";
+        public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/";
+        public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "learn/unity-games/developer-tools";
         //TODO define url
         public const string LOCAL_TEST_CONNECT_INFO_URL = "";
         public const string EDGEGAP_DOC_APP_INFO_PATH = "application/version/";
