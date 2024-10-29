@@ -188,7 +188,11 @@ Toggle > #unity-checkmark {
     align-content: stretch;
     flex-grow: 10;
     flex-shrink: 1;
-    overflow: clip;
+    overflow: hidden;
+}
+
+#ApiTokenMaskedTxt {
+    flex-shrink: 0;
 }
 
 .checkmark-edgegap {

@@ -58,7 +58,7 @@
                     <ui:Label tabindex="-1" text="{DockerRequirementsResultLabel}" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ValidateDockerResultLabel" class="text-edgegap" style="color: rgb(138, 238, 140); align-items: stretch; justify-content: flex-start; align-self: center;" />
                 </ui:VisualElement>
                 <ui:VisualElement name="BuildPathRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
-                    <ui:TextField name="ContainerizeBuildPathTxt" label="Build Path" password="false" view-data-key="ContainerizeBuildPathTxt" readonly="true" tooltip="Path to the server build folder inside the project." class="text-edgegap label-right-padding" />
+                    <ui:TextField name="ContainerizeBuildPathTxt" label="Relative Build Path" password="false" view-data-key="ContainerizeBuildPathTxt" readonly="true" tooltip="Path to the server build folder inside the project." class="text-edgegap label-right-padding" />
                     <ui:Button name="ResetBuildPathBtn" text="&lt;b&gt;X&lt;/b&gt;" class="text-edgegap btn-show-dropdown" style="margin-left: 0; max-width: 250px; width: auto; min-width: auto;" />
                 </ui:VisualElement>
                 <ui:VisualElement name="ImageNameRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
