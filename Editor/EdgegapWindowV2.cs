@@ -43,7 +43,6 @@ namespace Edgegap.Editor
         private bool IsInitd;
         private bool _isApiTokenVerified; // Toggles the rest of the UI
 
-        private ApiEnvironment _apiEnvironment; // TODO: Swap out hard-coding with UI element?
         private GetRegistryCredentialsResult _credentials; // ?
         private static readonly Regex _appNameAllowedCharsRegex = new Regex(
             @"^[a-zA-Z0-9_\-+\.]*$"
@@ -212,7 +211,6 @@ namespace Edgegap.Editor
 #endif
         }
 
-        // called when
         protected void OnEnable()
         {
 #if UNITY_2021_3_OR_NEWER // only load stylesheet in supported Unity versions, otherwise it shows errors in U2020
@@ -278,7 +276,6 @@ namespace Edgegap.Editor
             if (_debugBtn == null)
                 return;
 
-            unregisterClickCallbacks();
             unregisterUICallbacks();
 #endif
         }
@@ -293,26 +290,8 @@ namespace Edgegap.Editor
         {
             setVisualElementsToFields();
             closeDisableGroups();
-            registerClickCallbacks();
             registerUICallbacks();
             initToggleDynamicUI();
-        }
-
-        private void closeDisableGroups()
-        {
-            _serverBuildFoldout.value = false;
-            _containerizeFoldout.value = false;
-            _localTestFoldout.value = false;
-            _createAppFoldout.value = false;
-            _deployAppFoldout.value = false;
-            _nextStepsFoldout.value = false;
-
-            _serverBuildFoldout.SetEnabled(false);
-            _containerizeFoldout.SetEnabled(false);
-            _localTestFoldout.SetEnabled(false);
-            _createAppFoldout.SetEnabled(false);
-            _deployAppFoldout.SetEnabled(false);
-            _nextStepsFoldout.SetEnabled(false);
         }
 
         /// <summary>Set fields referencing UI Builder's fields. In order of appearance from top-to-bottom.</summary>
@@ -513,8 +492,23 @@ namespace Edgegap.Editor
             _lifecycleManageLabelLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID
             );
+        }
 
-            _apiEnvironment = EdgegapWindowMetadata.API_ENVIRONMENT; // (!) TODO: Hard-coded while unused in UI
+        private void closeDisableGroups()
+        {
+            _serverBuildFoldout.value = false;
+            _containerizeFoldout.value = false;
+            _localTestFoldout.value = false;
+            _createAppFoldout.value = false;
+            _deployAppFoldout.value = false;
+            _nextStepsFoldout.value = false;
+
+            _serverBuildFoldout.SetEnabled(false);
+            _containerizeFoldout.SetEnabled(false);
+            _localTestFoldout.SetEnabled(false);
+            _createAppFoldout.SetEnabled(false);
+            _deployAppFoldout.SetEnabled(false);
+            _nextStepsFoldout.SetEnabled(false);
         }
 
         /// <summary>
@@ -522,104 +516,58 @@ namespace Edgegap.Editor
         /// </summary>
         private void registerUICallbacks()
         {
-            _apiTokenInput.RegisterValueChangedCallback(onApiTokenInputChanged);
-            _apiTokenInput.RegisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
-
-            _buildFolderNameInput.RegisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
-
-            _buildPathInput.RegisterCallback<FocusEvent>(OnBuildPathInputFocus);
-
-            _dockerfilePathInput.RegisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
-            _containerizeImageNameInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
-            _containerizeImageNameInput.RegisterCallback<FocusEvent>(
-                OnContainerizeImageNameInputFocus
-            );
-            _containerizeImageTagInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
-
-            _localTestImageInput.RegisterValueChangedCallback(OnLocalTestInputsChanged);
-            _localTestDockerRunInput.RegisterCallback<FocusOutEvent>(
-                OnLocalTestDockerParamsFocusOut
-            );
-
-            _createAppNameInput.RegisterValueChangedCallback(OnCreateAppNameInputChanged);
-            _serverImageNameInput.RegisterValueChangedCallback(OnCreateInputsChanged);
-            _serverImageTagInput.RegisterValueChangedCallback(OnCreateInputsChanged);
-
-            _deployAppNameInput.RegisterValueChangedCallback(OnDeployAppNameInputChanged);
-            _deployAppVersionInput.RegisterValueChangedCallback(OnDeployAppVersionInputChanged);
-        }
-
-        /// <summary>
-        /// Prevents memory leaks, mysterious errors and "ghost" values set from a previous session.
-        /// Should parity the opposite of registerFieldCallbacks().
-        /// </summary>
-        private void unregisterUICallbacks()
-        {
-            _apiTokenInput.UnregisterValueChangedCallback(onApiTokenInputChanged);
-            _apiTokenInput.UnregisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
-
-            _buildFolderNameInput.UnregisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
-
-            _buildPathInput.UnregisterCallback<FocusEvent>(OnBuildPathInputFocus);
-
-            _dockerfilePathInput.UnregisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
-            _containerizeImageNameInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
-            _containerizeImageNameInput.UnregisterCallback<FocusEvent>(
-                OnContainerizeImageNameInputFocus
-            );
-            _containerizeImageTagInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
-
-            _localTestImageInput.UnregisterValueChangedCallback(OnLocalTestInputsChanged);
-            _localTestDockerRunInput.UnregisterCallback<FocusOutEvent>(
-                OnLocalTestDockerParamsFocusOut
-            );
-
-            _createAppNameInput.UnregisterValueChangedCallback(OnCreateAppNameInputChanged);
-            _serverImageNameInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
-            _serverImageTagInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
-
-            _deployAppNameInput.UnregisterValueChangedCallback(OnDeployAppNameInputChanged);
-            _deployAppVersionInput.UnregisterValueChangedCallback(OnDeployAppVersionInputChanged);
-        }
-
-        /// <summary>
-        /// Register click actions, mostly from buttons: Need to -= unregister them @ OnDisable()
-        /// </summary>
-        private void registerClickCallbacks()
-        {
             _debugBtn.clickable.clicked += onDebugBtnClick;
 
-            _apiTokenVerifyBtn.clickable.clicked += onApiTokenVerifyBtnClick;
-            _apiTokenGetBtn.clickable.clicked += OpenGetTokenUrl;
             _edgegapSignInBtn.clickable.clicked += OnEdgegapSignInBtnClick;
+            _apiTokenGetBtn.clickable.clicked += OpenGetTokenUrl;
+            _apiTokenInput.RegisterValueChangedCallback(onApiTokenInputChanged);
+            _apiTokenInput.RegisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
+            _apiTokenVerifyBtn.clickable.clicked += onApiTokenVerifyBtnClick;
             _signOutBtn.clickable.clicked += OnSignOutBtnClickAsync;
             _joinEdgegapDiscordBtn.clickable.clicked += OnDiscordBtnClick;
 
             _infoLinuxRequirementsBtn.clickable.clicked += OnLinuxInfoClick;
             _installLinuxRequirementsBtn.clickable.clicked += OnInstallLinuxBtnClick;
             _buildParamsBtn.clickable.clicked += OnOpenBuildParamsBtnClick;
+            _buildFolderNameInput.RegisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
             _serverBuildBtn.clickable.clicked += OnBuildServerBtnClick;
 
             _infoDockerRequirementsBtn.clickable.clicked += OnDockerInfoClick;
             _validateDockerRequirementsBtn.clickable.clicked += OnValidateDockerBtnClick;
+            _buildPathInput.RegisterCallback<FocusEvent>(OnBuildPathInputFocus);
             _buildPathResetBtn.clickable.clicked += OnResetBuildPathBtnClick;
+            _containerizeImageNameInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
+            _containerizeImageNameInput.RegisterCallback<FocusEvent>(
+                OnContainerizeImageNameInputFocus
+            );
+            _containerizeImageTagInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
             _dockerfilePathResetBtn.clickable.clicked += OnResetDockerfilePathBtnClick;
+            _dockerfilePathInput.RegisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
             _containerizeServerBtn.clickable.clicked += OnContainerizeBtnClickAsync;
 
             _localTestImageShowDropdownBtn.clickable.clicked += OnLocalTestImageDropdownClick;
+            _localTestImageInput.RegisterValueChangedCallback(OnLocalTestInputsChanged);
+            _localTestDockerRunInput.RegisterCallback<FocusOutEvent>(
+                OnLocalTestDockerParamsFocusOut
+            );
             _localTestDeployBtn.clickable.clicked += OnLocalTestDeployClick;
             _localTestTerminateBtn.clickable.clicked += OnLocalTestTerminateCLick;
             _localTestDiscordHelpBtn.clickable.clicked += OnDiscordBtnClick;
             //_localTestInfoConnectBtn.clickable.clicked += OnLocalContainerConnectLinkClick;
 
             _createAppNameShowDropdownBtn.clickable.clicked += OnCreateAppNameDropdownClick;
-            _uploadImageCreateAppBtn.clickable.clicked += OnUploadImageCreateAppBtnClickAsync;
+            _createAppNameInput.RegisterValueChangedCallback(OnCreateAppNameInputChanged);
+            _serverImageNameInput.RegisterValueChangedCallback(OnCreateInputsChanged);
+            _serverImageTagInput.RegisterValueChangedCallback(OnCreateInputsChanged);
             _portMappingLabelLink.clickable.clicked += OnPortsMappingLinkClick;
+            _uploadImageCreateAppBtn.clickable.clicked += OnUploadImageCreateAppBtnClickAsync;
             _appInfoLabelLink.clickable.clicked += OnYourAppLinkClick;
 
-            _deployLimitLabelLink.clickable.clicked += OnDeployLimitLinkClick;
             _deployAppNameShowDropdownBtn.clickable.clicked += OnDeployAppNameDropdownClick;
+            _deployAppNameInput.RegisterValueChangedCallback(OnDeployAppNameInputChanged);
             _deployAppVersionShowDropdownBtn.clickable.clicked += OnDeployAppVersionDropdownClick;
+            _deployAppVersionInput.RegisterValueChangedCallback(OnDeployAppVersionInputChanged);
+            _deployLimitLabelLink.clickable.clicked += OnDeployLimitLinkClick;
             _deployAppBtn.clickable.clicked += OnDeploymentCreateBtnClick;
             _stopLastDeployBtn.clickable.clicked += OnStopLastDeployClick;
             _discordHelpBtn.clickable.clicked += OnDiscordBtnClick;
@@ -633,43 +581,62 @@ namespace Edgegap.Editor
 
         /// <summary>
         /// Prevents memory leaks, mysterious errors and "ghost" values set from a previous session.
-        /// Should parity the opposite of registerClickEvents().
+        /// Should parity the opposite of registerFieldCallbacks().
         /// </summary>
-        private void unregisterClickCallbacks()
+        private void unregisterUICallbacks()
         {
             _debugBtn.clickable.clicked -= onDebugBtnClick;
 
-            _apiTokenVerifyBtn.clickable.clicked -= onApiTokenVerifyBtnClick;
-            _apiTokenGetBtn.clickable.clicked -= OpenGetTokenUrl;
             _edgegapSignInBtn.clickable.clicked -= OnEdgegapSignInBtnClick;
+            _apiTokenGetBtn.clickable.clicked -= OpenGetTokenUrl;
+            _apiTokenInput.UnregisterValueChangedCallback(onApiTokenInputChanged);
+            _apiTokenInput.UnregisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
+            _apiTokenVerifyBtn.clickable.clicked -= onApiTokenVerifyBtnClick;
             _signOutBtn.clickable.clicked -= OnSignOutBtnClickAsync;
             _joinEdgegapDiscordBtn.clickable.clicked -= OnDiscordBtnClick;
 
             _infoLinuxRequirementsBtn.clickable.clicked -= OnLinuxInfoClick;
             _installLinuxRequirementsBtn.clickable.clicked -= OnInstallLinuxBtnClick;
             _buildParamsBtn.clickable.clicked -= OnOpenBuildParamsBtnClick;
+            _buildFolderNameInput.UnregisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
             _serverBuildBtn.clickable.clicked -= OnBuildServerBtnClick;
 
             _infoDockerRequirementsBtn.clickable.clicked -= OnDockerInfoClick;
             _validateDockerRequirementsBtn.clickable.clicked -= OnValidateDockerBtnClick;
+            _buildPathInput.UnregisterCallback<FocusEvent>(OnBuildPathInputFocus);
             _buildPathResetBtn.clickable.clicked -= OnResetBuildPathBtnClick;
+            _containerizeImageNameInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
+            _containerizeImageNameInput.UnregisterCallback<FocusEvent>(
+                OnContainerizeImageNameInputFocus
+            );
+            _containerizeImageTagInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
             _dockerfilePathResetBtn.clickable.clicked -= OnResetDockerfilePathBtnClick;
+            _dockerfilePathInput.UnregisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
             _containerizeServerBtn.clickable.clicked -= OnContainerizeBtnClickAsync;
 
             _localTestImageShowDropdownBtn.clickable.clicked -= OnLocalTestImageDropdownClick;
+            _localTestImageInput.UnregisterValueChangedCallback(OnLocalTestInputsChanged);
+            _localTestDockerRunInput.UnregisterCallback<FocusOutEvent>(
+                OnLocalTestDockerParamsFocusOut
+            );
             _localTestDeployBtn.clickable.clicked -= OnLocalTestDeployClick;
             _localTestTerminateBtn.clickable.clicked -= OnLocalTestTerminateCLick;
             _localTestDiscordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
             //_localTestInfoConnectBtn.clickable.clicked -= OnLocalContainerConnectLinkClick;
 
             _createAppNameShowDropdownBtn.clickable.clicked -= OnCreateAppNameDropdownClick;
-            _uploadImageCreateAppBtn.clickable.clicked -= OnUploadImageCreateAppBtnClickAsync;
+            _createAppNameInput.UnregisterValueChangedCallback(OnCreateAppNameInputChanged);
+            _serverImageNameInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
+            _serverImageTagInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
             _portMappingLabelLink.clickable.clicked -= OnPortsMappingLinkClick;
+            _uploadImageCreateAppBtn.clickable.clicked -= OnUploadImageCreateAppBtnClickAsync;
             _appInfoLabelLink.clickable.clicked -= OnYourAppLinkClick;
 
-            _deployLimitLabelLink.clickable.clicked -= OnDeployLimitLinkClick;
             _deployAppNameShowDropdownBtn.clickable.clicked -= OnDeployAppNameDropdownClick;
+            _deployAppNameInput.UnregisterValueChangedCallback(OnDeployAppNameInputChanged);
             _deployAppVersionShowDropdownBtn.clickable.clicked -= OnDeployAppVersionDropdownClick;
+            _deployAppVersionInput.UnregisterValueChangedCallback(OnDeployAppVersionInputChanged);
+            _deployLimitLabelLink.clickable.clicked -= OnDeployLimitLinkClick;
             _deployAppBtn.clickable.clicked -= OnDeploymentCreateBtnClick;
             _stopLastDeployBtn.clickable.clicked -= OnStopLastDeployClick;
             _discordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
@@ -1173,7 +1140,8 @@ namespace Edgegap.Editor
         private bool CheckFilledContainerizeServerInputs()
         {
             return _containerizeImageNameInput.value.Length > 0
-                && _containerizeImageTagInput.value.Length > 0;
+                && _containerizeImageTagInput.value.Length > 0
+                && !_containerizeImageNameInput.ClassListContains("placeholder");
         }
 
         private void OnContainerizeImageNameInputFocus(FocusEvent evt)
