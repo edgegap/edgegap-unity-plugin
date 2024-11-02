@@ -138,6 +138,7 @@
 .text-edgegap {
     font-size: 11px;
     color: rgb(222, 222, 222);
+    overflow: hidden;
     /* MIRROR CHANGE: disable hardcoded font path
     -unity-font-definition: url('./Fonts/Spartan-Regular%20SDF.asset?fileID=11400000&guid=8b0fb2c68be09174f8ea5057b27a545c&type=2#Spartan-Regular SDF');
     */
@@ -176,6 +177,7 @@ Toggle > #unity-checkmark {
     padding-right: 5px;
     margin-bottom: 3px;
     justify-content: flex-start;
+    overflow: hidden;
 }
 
 .unity-text-field {

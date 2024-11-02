@@ -21,7 +21,7 @@ namespace Edgegap.Editor
             Debug,
             Error,
         }
-        
+
         /// <summary>
         /// Set to Debug to show more logs. Default `Error`.
         /// - Error level includes "potentially-intentional" (!fatal) errors logged with Debug.Log
@@ -34,7 +34,7 @@ namespace Edgegap.Editor
         /// Default enables groups. Default `false`.
         /// </summary>
         public const bool SHOW_DEBUG_BTN = false;
-        
+
         /// <summary>
         /// When running a Docker-based "Build & Push" flow, skip building the Unity server binary
         /// (great for testing push flow). Default false.
@@ -59,33 +59,45 @@ namespace Edgegap.Editor
         public const ProtocolType DEFAULT_PROTOCOL_TYPE = ProtocolType.UDP;
         public const string READY_STATUS = "Status.READY";
 
-        public const string EDGEGAP_SIGN_IN_URL = "https://app.edgegap.com/";
+        public const string EDGEGAP_SIGN_IN_URL = "https://app.edgegap.com?";
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
-        public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/";
-        public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH = "learn/unity-games/developer-tools";
-        //TODO define url
-        public const string LOCAL_TEST_CONNECT_INFO_URL = "";
-        public const string EDGEGAP_DOC_APP_INFO_PATH = "application/version/";
-        public const string EDGEGAP_CREATE_APP_BASE_URL = "https://app.edgegap.com/application-management/applications/";
-        public const string EDGEGAP_DEPLOY_APP_URL = "https://app.edgegap.com/deployment-management/deployments/list/";
-        public const string EDGEGAP_FREE_TIER_INFO_URL = "https://app.edgegap.com/user-settings?tab=memberships";
         public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/MmJf8fWjnt";
-        //TODO define url
-        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "";
-        public const string EDGEGAP_DOC_LOBBY_PATH = "lobby/service/";
-        public const string EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH = "gen2-matchmaker/";
-        public const string EDGEGAP_DOC_ADV_MATCHMAKER_PATH = "matchmaker/advanced/";
-        //TODO define url
-        public const string SCALING_LIFECYCLE_INFO_URL = "";
+        public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/";
+        public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH =
+            "learn/unity-games/developer-tools#usage-requirements";
+        public const string EDGEGAP_DOC_USAGE_REQUIREMENTS_PATH =
+            "learn/unity-games/developer-tools#usage-requirements";
+        public const string LOCAL_TEST_CONNECT_INFO_PATH =
+            "learn/unity-games/getting-started-with-servers#4-test-your-server-locally";
+        public const string EDGEGAP_DOC_APP_INFO_PATH =
+            "learn/unity-games/getting-started-with-servers#5-create-an-edgegap-application";
+        public const string EDGEGAP_CREATE_APP_BASE_URL =
+            "https://app.edgegap.com/application-management/applications?";
+        public const string EDGEGAP_DOC_DEPLOY_GUIDE_PATH =
+            "learn/unity-games/getting-started-with-servers#6-deploy-a-server-on-edgegap";
+        public const string EDGEGAP_DEPLOY_APP_URL =
+            "https://app.edgegap.com/deployment-management/deployments/list?";
+        public const string EDGEGAP_FREE_TIER_INFO_URL =
+            "https://app.edgegap.com/user-settings?tab=memberships";
+        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "docs/category/netcodes";
+        public const string EDGEGAP_DOC_LOBBY_PATH = "docs/lobby/service";
+        public const string EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH = "docs/gen2-matchmaker";
+        public const string EDGEGAP_DOC_ADV_MATCHMAKER_PATH = "docs/matchmaker/advanced";
+        public const string SCALING_LIFECYCLE_INFO_URL = "learn/advanced-features/deployments";
 
         private const string DEFAULT_UTM_SOURCE_TAG = "plugin_unity";
         private const string DEFAULT_UTM_MEDIUM_TAG = "servers_quickstart_plugin";
         private const string DEFAULT_UTM_CONTENT_TAG = "plugin_button";
-        public const string DEFAULT_UTM_TAGS = "utm_source=" + DEFAULT_UTM_SOURCE_TAG +
-                                               "&utm_medium=" + DEFAULT_UTM_MEDIUM_TAG +
-                                               "&utm_content=" + DEFAULT_UTM_CONTENT_TAG;
+        public const string DEFAULT_UTM_TAGS =
+            "utm_source="
+            + DEFAULT_UTM_SOURCE_TAG
+            + "&utm_medium="
+            + DEFAULT_UTM_MEDIUM_TAG
+            + "&utm_content="
+            + DEFAULT_UTM_CONTENT_TAG;
+        public const string DEFAULT_NEW_APPLICATION_LABEL = "Create New Application";
         public const string DEFAULT_DEPLOYMENT_TAG = "quickstart";
-        public const string DEFAULT_VERSION_TAG = "latest";
+        public const string DEFAULT_VERSION_TAG = "{yy.MM.DD-HH.mm.ss}-UTC";
         public const string LOADING_RICH_STR = "<i>Loading...</i>";
         public const string PROCESSING_RICH_STR = "<i>Processing...</i>";
         public const string DEPLOY_REQUEST_RICH_STR = "<i>Requesting Deploy...</i>";
@@ -94,10 +106,10 @@ namespace Edgegap.Editor
         #region Colors
         /// <summary>Earthy lime green</summary>
         public const string SUCCESS_COLOR_HEX = "#8AEE8C";
-        
+
         /// <summary>Calming light orange</summary>
         public const string WARN_COLOR_HEX = "#EEC58A";
-        
+
         /// <summary>Vivid blood orange</summary>
         public const string FAIL_COLOR_HEX = "#EE9A8A";
 
@@ -108,17 +120,17 @@ namespace Edgegap.Editor
         {
             /// <summary>CornYellow</summary>
             Processing,
-            
+
             /// <summary>EarthyLimeGreen</summary>
             Success,
-            
+
             /// <summary>CalmingLightOrange</summary>
             Warn,
-                
+
             /// <summary>VividBloodOrange</summary>
             Error,
         }
-        
+
         /// <returns>Wraps string in color rich text</returns>
         public static string WrapRichTextInColor(string str, StatusColors statusColor)
         {
@@ -137,7 +149,7 @@ namespace Edgegap.Editor
             }
         }
         #endregion // Colors
-        
+
         #region Player Pref Key Ids for persistence
         /// <summary>Cached as base64</summary>
         public const string API_TOKEN_KEY_STR = "ApiToken";
@@ -224,7 +236,7 @@ namespace Edgegap.Editor
         public const string NEXT_STEPS_ADV_MATCHMAKER_LABEL_LINK_ID = "AdvMMLinkTxt";
         public const string NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID = "LifecycleManageTxt";
         #endregion // UI Element Ids
-        
+
 
 
         //[Obsolete("Hard-coded; not from UI. TODO: Get from UI")] // MIRROR CHANGE: comment this out to avoid import warnings

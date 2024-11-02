@@ -27,6 +27,7 @@ namespace Edgegap.Editor
     /// </summary>
     public class EdgegapWindowV2 : EditorWindow
     {
+        #region Vars
         #region Filepaths
         internal string ProjectRootPath => Directory.GetCurrentDirectory();
         internal string ThisScriptPath =>
@@ -43,17 +44,17 @@ namespace Edgegap.Editor
         private bool IsInitd;
         private bool _isApiTokenVerified; // Toggles the rest of the UI
 
-        private GetRegistryCredentialsResult _credentials; // ?
+        private GetRegistryCredentialsResult _credentials;
         private static readonly Regex _appNameAllowedCharsRegex = new Regex(
             @"^[a-zA-Z0-9_\-+\.]*$"
-        ); // MIRROR CHANGE: 'new()' not supported in Unity 2020
-        private string _deploymentRequestId; // ?
-        private string _userExternalIp; // ?
+        );
+        private string _deploymentRequestId;
+        private string _userExternalIp;
 
-        private string _containerRegistryUrl; // ?
-        private string _containerProject; // ?
-        private string _containerUsername; // ?
-        private string _containerToken; // ?
+        private string _containerRegistryUrl;
+        private string _containerProject;
+        private string _containerUsername;
+        private string _containerToken;
 
         private List<string> _localImages = null;
         private List<string> _existingAppNames = null;
@@ -73,7 +74,7 @@ namespace Edgegap.Editor
         private VisualElement _postAuthContainer;
         #endregion
 
-        #region UI / Connect Containers
+        #region UI / Containers / Connect
         private VisualElement _preAuthContainer;
         private VisualElement _authContainer;
         private Button _joinEdgegapDiscordBtn;
@@ -108,10 +109,15 @@ namespace Edgegap.Editor
         private Button _validateDockerRequirementsBtn;
         private Label _dockerRequirementsResultLabel;
         private TextField _buildPathInput;
+        internal string _buildPathInputDefault => $"Builds/{_buildFolderNameInput.value}";
         private Button _buildPathResetBtn;
         private TextField _containerizeImageNameInput;
-        internal string _containerizeImageNameInputDefault => Tokenize(Application.productName);
+        public string _containerizeImageNameInputDefault =>
+            Tokenize(Application.productName.ToLowerInvariant());
         private TextField _containerizeImageTagInput;
+        internal string _containerizeImageTagInputDefault =>
+            EdgegapWindowMetadata.DEFAULT_VERSION_TAG;
+        internal string nowUTC => $"{DateTime.UtcNow.ToString("yy.MM.dd-HH.mm.ss")}-UTC";
         private TextField _dockerfilePathInput;
         internal string _dockerfilePathInputDefault =>
             $"{Directory.GetParent(ThisScriptPath).FullName}{Path.DirectorySeparatorChar}Dockerfile";
@@ -134,7 +140,7 @@ namespace Edgegap.Editor
         private Button _localTestInfoConnectBtn;
         #endregion
 
-        #region UI / App
+        #region UI / Upload App
         private Foldout _createAppFoldout;
         private TextField _createAppNameInput;
         private TextField _serverImageNameInput;
@@ -161,10 +167,10 @@ namespace Edgegap.Editor
         #region UI / Next
         private Foldout _nextStepsFoldout;
         private Button _serverConnectLink;
-        private Button _lobbyLabelLink;
         private Button _managedMatchmakerLabelLink;
         private Button _advMatchmakerLabelLink;
         private Button _lifecycleManageLabelLink;
+        #endregion
         #endregion
         #endregion
 
@@ -174,7 +180,7 @@ namespace Edgegap.Editor
         {
             EdgegapWindowV2 window = GetWindow<EdgegapWindowV2>();
             window.titleContent = new GUIContent("Edgegap Hosting"); // MIRROR CHANGE: 'Edgegap Server Management' is too long for the tab space
-            window.maxSize = new Vector2(635, 900);
+            window.maxSize = new Vector2(600, 900);
             window.minSize = window.maxSize;
         }
 
@@ -249,19 +255,6 @@ namespace Edgegap.Editor
             // Only show the rest of the form if apiToken is verified
             _postAuthContainer.SetEnabled(_isApiTokenVerified);
 
-            // Only enable certain elements if the required inputs are filled
-            bool containerizeServerInputsFilled = CheckFilledContainerizeServerInputs();
-            _containerizeServerBtn.SetEnabled(containerizeServerInputsFilled);
-
-            bool localTestInputsFilled = CheckFilledLocalTestInputs();
-            _localTestDeployBtn.SetEnabled(localTestInputsFilled);
-
-            bool createAppInputsFilled = CheckFilledCreateAppInputs();
-            _uploadImageCreateAppBtn.SetEnabled(createAppInputsFilled);
-
-            bool deployServerInputsFilled = CheckFilledDeployServerInputs();
-            _deployAppBtn.SetEnabled(deployServerInputsFilled);
-
             await syncFormWithObjectDynamicAsync(); // API calls
 
             IsInitd = true;
@@ -273,9 +266,6 @@ namespace Edgegap.Editor
         {
 #if UNITY_2021_3_OR_NEWER // only load stylesheet in supported Unity versions, otherwise it shows errors in U2020
             // sometimes this is called without having been registered, throwing NRE
-            if (_debugBtn == null)
-                return;
-
             unregisterUICallbacks();
 #endif
         }
@@ -480,9 +470,6 @@ namespace Edgegap.Editor
             _serverConnectLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.NEXT_STEPS_SERVER_CONNECT_LINK_ID
             );
-            _lobbyLabelLink = rootVisualElement.Q<Button>(
-                EdgegapWindowMetadata.NEXT_STEPS_LOBBY_LABEL_LINK_ID
-            );
             _managedMatchmakerLabelLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.NEXT_STEPS_MANAGED_MATCHMAKER_LABEL_LINK_ID
             );
@@ -512,7 +499,7 @@ namespace Edgegap.Editor
         }
 
         /// <summary>
-        /// Register non-btn change actionss. We'll want to save for persistence, validate, etc
+        /// Register UI callbacks. We'll want to save for persistence, validate, etc
         /// </summary>
         private void registerUICallbacks()
         {
@@ -537,10 +524,19 @@ namespace Edgegap.Editor
             _buildPathInput.RegisterCallback<FocusEvent>(OnBuildPathInputFocus);
             _buildPathResetBtn.clickable.clicked += OnResetBuildPathBtnClick;
             _containerizeImageNameInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
-            _containerizeImageNameInput.RegisterCallback<FocusEvent>(
-                OnContainerizeImageNameInputFocus
+            _containerizeImageNameInput.RegisterCallback<FocusInEvent>(
+                OnContainerizeImageNameInputFocusIn
+            );
+            _containerizeImageNameInput.RegisterCallback<FocusOutEvent>(
+                OnContainerizeImageNameInputFocusOut
             );
             _containerizeImageTagInput.RegisterValueChangedCallback(OnContainerizeInputsChanged);
+            _containerizeImageTagInput.RegisterCallback<FocusInEvent>(
+                OnContainerizeImageTagInputFocusIn
+            );
+            _containerizeImageTagInput.RegisterCallback<FocusOutEvent>(
+                OnContainerizeImageTagInputFocusOut
+            );
             _dockerfilePathResetBtn.clickable.clicked += OnResetDockerfilePathBtnClick;
             _dockerfilePathInput.RegisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
             _containerizeServerBtn.clickable.clicked += OnContainerizeBtnClickAsync;
@@ -553,10 +549,10 @@ namespace Edgegap.Editor
             _localTestDeployBtn.clickable.clicked += OnLocalTestDeployClick;
             _localTestTerminateBtn.clickable.clicked += OnLocalTestTerminateCLick;
             _localTestDiscordHelpBtn.clickable.clicked += OnDiscordBtnClick;
-            //_localTestInfoConnectBtn.clickable.clicked += OnLocalContainerConnectLinkClick;
+            _localTestInfoConnectBtn.clickable.clicked += OnLocalContainerConnectLinkClick;
 
             _createAppNameShowDropdownBtn.clickable.clicked += OnCreateAppNameDropdownClick;
-            _createAppNameInput.RegisterValueChangedCallback(OnCreateAppNameInputChanged);
+            _createAppNameInput.RegisterCallback<FocusOutEvent>(OnCreateAppNameInputFocusOut);
             _serverImageNameInput.RegisterValueChangedCallback(OnCreateInputsChanged);
             _serverImageTagInput.RegisterValueChangedCallback(OnCreateInputsChanged);
             _portMappingLabelLink.clickable.clicked += OnPortsMappingLinkClick;
@@ -572,16 +568,15 @@ namespace Edgegap.Editor
             _stopLastDeployBtn.clickable.clicked += OnStopLastDeployClick;
             _discordHelpBtn.clickable.clicked += OnDiscordBtnClick;
 
-            //_serverConnectLink.clickable.clicked += OnServerConnectLinkClick;
-            _lobbyLabelLink.clickable.clicked += OnLobbyLinkClick;
+            _serverConnectLink.clickable.clicked += OnServerConnectLinkClick;
             _managedMatchmakerLabelLink.clickable.clicked += OnManagedMatchmakerLinkClick;
             _advMatchmakerLabelLink.clickable.clicked += OnAdvMatchmakerLinkClick;
-            //_lifecycleManageLabelLink.clickable.clicked += OnScalingLifecycleLinkClick;
+            _lifecycleManageLabelLink.clickable.clicked += OnScalingLifecycleLinkClick;
         }
 
         /// <summary>
         /// Prevents memory leaks, mysterious errors and "ghost" values set from a previous session.
-        /// Should parity the opposite of registerFieldCallbacks().
+        /// Should parity the opposite of registerUICallbacks().
         /// </summary>
         private void unregisterUICallbacks()
         {
@@ -606,10 +601,19 @@ namespace Edgegap.Editor
             _buildPathInput.UnregisterCallback<FocusEvent>(OnBuildPathInputFocus);
             _buildPathResetBtn.clickable.clicked -= OnResetBuildPathBtnClick;
             _containerizeImageNameInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
-            _containerizeImageNameInput.UnregisterCallback<FocusEvent>(
-                OnContainerizeImageNameInputFocus
+            _containerizeImageNameInput.UnregisterCallback<FocusInEvent>(
+                OnContainerizeImageNameInputFocusIn
+            );
+            _containerizeImageNameInput.UnregisterCallback<FocusOutEvent>(
+                OnContainerizeImageNameInputFocusOut
             );
             _containerizeImageTagInput.UnregisterValueChangedCallback(OnContainerizeInputsChanged);
+            _containerizeImageTagInput.UnregisterCallback<FocusInEvent>(
+                OnContainerizeImageTagInputFocusIn
+            );
+            _containerizeImageTagInput.UnregisterCallback<FocusOutEvent>(
+                OnContainerizeImageTagInputFocusOut
+            );
             _dockerfilePathResetBtn.clickable.clicked -= OnResetDockerfilePathBtnClick;
             _dockerfilePathInput.UnregisterCallback<FocusEvent>(OnDockerfilePathInputFocus);
             _containerizeServerBtn.clickable.clicked -= OnContainerizeBtnClickAsync;
@@ -622,10 +626,10 @@ namespace Edgegap.Editor
             _localTestDeployBtn.clickable.clicked -= OnLocalTestDeployClick;
             _localTestTerminateBtn.clickable.clicked -= OnLocalTestTerminateCLick;
             _localTestDiscordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
-            //_localTestInfoConnectBtn.clickable.clicked -= OnLocalContainerConnectLinkClick;
+            _localTestInfoConnectBtn.clickable.clicked -= OnLocalContainerConnectLinkClick;
 
             _createAppNameShowDropdownBtn.clickable.clicked -= OnCreateAppNameDropdownClick;
-            _createAppNameInput.UnregisterValueChangedCallback(OnCreateAppNameInputChanged);
+            _createAppNameInput.UnregisterCallback<FocusOutEvent>(OnCreateAppNameInputFocusOut);
             _serverImageNameInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
             _serverImageTagInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
             _portMappingLabelLink.clickable.clicked -= OnPortsMappingLinkClick;
@@ -641,11 +645,10 @@ namespace Edgegap.Editor
             _stopLastDeployBtn.clickable.clicked -= OnStopLastDeployClick;
             _discordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
 
-            //_serverConnectLink.clickable.clicked -= OnServerConnectLinkClick;
-            _lobbyLabelLink.clickable.clicked -= OnLobbyLinkClick;
+            _serverConnectLink.clickable.clicked -= OnServerConnectLinkClick;
             _managedMatchmakerLabelLink.clickable.clicked -= OnManagedMatchmakerLinkClick;
             _advMatchmakerLabelLink.clickable.clicked -= OnAdvMatchmakerLinkClick;
-            //_lifecycleManageLabelLink.clickable.clicked -= OnScalingLifecycleLinkClick;
+            _lifecycleManageLabelLink.clickable.clicked -= OnScalingLifecycleLinkClick;
         }
 
         private void initToggleDynamicUI()
@@ -674,7 +677,6 @@ namespace Edgegap.Editor
                     null
                 );
 
-            _deployAppVersionShowDropdownBtn.SetEnabled(false);
             _debugBtn.visible = EdgegapWindowMetadata.SHOW_DEBUG_BTN;
         }
 
@@ -725,7 +727,7 @@ namespace Edgegap.Editor
 
         private void OpenGetTokenUrl()
         {
-            Application.OpenURL(
+            OpenEdgegapURL(
                 EdgegapWindowMetadata.EDGEGAP_GET_A_TOKEN_URL
                     + "&"
                     + EdgegapWindowMetadata.DEFAULT_UTM_TAGS
@@ -892,20 +894,17 @@ namespace Edgegap.Editor
         /// <param name="isConnected"></param>
         private void ToggleIsConnectedContainers(bool isConnected)
         {
-            _preAuthContainer.style.display = isConnected ? DisplayStyle.None : DisplayStyle.Flex;
             _preAuthContainer.SetEnabled(!isConnected);
+            _preAuthContainer.style.display = isConnected ? DisplayStyle.None : DisplayStyle.Flex;
 
-            _authContainer.style.display = isConnected ? DisplayStyle.Flex : DisplayStyle.None;
             _authContainer.SetEnabled(isConnected);
+            _authContainer.style.display = isConnected ? DisplayStyle.Flex : DisplayStyle.None;
         }
         #endregion
 
         #region Fns / Build
         private void OnLinuxInfoClick() =>
-            OpenEdgegapDocsURL(
-                EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH,
-                "#usage-requirements"
-            );
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
 
         /// <summary>
         /// Linux server build requirements install btn click
@@ -934,10 +933,7 @@ namespace Edgegap.Editor
                     "Requirements not currently installed."
                 );
                 await Task.Delay(1);
-                OpenEdgegapDocsURL(
-                    EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH,
-                    "#install-unity-linux-build-support"
-                );
+                OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
             }
             else
             {
@@ -1013,7 +1009,7 @@ namespace Edgegap.Editor
                 }
 
                 _containerizeFoldout.value = true;
-                _buildPathInput.value = $"Builds/{_buildFolderNameInput.value}";
+                _buildPathInput.SetValueWithoutNotify(_buildPathInputDefault);
             }
             catch (Exception e)
             {
@@ -1030,63 +1026,67 @@ namespace Edgegap.Editor
 
         #region Fns / Containerize
         private void OnDockerInfoClick() =>
-            OpenEdgegapDocsURL(
-                EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH,
-                "#usage-requirements"
-            );
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_USAGE_REQUIREMENTS_PATH);
 
         /// <summary>
         /// Validate Docker installation btn click
         /// </summary>
-        private async void OnValidateDockerBtnClick()
+        private void OnValidateDockerBtnClick()
+        {
+            _ = ValidateDockerRequirement();
+        }
+
+        private async Task<string> ValidateDockerRequirement()
         {
             _validateDockerRequirementsBtn.SetEnabled(false);
             hideResultLabels();
-
+            string error;
             try
             {
-                (bool isValid, string error) =
-                    await EdgegapBuildUtils.DockerSetupAndInstallationCheck(
-                        _dockerfilePathInputDefault
-                    );
-
-                if (!isValid)
-                {
-                    ShowErrorDialog(
-                        error.Contains("docker daemon is not running")
-                        || error.Contains("dockerDesktop")
-                            ? String.Join(
-                                "\n\n",
-                                new string[]
-                                {
-                                    "Docker is installed, but the daemon/app (such as `Docker Desktop`) is not running. ",
-                                    "Please start Docker Desktop and try again.",
-                                }
-                            )
-                            : String.Join(
-                                "\n\n",
-                                new string[]
-                                {
-                                    "Docker installation not found. Docker can be downloaded from:",
-                                    "https://www.docker.com/",
-                                }
-                            ),
-                        _dockerRequirementsResultLabel,
-                        "There was a problem."
-                    );
-                }
-                else
-                {
-                    OnBuildContainerizeUploadSuccess(
-                        _dockerRequirementsResultLabel,
-                        "Docker is running."
-                    );
-                }
+                error = await EdgegapBuildUtils.DockerSetupAndInstallationCheck(
+                    _dockerfilePathInputDefault
+                );
             }
-            finally
+            catch (Exception e)
             {
-                _validateDockerRequirementsBtn.SetEnabled(true);
+                error = e.Message;
             }
+            _validateDockerRequirementsBtn.SetEnabled(true);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                ShowErrorDialog(
+                    error.Contains("docker daemon is not running")
+                    || error.Contains("dockerDesktop")
+                        ? string.Join(
+                            "\n\n",
+                            new string[]
+                            {
+                                "Docker is installed, but the daemon/app (e.g. Docker Desktop) is not running.",
+                                "Please start Docker and try again.",
+                            }
+                        )
+                        : string.Join(
+                            "\n\n",
+                            new string[]
+                            {
+                                "Docker installation not found. Docker can be downloaded from:",
+                                "https://www.docker.com/",
+                            }
+                        ),
+                    _dockerRequirementsResultLabel,
+                    "There was a problem."
+                );
+                return error;
+            }
+            else
+            {
+                OnBuildContainerizeUploadSuccess(
+                    _dockerRequirementsResultLabel,
+                    "Docker is running."
+                );
+            }
+            return null;
         }
 
         /// <summary>
@@ -1140,13 +1140,35 @@ namespace Edgegap.Editor
         private bool CheckFilledContainerizeServerInputs()
         {
             return _containerizeImageNameInput.value.Length > 0
-                && _containerizeImageTagInput.value.Length > 0
-                && !_containerizeImageNameInput.ClassListContains("placeholder");
+                && _containerizeImageTagInput.value.Length > 0;
         }
 
-        private void OnContainerizeImageNameInputFocus(FocusEvent evt)
+        private void OnContainerizeImageNameInputFocusIn(FocusInEvent evt)
         {
-            TogglePlaceholder(_containerizeImageNameInput, _containerizeImageNameInputDefault);
+            TogglePlaceholder(
+                _containerizeImageNameInput,
+                _containerizeImageNameInputDefault,
+                true
+            );
+        }
+
+        private void OnContainerizeImageNameInputFocusOut(FocusOutEvent evt)
+        {
+            TogglePlaceholder(
+                _containerizeImageNameInput,
+                _containerizeImageNameInputDefault,
+                false
+            );
+        }
+
+        private void OnContainerizeImageTagInputFocusIn(FocusInEvent evt)
+        {
+            TogglePlaceholder(_containerizeImageTagInput, _containerizeImageTagInputDefault, true);
+        }
+
+        private void OnContainerizeImageTagInputFocusOut(FocusOutEvent evt)
+        {
+            TogglePlaceholder(_containerizeImageTagInput, _containerizeImageTagInputDefault, false);
         }
 
         /// <summary>
@@ -1181,6 +1203,10 @@ namespace Edgegap.Editor
         /// </summary>
         private async void OnContainerizeBtnClickAsync()
         {
+            if (!string.IsNullOrEmpty(await ValidateDockerRequirement()))
+            {
+                return;
+            }
             try
             {
                 _containerizeServerBtn.SetEnabled(false);
@@ -1216,9 +1242,12 @@ namespace Edgegap.Editor
                     }
                 }
 
-                string imageName = _containerizeImageNameInput.value.ToLowerInvariant();
+                string imageName = Tokenize(_containerizeImageNameInput.value);
                 string imageRepo = $"{_containerProject}/{imageName}";
-                string tag = _containerizeImageTagInput.value;
+                string tag =
+                    _containerizeImageTagInput.value == _containerizeImageTagInputDefault
+                        ? nowUTC
+                        : _containerizeImageTagInput.value;
 
                 await EdgegapBuildUtils.RunCommand_DockerBuild(
                     dockerfilePath,
@@ -1235,7 +1264,7 @@ namespace Edgegap.Editor
                     "Containerization succeeded."
                 );
 
-                string lowercaseImageName = _containerizeImageNameInput.value.ToLowerInvariant();
+                string lowercaseImageName = _containerizeImageNameInput.value;
 
                 _localTestFoldout.value = true;
                 _localTestImageInput.value = $"{lowercaseImageName}:{tag}";
@@ -1259,13 +1288,11 @@ namespace Edgegap.Editor
                     "Containerization failed (see logs)."
                 );
             }
-            finally
-            {
-                EditorUtility.ClearProgressBar();
-                _containerizeServerBtn.SetEnabled(true);
-                _apiTokenVerifyBtn.SetEnabled(true);
-                _signOutBtn.SetEnabled(true);
-            }
+
+            EditorUtility.ClearProgressBar();
+            _containerizeServerBtn.SetEnabled(true);
+            _apiTokenVerifyBtn.SetEnabled(true);
+            _signOutBtn.SetEnabled(true);
         }
 
         private async Task GetLocalDockerImagesAsync()
@@ -1296,19 +1323,23 @@ namespace Edgegap.Editor
         {
             UnityEditor.PopupWindow.Show(
                 _localTestImageShowDropdownBtn.worldBound,
-                new CustomPopupContent(_localImages, OnDropdownLocalTestImageSelect, 250)
+                new CustomPopupContent(
+                    _localImages,
+                    OnDropdownLocalTestImageSelect,
+                    _containerizeImageNameInputDefault
+                )
             );
+        }
+
+        private void OnDropdownLocalTestImageSelect(string image)
+        {
+            _localTestImageInput.SetValueWithoutNotify(image);
         }
 
         private void OnLocalTestInputsChanged(ChangeEvent<string> evt)
         {
             bool requiredInputFilled = CheckFilledLocalTestInputs();
             _localTestDeployBtn.SetEnabled(requiredInputFilled);
-        }
-
-        private void OnDropdownLocalTestImageSelect(string image)
-        {
-            _localTestImageInput.value = image;
         }
 
         private void OnLocalTestDockerParamsFocusOut(FocusOutEvent evt)
@@ -1428,7 +1459,7 @@ namespace Edgegap.Editor
         }
 
         private void OnLocalContainerConnectLinkClick() =>
-            OpenEdgegapURL(EdgegapWindowMetadata.LOCAL_TEST_CONNECT_INFO_URL);
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.LOCAL_TEST_CONNECT_INFO_PATH);
         #endregion
 
         #region Fns / Upload App
@@ -1439,12 +1470,18 @@ namespace Edgegap.Editor
         {
             List<string> appNameBtns =
                 !(_existingAppNames is null) || _existingAppNames.Count > 0
-                    ? _existingAppNames.Prepend("Create New Application").ToList()
-                    : new List<string> { "Create New Application" };
+                    ? _existingAppNames
+                        .Prepend(EdgegapWindowMetadata.DEFAULT_NEW_APPLICATION_LABEL)
+                        .ToList()
+                    : new List<string> { EdgegapWindowMetadata.DEFAULT_NEW_APPLICATION_LABEL };
 
             UnityEditor.PopupWindow.Show(
                 _createAppNameShowDropdownBtn.worldBound,
-                new CustomPopupContent(appNameBtns, OnDropdownCreateAppNameSelect)
+                new CustomPopupContent(
+                    appNameBtns,
+                    OnDropdownCreateAppNameSelect,
+                    _containerizeImageNameInputDefault
+                )
             );
         }
 
@@ -1455,7 +1492,7 @@ namespace Edgegap.Editor
         private void OnDropdownCreateAppNameSelect(string name)
         {
             string appName = Tokenize(name);
-            _createAppNameInput.value = appName;
+            _createAppNameInput.SetValueWithoutNotify(appName);
         }
 
         /// <summary>
@@ -1463,11 +1500,15 @@ namespace Edgegap.Editor
         /// Toggle create app btn if all required inputs are filled
         /// </summary>
         /// <param name="evt"></param>
-        private void OnCreateAppNameInputChanged(ChangeEvent<string> evt)
+        private void OnCreateAppNameInputFocusOut(FocusOutEvent evt)
         {
             // Validate: Only allow alphanumeric, underscore, dash, plus, period
-            if (!_appNameAllowedCharsRegex.IsMatch(evt.newValue))
-                _createAppNameInput.value = evt.previousValue; // Revert to the previous value
+            if (!_appNameAllowedCharsRegex.IsMatch(_createAppNameInput.value))
+            {
+                ShowErrorDialog(
+                    "Your app name contains invalid characters. Only characters [a-zA-Z0-9_-+.] are allowed."
+                );
+            }
 
             bool requiredInputsFilled = CheckFilledCreateAppInputs();
             _uploadImageCreateAppBtn.SetEnabled(requiredInputsFilled);
@@ -1491,7 +1532,7 @@ namespace Edgegap.Editor
         }
 
         private void OnPortsMappingLinkClick() =>
-            OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_DEPLOY_GUIDE_PATH);
 
         /// <summary>
         /// "Upload image and Create app version" btn click
@@ -1571,11 +1612,11 @@ namespace Edgegap.Editor
                     EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL
                         + _createAppNameInput.value
                         + "/versions/create/?"
-                        + EdgegapWindowMetadata.DEFAULT_UTM_TAGS
                 );
 
                 _deployAppFoldout.value = true;
-                _deployAppNameInput.value = _createAppNameInput.value;
+                DeployAppNameInputChanged(_createAppNameInput.value);
+                // _deployAppNameInput.SetValueWithoutNotify(_createAppNameInput.value);
                 _deployAppNameShowDropdownBtn.SetEnabled(true);
             }
             catch (Exception e)
@@ -1632,7 +1673,11 @@ namespace Edgegap.Editor
         {
             UnityEditor.PopupWindow.Show(
                 _deployAppNameShowDropdownBtn.worldBound,
-                new CustomPopupContent(_existingAppNames, OnDropdownDeployAppNameSelect)
+                new CustomPopupContent(
+                    _existingAppNames,
+                    OnDropdownDeployAppNameSelect,
+                    _containerizeImageNameInputDefault
+                )
             );
         }
 
@@ -1651,11 +1696,16 @@ namespace Edgegap.Editor
         /// Toggle deploy app btn if all required inputs in Deploy App section are filled
         /// </summary>
         /// <param name="evt"></param>
-        private async void OnDeployAppNameInputChanged(ChangeEvent<string> evt)
+        private void OnDeployAppNameInputChanged(ChangeEvent<string> evt)
+        {
+            DeployAppNameInputChanged(evt.newValue);
+        }
+
+        private async void DeployAppNameInputChanged(string newValue)
         {
             // Validate: Only allow alphanumeric, underscore, dash, plus, period
-            if (!_appNameAllowedCharsRegex.IsMatch(evt.newValue))
-                _deployAppNameInput.value = evt.previousValue; // Revert to the previous value
+            //  if (!_appNameAllowedCharsRegex.IsMatch(evt.newValue))
+            //    _deployAppNameInput.value = evt.previousValue; // Revert to the previous value
 
             bool requiredInputsFilled = CheckFilledDeployServerInputs();
             _deployAppBtn.SetEnabled(requiredInputsFilled);
@@ -1671,7 +1721,7 @@ namespace Edgegap.Editor
 
                     _deployAppVersionShowDropdownBtn.SetEnabled(false);
 
-                    if (_existingAppNames.Contains(evt.newValue))
+                    if (_existingAppNames.Contains(newValue))
                     {
                         _apiTokenVerifyBtn.SetEnabled(false);
                         _signOutBtn.SetEnabled(false);
@@ -1716,6 +1766,19 @@ namespace Edgegap.Editor
                     .Versions.Where(version => version.IsActive)
                     .ToList();
                 _storedDeployAppVersions = activeVersions.Select(version => version.Name).ToList();
+
+                // automatically clear if empty, or select if only one option
+                if (_storedDeployAppVersions is null || _storedDeployAppVersions.Count == 0)
+                {
+                    OnDropDownDeployAppVersionSelect("");
+                }
+                else if (
+                    _storedDeployAppVersions is not null
+                    && _storedDeployAppVersions.Count == 1
+                )
+                {
+                    OnDropDownDeployAppVersionSelect(_storedDeployAppVersions[0]);
+                }
             }
             else
             {
@@ -1733,7 +1796,11 @@ namespace Edgegap.Editor
         {
             UnityEditor.PopupWindow.Show(
                 _deployAppVersionShowDropdownBtn.worldBound,
-                new CustomPopupContent(_storedDeployAppVersions, OnDropDownDeployAppVersionSelect)
+                new CustomPopupContent(
+                    _storedDeployAppVersions,
+                    OnDropDownDeployAppVersionSelect,
+                    _containerizeImageNameInputDefault
+                )
             );
         }
 
@@ -1743,7 +1810,7 @@ namespace Edgegap.Editor
         /// <param name="version"></param>
         private void OnDropDownDeployAppVersionSelect(string version)
         {
-            _deployAppVersionInput.value = version;
+            _deployAppVersionInput.SetValueWithoutNotify(version);
         }
 
         /// <summary>
@@ -2044,10 +2111,7 @@ namespace Edgegap.Editor
 
         #region Fns / Next
         private void OnServerConnectLinkClick() =>
-            OpenEdgegapURL(EdgegapWindowMetadata.CONNECT_TO_DEPLOYMENT_INFO_URL);
-
-        private void OnLobbyLinkClick() =>
-            OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_LOBBY_PATH);
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.CONNECT_TO_DEPLOYMENT_INFO_URL);
 
         private void OnManagedMatchmakerLinkClick() =>
             OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH);
@@ -2056,12 +2120,12 @@ namespace Edgegap.Editor
             OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_ADV_MATCHMAKER_PATH);
 
         private void OnScalingLifecycleLinkClick() =>
-            OpenEdgegapURL(EdgegapWindowMetadata.SCALING_LIFECYCLE_INFO_URL);
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.SCALING_LIFECYCLE_INFO_URL);
         #endregion
 
         #region Fns / Discord
         private void OnDiscordBtnClick() =>
-            OpenEdgegapURL(EdgegapWindowMetadata.EDGEGAP_DISCORD_URL);
+            OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DISCORD_URL);
         #endregion
 
         #region State Management
@@ -2123,14 +2187,11 @@ namespace Edgegap.Editor
             // Was the API token verified? Load the Edgegap applications + local images for the dropdowns
             if (_isApiTokenVerified)
             {
+                if (IsLogLevelDebug)
+                    Debug.Log("syncFormWithObjectDynamicAsync: Found apiToken;");
+
                 _apiTokenVerifyBtn.SetEnabled(false);
                 _signOutBtn.SetEnabled(false);
-
-                if (IsLogLevelDebug)
-                    Debug.Log(
-                        "syncFormWithObjectDynamicAsync: Found apiToken; "
-                            + "calling GetAppsAsync =>"
-                    );
 
                 _createAppNameShowDropdownBtn.SetEnabled(false);
                 _deployAppNameShowDropdownBtn.SetEnabled(false);
@@ -2179,6 +2240,7 @@ namespace Edgegap.Editor
                     {
                         _localTestImageShowDropdownBtn.SetEnabled(true);
                     }
+                    SyncContainerEnablesToState();
                 }
 
                 _apiTokenVerifyBtn.SetEnabled(true);
@@ -2286,101 +2348,125 @@ namespace Edgegap.Editor
             {
                 _serverBuildFoldout.value = true;
 
+                // Set default values if empty fields
+                TogglePlaceholder(_buildFolderNameInput, _buildFolderNameInputDefault, false);
+                TogglePlaceholder(_buildPathInput, _buildPathInputDefault, false);
+                TogglePlaceholder(
+                    _containerizeImageNameInput,
+                    _containerizeImageNameInputDefault,
+                    false
+                );
+                TogglePlaceholder(
+                    _containerizeImageTagInput,
+                    _containerizeImageTagInputDefault,
+                    false
+                );
+                TogglePlaceholder(_dockerfilePathInput, _dockerfilePathInputDefault, false);
+                if (_localImages is not null && _localImages.Count > 0)
+                {
+                    TogglePlaceholder(_localTestImageInput, _localImages[0], false);
+                    string[] localImageAndVersion = _localImages[0].Split(":");
+
+                    if (_existingAppNames is null || _existingAppNames.Count == 0)
+                    {
+                        _createAppNameInput.SetValueWithoutNotify(localImageAndVersion[0]);
+                        _deployAppNameInput.SetValueWithoutNotify("");
+                        _deployAppVersionInput.SetValueWithoutNotify("");
+                    }
+                    TogglePlaceholder(_serverImageNameInput, localImageAndVersion[0], false);
+                    TogglePlaceholder(_serverImageTagInput, localImageAndVersion[1], false);
+                }
+                else
+                {
+                    _localTestImageInput.SetValueWithoutNotify("");
+                    _createAppNameInput.SetValueWithoutNotify("");
+                    _serverImageNameInput.SetValueWithoutNotify("");
+                    _serverImageTagInput.SetValueWithoutNotify("");
+                }
+                TogglePlaceholder(_localTestDockerRunInput, _localTestDockerRunInputDefault, false);
+
+                if (_existingAppNames is not null && _existingAppNames.Count == 1)
+                {
+                    OnDropdownCreateAppNameSelect(_existingAppNames[0]);
+                    TogglePlaceholder(_deployAppNameInput, _existingAppNames[0], false);
+                }
+
                 //open other foldouts if (non-default) persistent data is found in inputs
                 if (
-                    _buildPathInput.value.Length > 0
-                    || _containerizeImageNameInput.value.Length > 0
-                    || _containerizeImageTagInput.value.Length > 0
+                    _buildPathInput.value.Trim().Length > 0
+                    || _containerizeImageNameInput.value.Trim().Length > 0
+                    || _containerizeImageTagInput.value.Trim().Length > 0
                     || (
-                        _dockerfilePathInput.value.Length > 0
+                        _dockerfilePathInput.value.Trim().Length > 0
                         && _dockerfilePathInput.value != _dockerfilePathInputDefault
                     )
-                    || _optionalDockerParamsInput.value.Length > 0
+                    || _optionalDockerParamsInput.value.Trim().Length > 0
                 )
                     _containerizeFoldout.value = true;
 
                 if (
-                    _localTestImageInput.value.Length > 0
+                    _localTestImageInput.value.Trim().Length > 0
                     || (
-                        _localTestDockerRunInput.value.Length > 0
+                        _localTestDockerRunInput.value.Trim().Length > 0
                         && _localTestDockerRunInput.value != _localTestDockerRunInputDefault
                     )
                 )
                     _localTestFoldout.value = true;
 
                 if (
-                    _createAppNameInput.value.Length > 0
-                    || _serverImageNameInput.value.Length > 0
-                    || _serverImageTagInput.value.Length > 0
+                    _createAppNameInput.value.Trim().Length > 0
+                    || _serverImageNameInput.value.Trim().Length > 0
+                    || _serverImageTagInput.value.Trim().Length > 0
                 )
                     _createAppFoldout.value = true;
 
-                if (_deployAppNameInput.value.Length > 0 || _deployAppVersionInput.value.Length > 0)
+                if (
+                    _deployAppNameInput.value.Trim().Length > 0
+                    || _deployAppVersionInput.value.Trim().Length > 0
+                )
                     _deployAppFoldout.value = true;
-
-                // Set default values if empty fields
-                if (string.IsNullOrEmpty(_buildFolderNameInput.value))
-                    _buildFolderNameInput.value = _buildFolderNameInputDefault;
-
-                if (string.IsNullOrEmpty(_dockerfilePathInput.value))
-                    _dockerfilePathInput.value = _dockerfilePathInputDefault;
-
-                if (string.IsNullOrEmpty(_localTestDockerRunInput.value))
-                    _localTestDockerRunInput.value = _localTestDockerRunInputDefault;
             }
         }
         #endregion
 
         #region Utility / TextField
-        private void TogglePlaceholder(TextField input, string placeholder)
+        // <summary>
+        // Toggle specified placeholder value, with the option to force state.
+        /// <param name="input">TextField element to toggle state on.</param>
+        /// <param name="placeholder">Placeholder value to use.</param>
+        /// <param name="focus">Input focused or not.</param>
+        // </summary>
+        private void TogglePlaceholder(TextField input, string placeholder, bool focus)
         {
             // if custom non-empty value provided, disable placeholder class and do nothing
-            if (input.value.ToString() != placeholder || input.value.ToString().Trim().Length > 0)
+            if (input.value.ToString() != placeholder && !string.IsNullOrEmpty(input.value.Trim()))
             {
-                input.RemoveFromClassList("placeholder");
                 return;
             }
 
-            if (input.ClassListContains("placeholder"))
+            if (focus)
             {
-                input.value = "";
+                input.SetValueWithoutNotify("");
             }
             else
             {
-                input.value = placeholder;
+                input.SetValueWithoutNotify(placeholder);
             }
-            input.ToggleInClassList("placeholder");
         }
 
         private string Tokenize(string input)
         {
-            return Regex.Replace(input.Trim(), @"[\W]+", "");
+            return Regex.Replace(input.Trim(), @"[\W]+", "-");
         }
         #endregion
 
         #region Utility / Browser
-        private void OpenEdgegapURL(string url)
-        {
-            Application.OpenURL(url + "?" + EdgegapWindowMetadata.DEFAULT_UTM_TAGS);
-        }
+        private void OpenEdgegapURL(string URL) =>
+            Application.OpenURL($"{URL}&{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}");
 
-        /// <summary>
-        /// Open Edgegap documentation at a specific page/section
-        /// </summary>
-        /// <param name="pagePath">path to specific doc page</param>
-        /// <param name="pageSection">null || which section of the page to jump to</param>
-        private void OpenEdgegapDocsURL(string pagePath, string pageSection = "")
-        {
-            string[] urlParts = new string[]
-            {
-                EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL,
-                pagePath,
-                "?",
-                EdgegapWindowMetadata.DEFAULT_UTM_TAGS,
-                pageSection,
-            };
-            Application.OpenURL(String.Join("", urlParts));
-        }
+        private void OpenEdgegapDocsURL(string path) =>
+            // TODO: append "?{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}"
+            Application.OpenURL($"{EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL}{path}");
         #endregion
 
         #region Utility / HTTP
@@ -2398,4 +2484,5 @@ namespace Edgegap.Editor
         #endregion
     }
 }
+
 #endif

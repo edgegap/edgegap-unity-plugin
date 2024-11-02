@@ -1,11 +1,8 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Edgegap.Editor
 {
@@ -14,16 +11,23 @@ namespace Edgegap.Editor
         private Vector2 scrollPos;
         private List<string> _btnNames;
         private Action<string> _onBtnClick;
+        private string _defaultValue = "";
 
         private float _minHeight = 25;
         private float _maxHeight = 100;
         private float _width;
 
-        public CustomPopupContent(List<string> btnNames, Action<string> btnCallback, float width = 200)
+        public CustomPopupContent(
+            List<string> btnNames,
+            Action<string> btnCallback,
+            string defaultValue,
+            float width = 400
+        )
         {
             _btnNames = btnNames;
             _onBtnClick = btnCallback;
             _width = width;
+            _defaultValue = defaultValue;
         }
 
         public override Vector2 GetWindowSize()
@@ -35,7 +39,7 @@ namespace Edgegap.Editor
                 height *= _btnNames.Count;
             }
 
-            return new Vector2(_width, height <= _maxHeight? height: _maxHeight);
+            return new Vector2(_width, height <= _maxHeight ? height : _maxHeight);
         }
 
         public override void OnGUI(Rect rect)
@@ -48,13 +52,13 @@ namespace Edgegap.Editor
                 {
                     if (name == "Create New Application")
                     {
-                        _onBtnClick(Application.productName);
+                        _onBtnClick(_defaultValue);
                     }
                     else
                     {
                         _onBtnClick(name);
                     }
-                    
+
                     editorWindow.Close();
                 }
             }

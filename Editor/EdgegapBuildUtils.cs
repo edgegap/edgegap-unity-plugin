@@ -46,7 +46,7 @@ namespace Edgegap
             return BuildPipeline.BuildPlayer(options);
         }
 
-        public static async Task<(bool, string)> DockerSetupAndInstallationCheck(string path)
+        public static async Task<string> DockerSetupAndInstallationCheck(string path)
         {
             if (!File.Exists(path))
             {
@@ -67,7 +67,7 @@ namespace Edgegap
             if (!string.IsNullOrEmpty(error))
             {
                 Debug.LogError(error);
-                return (false, error);
+                return error;
             }
 
             Debug.Log($"[Edgegap] Docker version detected: {output}"); // MIRROR CHANGE
@@ -84,10 +84,10 @@ namespace Edgegap
             if (!string.IsNullOrEmpty(error))
             {
                 Debug.LogError(error);
-                return (false, error);
+                return error;
             }
 
-            return (true, null);
+            return null;
         }
 
         public static async Task InstallLinuxModules(string unityVersion, Action<string> outputReciever = null, Action<string> errorReciever = null)
@@ -232,7 +232,6 @@ namespace Edgegap
             }
         }
 
-        // MIRROR CHANGE
         public static async Task RunCommand_DockerBuild(string dockerfilePath, string registry, string imageRepo, string tag, string projectPath, Action<string> onStatusUpdate, string extraParams = null)
         {
             string realErrorMessage = null;
@@ -258,7 +257,8 @@ namespace Edgegap
 #endif
                 (msg) =>
                 {
-                    if (msg.Contains("ERROR"))
+                    Debug.Log(msg);
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         realErrorMessage = msg;
                     }
@@ -291,7 +291,6 @@ namespace Edgegap
 
             return true;
         }
-        // END MIRROR CHANGE
 
         static async Task RunCommand(string command, string arguments, Action<string> outputReciever = null, Action<string> errorReciever = null)
         {
@@ -305,7 +304,6 @@ namespace Edgegap
                 CreateNoWindow = true,
             };
 
-            // MIRROR CHANGE
 #if !UNITY_EDITOR_WIN
             // on mac, commands like 'docker' aren't found because it's not in the application's PATH
             // even if it runs on mac's terminal.
@@ -318,7 +316,6 @@ namespace Edgegap
             startInfo.EnvironmentVariables["PATH"] = customPath;
             // Debug.Log("PATH: " + customPath);
 #endif
-            // END MIRROR CHANGE
 
             Process proc = new Process() { StartInfo = startInfo, };
             proc.EnableRaisingEvents = true;
