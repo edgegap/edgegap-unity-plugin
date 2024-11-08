@@ -102,7 +102,7 @@
                 <ui:Button name="LocalContainerConnectLink" text="Learn how to connect to your local container using a local IP address. ⓘ" class="text-edgegap btn-text-link" style="margin-left: 5px; width: auto; min-width: 500px; padding-top: 5px; padding-left: 0; left: 0; -unity-text-align: middle-left;" />
             </ui:Foldout>
             <ui:VisualElement name="EdgegapAppFoldoutHorizRow" class="container-row-parent" style="flex-grow: 1; flex-direction: row;">
-                <ui:Foldout text="&lt;b&gt;5. Create an Edgegap Application&lt;/b&gt;" name="EdgegapAppFoldout" class="text-edgegap" style="flex-grow: 1; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0; min-width: auto;">
+                <ui:Foldout text="&lt;b&gt;5. Upload to Edgegap&lt;/b&gt;" name="EdgegapAppFoldout" class="text-edgegap" style="flex-grow: 1; padding-bottom: 0; padding-top: 0; padding-right: 0; padding-left: 0; min-width: auto;">
                     <ui:VisualElement name="Row" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;" />
                     <ui:VisualElement name="ApplicationNameRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
                         <ui:TextField name="CreateAppNameTxt" label="Application Name" tooltip="Arbitrary name to call your app" password="false" view-data-key="ApplicationNameTxt" class="text-edgegap label-right-padding" />

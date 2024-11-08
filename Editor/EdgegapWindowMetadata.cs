@@ -53,7 +53,7 @@ namespace Edgegap.Editor
         public const int PORT_DEFAULT = 7770;
         public const int PORT_MIN = 1024;
         public const int PORT_MAX = 49151;
-        public const int DEPLOYMENT_AWAIT_READY_STATUS_TIMEOUT_MINS = 1;
+        public const int DEPLOYMENT_AWAIT_READY_STATUS_TIMEOUT_MINS = 5;
         public const int DEPLOYMENT_READY_STATUS_POLL_SECONDS = 2;
         public const int DEPLOYMENT_STOP_STATUS_POLL_SECONDS = 2;
         public const ProtocolType DEFAULT_PROTOCOL_TYPE = ProtocolType.UDP;
@@ -74,9 +74,11 @@ namespace Edgegap.Editor
             "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DOC_DEPLOY_GUIDE_PATH =
             "learn/unity-games/getting-started-with-servers#6-deploy-a-server-on-edgegap";
+        public const string EDGEGAP_DEPLOY_APP_URL =
+            "https://app.edgegap.com/deployment-management/deployments/list";
         public const string EDGEGAP_FREE_TIER_INFO_URL =
             "https://app.edgegap.com/user-settings?tab=memberships";
-        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "docs/category/netcodes";
+        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "docs/category/unity-netcodes";
         public const string EDGEGAP_DOC_LOBBY_PATH = "docs/lobby/service";
         public const string EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH = "docs/gen2-matchmaker";
         public const string EDGEGAP_DOC_ADV_MATCHMAKER_PATH = "docs/matchmaker/advanced";
@@ -150,7 +152,6 @@ namespace Edgegap.Editor
         #region Player Pref Key Ids for persistence
         /// <summary>Cached as base64</summary>
         public const string API_TOKEN_KEY_STR = "ApiToken";
-        public const string DEPLOYMENT_REQUEST_ID_KEY_STR = "DeploymentRequestId";
         #endregion // Editor Pref Key Ids for persistence
 
         #region UI Element Ids
