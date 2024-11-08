@@ -59,7 +59,6 @@ namespace Edgegap.Editor
         public const ProtocolType DEFAULT_PROTOCOL_TYPE = ProtocolType.UDP;
         public const string READY_STATUS = "Status.READY";
 
-        public const string EDGEGAP_SIGN_IN_URL = "https://app.edgegap.com?";
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
         public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/MmJf8fWjnt";
         public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/";
@@ -72,11 +71,9 @@ namespace Edgegap.Editor
         public const string EDGEGAP_DOC_APP_INFO_PATH =
             "learn/unity-games/getting-started-with-servers#5-create-an-edgegap-application";
         public const string EDGEGAP_CREATE_APP_BASE_URL =
-            "https://app.edgegap.com/application-management/applications?";
+            "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DOC_DEPLOY_GUIDE_PATH =
             "learn/unity-games/getting-started-with-servers#6-deploy-a-server-on-edgegap";
-        public const string EDGEGAP_DEPLOY_APP_URL =
-            "https://app.edgegap.com/deployment-management/deployments/list?";
         public const string EDGEGAP_FREE_TIER_INFO_URL =
             "https://app.edgegap.com/user-settings?tab=memberships";
         public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "docs/category/netcodes";

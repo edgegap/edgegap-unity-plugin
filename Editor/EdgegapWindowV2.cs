@@ -38,16 +38,13 @@ namespace Edgegap.Editor
             )[0];
         #endregion
 
-        #region State Variables ??
+        #region State Variables
         public static bool IsLogLevelDebug =>
             EdgegapWindowMetadata.LOG_LEVEL == EdgegapWindowMetadata.LogLevel.Debug;
         private bool IsInitd;
         private bool _isApiTokenVerified; // Toggles the rest of the UI
 
         private GetRegistryCredentialsResult _credentials;
-        private static readonly Regex _appNameAllowedCharsRegex = new Regex(
-            @"^[a-zA-Z0-9_\-+\.]*$"
-        );
         private string _deploymentRequestId;
         private string _userExternalIp;
 
@@ -143,6 +140,9 @@ namespace Edgegap.Editor
         #region UI / Upload App
         private Foldout _createAppFoldout;
         private TextField _createAppNameInput;
+        private static readonly Regex _appNameAllowedCharsRegex = new Regex(
+            @"^[a-zA-Z0-9_\-+\.]*$"
+        );
         private TextField _serverImageNameInput;
         private TextField _serverImageTagInput;
         private Button _portMappingLabelLink;
@@ -1609,10 +1609,17 @@ namespace Edgegap.Editor
                 }
 
                 OpenEdgegapURL(
-                    EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL
-                        + _createAppNameInput.value
-                        + "/versions/create/?"
+                    string.Join(
+                        "",
+                        new string[]
+                        {
+                            EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL,
+                            _createAppNameInput.value,
+                            "/versions/create/?",
+                        }
+                    )
                 );
+                ;
 
                 _deployAppFoldout.value = true;
                 DeployAppNameInputChanged(_createAppNameInput.value);
