@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using Codice.CM.Common;
 using Edgegap.Editor.Api;
 using Edgegap.Editor.Api.Models;
@@ -1552,8 +1553,7 @@ namespace Edgegap.Editor
                     Debug.Log("uploadDockerImageAsync");
                 ProgressCounter = 0;
 
-                string imageName = _serverImageNameInput.value.ToLowerInvariant();
-                string imageRepo = $"{_containerProject}/{imageName}";
+                string imageRepo = $"{_containerProject}/{_serverImageNameInput.value}";
                 string tag = _serverImageTagInput.value;
 
                 bool isDockerLoginSuccess = await EdgegapBuildUtils.LoginContainerRegistry(
@@ -1568,15 +1568,16 @@ namespace Edgegap.Editor
                     throw new Exception("Docker authorization failed (see logs).");
                 }
 
-                bool isPushSuccess = await EdgegapBuildUtils.RunCommand_DockerPush(
+                string pushError = await EdgegapBuildUtils.RunCommand_DockerPush(
                     _containerRegistryUrl,
                     imageRepo,
                     tag,
                     status => ShowWorkInProgress("Pushing Docker Image", status)
                 );
 
-                if (!isPushSuccess)
+                if (!string.IsNullOrEmpty(pushError.Trim()))
                 {
+                    Debug.LogError(pushError);
                     throw new Exception("Unable to push docker image to registry (see logs).");
                 }
 
@@ -1586,26 +1587,34 @@ namespace Edgegap.Editor
                     Debug.Log("createAppAsync");
 
                 EdgegapAppApi appApi = getAppApi();
-                CreateAppRequest createAppRequest = new CreateAppRequest(
-                    _createAppNameInput.value,
-                    isActive: true,
-                    ""
+
+                EdgegapHttpResult<GetCreateAppResult> getAppResult = await appApi.GetApp(
+                    _createAppNameInput.value
                 );
 
-                EdgegapHttpResult<GetCreateAppResult> createAppResult = await appApi.CreateApp(
-                    createAppRequest
-                );
-
-                if (!(createAppResult.IsResultCode200 || createAppResult.IsResultCode409)) // 409 == app already exists
+                if (!getAppResult.IsResultCode200)
                 {
-                    Debug.LogError(createAppResult.HasErr);
-                    throw new Exception(
-                        $"Error {createAppResult.StatusCode}: {createAppResult.ReasonPhrase}"
+                    CreateAppRequest createAppRequest = new CreateAppRequest(
+                        _createAppNameInput.value,
+                        isActive: true,
+                        ""
                     );
-                }
-                else if (!_existingAppNames.Contains(_createAppNameInput.value))
-                {
-                    _existingAppNames.Add(_createAppNameInput.value);
+
+                    EdgegapHttpResult<GetCreateAppResult> createAppResult = await appApi.CreateApp(
+                        createAppRequest
+                    );
+
+                    if (!createAppResult.IsResultCode200)
+                    {
+                        Debug.LogError(createAppResult.HasErr);
+                        throw new Exception(
+                            $"Error {createAppResult.StatusCode}: {createAppResult.ReasonPhrase}"
+                        );
+                    }
+                    else if (!_existingAppNames.Contains(_createAppNameInput.value))
+                    {
+                        _existingAppNames.Add(_createAppNameInput.value);
+                    }
                 }
 
                 OpenEdgegapURL(
@@ -1615,7 +1624,13 @@ namespace Edgegap.Editor
                         {
                             EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL,
                             _createAppNameInput.value,
-                            "/versions/create/?",
+                            "/versions/create/",
+                            $"?name={HttpUtility.UrlEncode(_serverImageTagInput.value)}",
+                            $"&registry={HttpUtility.UrlEncode(_containerRegistryUrl)}",
+                            $"&imageRepo={HttpUtility.UrlEncode(imageRepo)}",
+                            $"&dockerTag={HttpUtility.UrlEncode(tag)}",
+                            $"&vCPU=1",
+                            $"&memory=1",
                         }
                     )
                 );
@@ -1624,7 +1639,6 @@ namespace Edgegap.Editor
                 _deployAppFoldout.value = true;
                 DeployAppNameInputChanged(_createAppNameInput.value);
                 // _deployAppNameInput.SetValueWithoutNotify(_createAppNameInput.value);
-                _deployAppNameShowDropdownBtn.SetEnabled(true);
             }
             catch (Exception e)
             {
