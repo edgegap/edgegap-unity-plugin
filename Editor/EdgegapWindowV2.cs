@@ -15,6 +15,7 @@ using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
 using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -43,7 +44,6 @@ namespace Edgegap.Editor
         #region State Variables
         public static bool IsLogLevelDebug =>
             EdgegapWindowMetadata.LOG_LEVEL == EdgegapWindowMetadata.LogLevel.Debug;
-        private bool IsInitd;
         private bool _isApiTokenVerified; // Toggles the rest of the UI
 
         private GetRegistryCredentialsResult _credentials;
@@ -55,8 +55,8 @@ namespace Edgegap.Editor
         private string _containerToken;
 
         private List<string> _localImages = null;
-        private List<string> _existingAppNames = null;
-        private List<string> _storedDeployAppVersions = null;
+        private List<string> _storedAppNames = null;
+        private List<string> _storedAppVersions = null;
 
         EdgegapDeploymentsApi _deployAPI;
         #endregion
@@ -132,7 +132,7 @@ namespace Edgegap.Editor
         private TextField _localTestImageInput;
         private Button _localTestImageShowDropdownBtn;
         private TextField _localTestDockerRunInput;
-        internal string _localTestDockerRunInputDefault => "-p 7770/udp";
+        internal string _localTestDockerRunInputDefault => "-p 7777/udp";
         private Button _localTestDeployBtn;
         private Button _localTestTerminateBtn;
         private Button _localTestDiscordHelpBtn;
@@ -170,8 +170,7 @@ namespace Edgegap.Editor
         #region UI / Next
         private Foldout _nextStepsFoldout;
         private Button _serverConnectLink;
-        private Button _managedMatchmakerLabelLink;
-        private Button _advMatchmakerLabelLink;
+        private Button _gen2MatchmakerLabelLink;
         private Button _lifecycleManageLabelLink;
         #endregion
         #endregion
@@ -259,8 +258,6 @@ namespace Edgegap.Editor
             _postAuthContainer.SetEnabled(_isApiTokenVerified);
 
             await InitializeState(); // API calls
-
-            IsInitd = true;
 #endif
         }
 
@@ -473,11 +470,8 @@ namespace Edgegap.Editor
             _serverConnectLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.NEXT_STEPS_SERVER_CONNECT_LINK_ID
             );
-            _managedMatchmakerLabelLink = rootVisualElement.Q<Button>(
+            _gen2MatchmakerLabelLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.NEXT_STEPS_MANAGED_MATCHMAKER_LABEL_LINK_ID
-            );
-            _advMatchmakerLabelLink = rootVisualElement.Q<Button>(
-                EdgegapWindowMetadata.NEXT_STEPS_ADV_MATCHMAKER_LABEL_LINK_ID
             );
             _lifecycleManageLabelLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID
@@ -575,8 +569,7 @@ namespace Edgegap.Editor
             _discordHelpBtn.clickable.clicked += OnDiscordBtnClick;
 
             _serverConnectLink.clickable.clicked += OnServerConnectLinkClick;
-            _managedMatchmakerLabelLink.clickable.clicked += OnManagedMatchmakerLinkClick;
-            _advMatchmakerLabelLink.clickable.clicked += OnAdvMatchmakerLinkClick;
+            _gen2MatchmakerLabelLink.clickable.clicked += OnGen2MatchmakerLinkClick;
             _lifecycleManageLabelLink.clickable.clicked += OnScalingLifecycleLinkClick;
         }
 
@@ -655,8 +648,7 @@ namespace Edgegap.Editor
             _discordHelpBtn.clickable.clicked -= OnDiscordBtnClick;
 
             _serverConnectLink.clickable.clicked -= OnServerConnectLinkClick;
-            _managedMatchmakerLabelLink.clickable.clicked -= OnManagedMatchmakerLinkClick;
-            _advMatchmakerLabelLink.clickable.clicked -= OnAdvMatchmakerLinkClick;
+            _gen2MatchmakerLabelLink.clickable.clicked -= OnGen2MatchmakerLinkClick;
             _lifecycleManageLabelLink.clickable.clicked -= OnScalingLifecycleLinkClick;
         }
 
@@ -705,8 +697,8 @@ namespace Edgegap.Editor
             _containerUsername = null;
             _containerToken = null;
             _localImages = null;
-            _existingAppNames = null;
-            _storedDeployAppVersions = null;
+            _storedAppNames = null;
+            _storedAppVersions = null;
 
             hideResultLabels();
             closeDisableGroups();
@@ -1486,11 +1478,19 @@ namespace Edgegap.Editor
         /// </summary>
         private async void OnCreateAppNameDropdownClick()
         {
-            await GetApps();
+            try
+            {
+                _storedAppNames.Clear();
+                await GetApps();
+            }
+            catch (Exception e)
+            {
+                ShowErrorDialog($"GetApps Error: {e}");
+            }
 
             List<string> appNameBtns =
-                !(_existingAppNames is null) || _existingAppNames.Count > 0
-                    ? _existingAppNames
+                !(_storedAppNames is null) || _storedAppNames.Count > 0
+                    ? _storedAppNames
                         .Prepend(EdgegapWindowMetadata.DEFAULT_NEW_APPLICATION_LABEL)
                         .ToList()
                     : new List<string> { EdgegapWindowMetadata.DEFAULT_NEW_APPLICATION_LABEL };
@@ -1627,9 +1627,9 @@ namespace Edgegap.Editor
                             $"Error {createAppResult.StatusCode}: {createAppResult.ReasonPhrase}"
                         );
                     }
-                    else if (!_existingAppNames.Contains(_createAppNameInput.value))
+                    else if (!_storedAppNames.Contains(_createAppNameInput.value))
                     {
-                        _existingAppNames.Add(_createAppNameInput.value);
+                        _storedAppNames.Add(_createAppNameInput.value);
                     }
                 }
 
@@ -1710,12 +1710,20 @@ namespace Edgegap.Editor
         /// </summary>
         private async void OnDeployAppNameDropdownClick()
         {
-            await GetApps();
+            try
+            {
+                _storedAppNames.Clear();
+                await GetApps();
+            }
+            catch (Exception e)
+            {
+                ShowErrorDialog($"GetApps Error: {e}");
+            }
 
             UnityEditor.PopupWindow.Show(
                 _deployAppNameShowDropdownBtn.worldBound,
                 new CustomPopupContent(
-                    _existingAppNames,
+                    _storedAppNames,
                     OnDropdownDeployAppNameSelect,
                     _containerizeImageNameInputDefault
                 )
@@ -1730,7 +1738,7 @@ namespace Edgegap.Editor
         {
             string appName = Regex.Replace(name, @"\s", "_");
             _deployAppNameInput.value = appName;
-            _deployAppVersionInput.Focus();
+            _deployAppVersionShowDropdownBtn.Focus();
         }
 
         /// <summary>
@@ -1740,8 +1748,6 @@ namespace Edgegap.Editor
         /// <param name="evt"></param>
         private void OnDeployAppNameInputChanged(ChangeEvent<string> evt)
         {
-            if (evt.previousValue == evt.newValue)
-                return;
             DeployAppNameInputChanged(evt.newValue);
         }
 
@@ -1749,34 +1755,28 @@ namespace Edgegap.Editor
         {
             _deployAppBtn.SetEnabled(CheckFilledDeployServerInputs());
             _deployAppVersionShowDropdownBtn.SetEnabled(false);
-
-            if (IsInitd && _isApiTokenVerified)
+            try
             {
-                try
+                if (_storedAppVersions is not null)
                 {
-                    if (_storedDeployAppVersions is not null)
-                    {
-                        _storedDeployAppVersions.Clear();
-                    }
-
-                    if (_existingAppNames.Contains(newValue))
-                    {
-                        _apiTokenVerifyBtn.SetEnabled(false);
-                        await GetAppVersions();
-                    }
+                    _storedAppVersions.Clear();
                 }
-                catch (Exception e)
-                {
-                    Debug.LogError($"GetAppVersions Error: {e}");
-                }
-                finally
-                {
-                    _apiTokenVerifyBtn.SetEnabled(true);
 
-                    if (_storedDeployAppVersions is not null && _storedDeployAppVersions.Count > 0)
-                    {
-                        _deployAppVersionShowDropdownBtn.SetEnabled(true);
-                    }
+                if (_storedAppNames is not null && _storedAppNames.Contains(newValue))
+                {
+                    await GetAppVersions();
+                }
+            }
+            catch (Exception e)
+            {
+                ShowErrorDialog($"GetAppVersions Error: {e}");
+            }
+            finally
+            {
+                if (_storedAppVersions is not null && _storedAppVersions.Count > 0)
+                {
+                    _deployAppBtn.SetEnabled(CheckFilledDeployServerInputs());
+                    _deployAppVersionShowDropdownBtn.SetEnabled(true);
                 }
             }
         }
@@ -1789,12 +1789,22 @@ namespace Edgegap.Editor
         /// <summary>
         /// Show app version dropdown btn click
         /// </summary>
-        private void OnDeployAppVersionDropdownClick()
+        private async void OnDeployAppVersionDropdownClick()
         {
+            try
+            {
+                _storedAppVersions.Clear();
+                await GetAppVersions();
+            }
+            catch (Exception e)
+            {
+                ShowErrorDialog($"GetAppVersions Error: {e}");
+            }
+
             UnityEditor.PopupWindow.Show(
                 _deployAppVersionShowDropdownBtn.worldBound,
                 new CustomPopupContent(
-                    _storedDeployAppVersions,
+                    _storedAppVersions,
                     OnDropDownDeployAppVersionSelect,
                     _containerizeImageNameInputDefault
                 )
@@ -1835,7 +1845,6 @@ namespace Edgegap.Editor
 
                 await CreateDeploymentStartServer();
 
-                _deployAppBtn.SetEnabled(false);
                 _nextStepsFoldout.SetValueWithoutNotify(true);
             }
             catch (Exception e)
@@ -1874,7 +1883,9 @@ namespace Edgegap.Editor
                 _userExternalIp = getYourPublicIpResponseTask?.Data?.PublicIp;
                 if (!string.IsNullOrEmpty(_userExternalIp))
                 {
-                    Debug.LogWarning("Couldn't retrieve your public IP.");
+                    Debug.LogWarning(
+                        $"Couldn't retrieve your public IP. {getYourPublicIpResponseTask.Error}"
+                    );
                 }
             }
 
@@ -2079,7 +2090,7 @@ namespace Edgegap.Editor
         private void OnServerConnectLinkClick() =>
             OpenEdgegapDocsURL(EdgegapWindowMetadata.CONNECT_TO_DEPLOYMENT_INFO_URL);
 
-        private void OnManagedMatchmakerLinkClick() =>
+        private void OnGen2MatchmakerLinkClick() =>
             OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH);
 
         private void OnAdvMatchmakerLinkClick() =>
@@ -2166,7 +2177,7 @@ namespace Edgegap.Editor
                 {
                     _createAppNameShowDropdownBtn.SetEnabled(true);
 
-                    if (_existingAppNames is not null && _existingAppNames.Count > 0)
+                    if (_storedAppNames is not null && _storedAppNames.Count > 0)
                     {
                         _deployAppNameShowDropdownBtn.SetEnabled(true);
                     }
@@ -2217,7 +2228,7 @@ namespace Edgegap.Editor
                 }
                 finally
                 {
-                    if (_storedDeployAppVersions is not null && _storedDeployAppVersions.Count > 0)
+                    if (_storedAppVersions is not null && _storedAppVersions.Count > 0)
                     {
                         _deployAppVersionShowDropdownBtn.SetEnabled(true);
                     }
@@ -2285,7 +2296,7 @@ namespace Edgegap.Editor
                     TogglePlaceholder(_localTestImageInput, _localImages[0], false);
                     string[] localImageAndVersion = _localImages[0].Split(":");
 
-                    if (_existingAppNames is null || _existingAppNames.Count == 0)
+                    if (_storedAppNames is null || _storedAppNames.Count == 0)
                     {
                         _createAppNameInput.SetValueWithoutNotify(localImageAndVersion[0]);
                         _deployAppNameInput.SetValueWithoutNotify("");
@@ -2303,10 +2314,10 @@ namespace Edgegap.Editor
                 }
                 TogglePlaceholder(_localTestDockerRunInput, _localTestDockerRunInputDefault, false);
 
-                if (_existingAppNames is not null && _existingAppNames.Count == 1)
+                if (_storedAppNames is not null && _storedAppNames.Count == 1)
                 {
-                    OnDropdownCreateAppNameSelect(_existingAppNames[0]);
-                    TogglePlaceholder(_deployAppNameInput, _existingAppNames[0], false);
+                    OnDropdownCreateAppNameSelect(_storedAppNames[0]);
+                    TogglePlaceholder(_deployAppNameInput, _storedAppNames[0], false);
                 }
 
                 //open other foldouts if (non-default) persistent data is found in inputs
@@ -2354,7 +2365,7 @@ namespace Edgegap.Editor
             if (getAppsResult.IsResultCode200)
             {
                 GetAppsResult existingApps = getAppsResult.Data;
-                _existingAppNames = existingApps.Applications.Select(app => app.AppName).ToList();
+                _storedAppNames = existingApps.Applications.Select(app => app.AppName).ToList();
             }
         }
 
@@ -2374,23 +2385,20 @@ namespace Edgegap.Editor
                 List<VersionData> activeVersions = appVersionsData
                     .Versions.Where(version => version.IsActive)
                     .ToList();
-                _storedDeployAppVersions = activeVersions.Select(version => version.Name).ToList();
+                _storedAppVersions = activeVersions.Select(version => version.Name).ToList();
 
                 // automatically clear if empty, or select if only one option
                 if (
-                    _storedDeployAppVersions is null
-                    || _storedDeployAppVersions.Count == 0
-                    || _storedDeployAppVersions.Count > 1
+                    _storedAppVersions is null
+                    || _storedAppVersions.Count == 0
+                    || _storedAppVersions.Count > 1
                 )
                 {
                     OnDropDownDeployAppVersionSelect("");
                 }
-                else if (
-                    _storedDeployAppVersions is not null
-                    && _storedDeployAppVersions.Count == 1
-                )
+                else if (_storedAppVersions is not null && _storedAppVersions.Count == 1)
                 {
-                    OnDropDownDeployAppVersionSelect(_storedDeployAppVersions[0]);
+                    OnDropDownDeployAppVersionSelect(_storedAppVersions[0]);
                 }
             }
             else
