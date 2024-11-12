@@ -32,8 +32,14 @@ namespace Edgegap.Editor.Api.Models.Requests
         [JsonProperty("geo_ip_list")]
         public string[] GeoIpList { get; set; } = {};
         #endregion // Required
-        
-        
+
+        /// <summary>
+        /// The list of tags assigned to the deployment
+        /// </summary>
+        [JsonProperty("tags")]
+        public string[] Tags { get; set; } = { EdgegapWindowMetadata.DEFAULT_DEPLOYMENT_TAG };
+
+
         /// <summary>Used by Newtonsoft</summary>
         public CreateDeploymentRequest()
         {
