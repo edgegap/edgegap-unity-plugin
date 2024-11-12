@@ -70,6 +70,18 @@ namespace Edgegap.Editor.Api
             
             return result;
         }
+
+        public async Task<EdgegapHttpResult<GetDeploymentsResult>> GetDeploymentsAsync()
+        {
+            HttpResponseMessage response = await GetAsync($"v1/deployments");
+            EdgegapHttpResult<GetDeploymentsResult> result = new EdgegapHttpResult<GetDeploymentsResult>(response);
+
+            bool isSuccess = response.StatusCode == HttpStatusCode.OK; // 200
+            if (!isSuccess)
+                return result;
+
+            return result;
+        }
         
         /// <summary>
         /// DELETE v1/stop/{requestId}
