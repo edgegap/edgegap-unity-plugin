@@ -850,8 +850,8 @@ namespace Edgegap.Editor
                 _containerProject = _credentials.Project;
                 _containerUsername = _credentials.Username;
                 _containerToken = _credentials.Token;
-				//VSA create new user
-				VSAttribution.SendAttributionEvent("verify", "Edgegap", _apiTokenInput.value);
+                //VSA create new user
+                VSAttribution.SendAttributionEvent("verify", "Edgegap", _apiTokenInput.value);
                 Debug.Log("Edgegap API token verified successfully.");
             }
             else
