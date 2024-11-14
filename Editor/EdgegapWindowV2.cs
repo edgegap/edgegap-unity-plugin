@@ -13,6 +13,7 @@ using Edgegap.Editor.Api;
 using Edgegap.Editor.Api.Models;
 using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
+using Edgegap.Codice.Utils;
 using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEditor;
 using UnityEditor.Build;
@@ -1655,7 +1656,7 @@ namespace Edgegap.Editor
                 ;
 
                 _deployAppFoldout.SetValueWithoutNotify(true);
-                DeployAppNameInputChanged(_createAppNameInput.value);
+                _deployAppNameInput.SetValueWithoutNotify(_createAppNameInput.value);
             }
             catch (Exception e)
             {
@@ -1793,6 +1794,9 @@ namespace Edgegap.Editor
         /// </summary>
         private async void OnDeployAppVersionDropdownClick()
         {
+            if (string.IsNullOrEmpty(_deployAppNameInput.value.Trim()))
+                return;
+
             try
             {
                 _storedAppVersions.Clear();
@@ -1805,11 +1809,7 @@ namespace Edgegap.Editor
 
             UnityEditor.PopupWindow.Show(
                 _deployAppVersionShowDropdownBtn.worldBound,
-                new CustomPopupContent(
-                    _storedAppVersions,
-                    OnDropDownDeployAppVersionSelect,
-                    _containerizeImageNameInputDefault
-                )
+                new CustomPopupContent(_storedAppVersions, OnDropDownDeployAppVersionSelect, "")
             );
         }
 
@@ -2368,6 +2368,26 @@ namespace Edgegap.Editor
             {
                 GetAppsResult existingApps = getAppsResult.Data;
                 _storedAppNames = existingApps.Applications.Select(app => app.AppName).ToList();
+
+                if (!_storedAppNames.Contains(_deployAppNameInput.value))
+                {
+                    // select if only one option, otherwise clear
+                    if (_storedAppNames.Count == 1)
+                    {
+                        _deployAppNameInput.value = _storedAppNames[0];
+                    }
+                    else
+                    {
+                        _deployAppNameInput.value = "";
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"Unable to retrieve applications.\n"
+                        + $"Status {getAppsResult.StatusCode}: {getAppsResult.ReasonPhrase}"
+                );
             }
         }
 
@@ -2389,18 +2409,14 @@ namespace Edgegap.Editor
                     .ToList();
                 _storedAppVersions = activeVersions.Select(version => version.Name).ToList();
 
-                // automatically clear if empty, or select if only one option
-                if (
-                    _storedAppVersions is null
-                    || _storedAppVersions.Count == 0
-                    || _storedAppVersions.Count > 1
-                )
-                {
-                    OnDropDownDeployAppVersionSelect("");
-                }
-                else if (_storedAppVersions is not null && _storedAppVersions.Count == 1)
+                // select if only one option, otherwise clear
+                if (_storedAppVersions.Count == 1)
                 {
                     OnDropDownDeployAppVersionSelect(_storedAppVersions[0]);
+                }
+                else
+                {
+                    OnDropDownDeployAppVersionSelect("");
                 }
             }
             else
