@@ -58,7 +58,7 @@ namespace Edgegap
             await RunCommand_DockerVersion(msg => output = msg,
                 (msg) =>
                 {
-                    if (msg.ToLower().Contains("error"))
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         error = msg;
                     }
@@ -75,7 +75,7 @@ namespace Edgegap
             await RunCommand_DockerPS(null,
                 (msg) =>
                 {
-                    if (msg.ToLower().Contains("error"))
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         error = msg;
                     }
@@ -135,7 +135,7 @@ namespace Edgegap
 #endif
                 (msg) =>
                 {
-                    if (msg.Contains("ERROR"))
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         errorReciever(msg);
                     }
@@ -148,16 +148,16 @@ namespace Edgegap
             string runCommand = IsArmCPU() ? "run --platform linux/amd64" : "run";
 
 #if UNITY_EDITOR_WIN
-            await RunCommand("docker.exe", $"{runCommand} --name edgegap-server-test -d {extraParams} {image} ",
+            await RunCommand("docker.exe", $"{runCommand} --name edgegap-server-test -d {extraParams} {image}",
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker {runCommand} {extraParams} {image} --name edgegap-server-test",
+            await RunCommand("/bin/bash", $"-c \"docker {runCommand} --name edgegap-server-test {extraParams} {image}\"",
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker {runCommand} {extraParams} {image} --name edgegap-server-test",
+            await RunCommand("/bin/bash", $"-c \"docker {runCommand} --name edgegap-server-test {extraParams} {image}\"",
 #endif
                 null,
                 (msg) =>
                 {
-                    if (msg.Contains("Error"))
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         throw new Exception(msg);
                     }
@@ -170,14 +170,14 @@ namespace Edgegap
 #if UNITY_EDITOR_WIN
             await RunCommand("docker.exe", $"stop edgegap-server-test",
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker stop edgegap-server-test",
+            await RunCommand("/bin/bash", $"-c \"docker stop edgegap-server-test\"",
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker stop edgegap-server-test",
+            await RunCommand("/bin/bash", $"-c \"docker stop edgegap-server-test\"",
 #endif
                 null,
                 (msg) =>
                 {
-                    if (msg.Contains("Error"))
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         throw new Exception(msg);
                     }
@@ -187,14 +187,14 @@ namespace Edgegap
 #if UNITY_EDITOR_WIN
             await RunCommand("docker.exe", $"rm edgegap-server-test",
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker rm edgegap-server-test",
+            await RunCommand("/bin/bash", $"-c \"docker rm edgegap-server-test\"",
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker rm edgegap-server-test",
+            await RunCommand("/bin/bash", $"-c \"docker rm edgegap-server-test\"",
 #endif
                 null,
                 (msg) =>
                 {
-                    if (msg.Contains("Error"))
+                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         throw new Exception(msg);
                     }
@@ -219,7 +219,7 @@ namespace Edgegap
 #endif
             (msg) =>
             {
-                if (msg.Contains("ERROR"))
+                if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                 {
                     error = msg;
                 }
@@ -248,6 +248,8 @@ namespace Edgegap
                 buildCommand += $" {extraParams}";
             }
 
+            bool done = false;
+
 #if UNITY_EDITOR_WIN
             await RunCommand("docker.exe", $"{buildCommand} -f \"{dockerfilePath}\" -t \"{registry}/{imageRepo}:{tag}\" \"{projectPath}\"", onStatusUpdate,
 #elif UNITY_EDITOR_OSX
@@ -257,17 +259,24 @@ namespace Edgegap
 #endif
                 (msg) =>
                 {
-                    Debug.Log(msg);
                     if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
                     {
                         realErrorMessage = msg;
                     }
+                    if (msg.ToLowerInvariant().Contains("done"))
+                    {
+                        done = true;
+                    }
+                    Debug.Log(msg);
                     onStatusUpdate(msg);
                 });
 
             if(realErrorMessage != null)
             {
                 throw new Exception(realErrorMessage);
+            } else if (!done)
+            {
+                throw new Exception("Couldn't complete containerization, see console log for details.");
             }
         }
 
@@ -430,10 +439,9 @@ namespace Edgegap
         {
             string error = null;
             await RunCommand_DockerLogin(registryUrl, repoUsername, repoPasswordToken, onStatusUpdate, msg => error = msg); // MIRROR CHANGE
-            if (error.Contains("ERROR"))
+            if (error.ToLowerInvariant().Contains("error") || error.ToLowerInvariant().Contains("invalid"))
             {
-                Debug.LogError(error);
-                return false;
+                throw new Exception(error);
             }
             return true;
         }
