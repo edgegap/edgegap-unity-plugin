@@ -88,6 +88,7 @@ namespace Edgegap.Editor
         #region UI / Connect / Auth
         private Button _signOutBtn;
         private TextField _apiTokenInput;
+        private string _apiToken => _apiTokenInput is null ? "" : _apiTokenInput.value.Trim();
         private Button _apiTokenVerifyBtn;
         private Button _apiTokenGetBtn;
         #endregion
@@ -505,7 +506,7 @@ namespace Edgegap.Editor
 
             _edgegapSignInBtn.clickable.clicked += OnEdgegapSignInBtnClick;
             _apiTokenGetBtn.clickable.clicked += OpenGetTokenUrl;
-            _apiTokenInput.RegisterValueChangedCallback(onApiTokenInputChanged);
+            _apiTokenInput.RegisterCallback<FocusInEvent>(onApiTokenInputFocusIn);
             _apiTokenInput.RegisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
             _apiTokenVerifyBtn.clickable.clicked += onApiTokenVerifyBtnClick;
             _signOutBtn.clickable.clicked += OnSignOutBtnClickAsync;
@@ -584,7 +585,7 @@ namespace Edgegap.Editor
 
             _edgegapSignInBtn.clickable.clicked -= OnEdgegapSignInBtnClick;
             _apiTokenGetBtn.clickable.clicked -= OpenGetTokenUrl;
-            _apiTokenInput.UnregisterValueChangedCallback(onApiTokenInputChanged);
+            _apiTokenInput.UnregisterCallback<FocusInEvent>(onApiTokenInputFocusIn);
             _apiTokenInput.UnregisterCallback<FocusOutEvent>(onApiTokenInputFocusOut);
             _apiTokenVerifyBtn.clickable.clicked -= onApiTokenVerifyBtnClick;
             _signOutBtn.clickable.clicked -= OnSignOutBtnClickAsync;
@@ -658,7 +659,7 @@ namespace Edgegap.Editor
             hideResultLabels();
 
             // ApiToken
-            if (string.IsNullOrEmpty(_apiTokenInput.value))
+            if (string.IsNullOrEmpty(_apiToken))
             {
                 string apiTokenBase64Str = EditorPrefs.GetString(
                     EdgegapWindowMetadata.API_TOKEN_KEY_STR,
@@ -756,33 +757,24 @@ namespace Edgegap.Editor
             OpenEdgegapURL(EdgegapWindowMetadata.EDGEGAP_GET_A_TOKEN_URL);
         }
 
-        /// <summary>
-        /// While changing the token, we temporarily unmask. On change, set state to !verified.
-        /// </summary>
-        /// <param name="evt"></param>
-        private void onApiTokenInputChanged(ChangeEvent<string> evt)
+        private void onApiTokenInputFocusIn(FocusInEvent evt)
         {
-            // Unmask while changing
-            TextField apiTokenTxt = evt.target as TextField;
-            apiTokenTxt.isPasswordField = false;
+            _apiTokenInput.isPasswordField = false;
+        }
 
-            // Token changed? Reset form to !verified state and fold all groups
+        private void onApiTokenInputFocusOut(FocusOutEvent evt)
+        {
+            _apiTokenInput.isPasswordField = true;
+
             _isApiTokenVerified = false;
             _postAuthContainer.SetEnabled(false);
             closeDisableGroups();
 
             // Toggle "Verify" btn on 1+ char entered
-            if (evt.newValue.Length > 0)
+            if (_apiToken.Length > 0)
             {
-                _apiTokenVerifyBtn.SetEnabled(true);
                 onApiTokenVerifyBtnClick();
             }
-        }
-
-        private void onApiTokenInputFocusOut(FocusOutEvent evt)
-        {
-            TextField apiTokenTxt = evt.target as TextField;
-            apiTokenTxt.isPasswordField = true;
         }
 
         private void onApiTokenVerifyBtnClick()
@@ -804,19 +796,17 @@ namespace Edgegap.Editor
 
             // Disable most ui while we verify
             _isApiTokenVerified = false;
-            _apiTokenVerifyBtn.SetEnabled(false);
             _signOutBtn.SetEnabled(false);
             UpdateUI();
             hideResultLabels();
 
             EdgegapWizardApi wizardApi = new EdgegapWizardApi(
                 EdgegapWindowMetadata.API_ENVIRONMENT,
-                _apiTokenInput.value.Trim(),
+                _apiToken,
                 EdgegapWindowMetadata.LOG_LEVEL
             );
             EdgegapHttpResult initQuickStartResultCode = await wizardApi.InitQuickStart();
 
-            _apiTokenVerifyBtn.SetEnabled(true);
             _signOutBtn.SetEnabled(true);
             _isApiTokenVerified = initQuickStartResultCode.IsResultCode204;
 
@@ -836,7 +826,7 @@ namespace Edgegap.Editor
                 _credentials = getRegistryCredentialsResult.Data;
                 EditorPrefs.SetString(
                     EdgegapWindowMetadata.API_TOKEN_KEY_STR,
-                    Base64Encode(_apiTokenInput.value)
+                    Base64Encode(_apiToken)
                 );
 
                 if (IsLogLevelDebug)
@@ -849,13 +839,13 @@ namespace Edgegap.Editor
                 _containerProject = _credentials.Project;
                 _containerUsername = _credentials.Username;
                 _containerToken = _credentials.Token;
-
                 Debug.Log("Edgegap API token verified successfully.");
             }
             else
             {
-                Debug.LogWarning(getRegistryCredentialsResult.Data.ToString());
-                // Fail
+                ShowErrorDialog(
+                    $"Couldn't retrieve Edgegap registry credentials, try re-logging.\n\n{getRegistryCredentialsResult.Data.ToString()}"
+                );
             }
 
             // Unlock the rest of the form, whether we prefill the container registry or not
@@ -1285,7 +1275,7 @@ namespace Edgegap.Editor
             }
             catch (Exception e)
             {
-                Debug.LogError($"OnContainerizeBtnClick Error: {e}");
+                Debug.LogError($"Containerization Error: {e}");
                 ShowErrorDialog(
                     e.Message,
                     _containerizeServerResultLabel,
@@ -1681,7 +1671,7 @@ namespace Edgegap.Editor
         private EdgegapAppApi getAppApi() =>
             new EdgegapAppApi(
                 EdgegapWindowMetadata.API_ENVIRONMENT,
-                _apiTokenInput.value.Trim(),
+                _apiToken,
                 EdgegapWindowMetadata.LOG_LEVEL
             );
 
@@ -1874,7 +1864,7 @@ namespace Edgegap.Editor
             {
                 EdgegapIpApi ipApi = new EdgegapIpApi(
                     EdgegapWindowMetadata.API_ENVIRONMENT,
-                    _apiTokenInput.value.Trim(),
+                    _apiToken,
                     EdgegapWindowMetadata.LOG_LEVEL
                 );
                 EdgegapHttpResult<GetYourPublicIpResult> getYourPublicIpResponseTask =
@@ -2069,12 +2059,13 @@ namespace Edgegap.Editor
         private async Task<List<string>> GetQuickstartDeployments()
         {
             EdgegapDeploymentsApi deployApi = GetDeployAPI();
+
             EdgegapHttpResult<GetDeploymentsResult> getDeploymentsResponse =
                 await deployApi.GetDeploymentsAsync();
 
             if (!getDeploymentsResponse.IsResultCode200)
             {
-                throw new Exception(getDeploymentsResponse.Error.ErrorMessage);
+                return new List<string>();
             }
 
             List<GetDeploymentResult> quickstartDeploys = getDeploymentsResponse
@@ -2136,7 +2127,7 @@ namespace Edgegap.Editor
 
         private async Task InitializeState()
         {
-            if (string.IsNullOrEmpty(_apiTokenInput.value))
+            if (string.IsNullOrEmpty(_apiToken))
             {
                 //show Sign In btn
                 ToggleIsConnectedContainers(false);
@@ -2160,7 +2151,6 @@ namespace Edgegap.Editor
                 if (IsLogLevelDebug)
                     Debug.Log("syncFormWithObjectDynamicAsync: Found apiToken;");
 
-                _apiTokenVerifyBtn.SetEnabled(false);
                 _signOutBtn.SetEnabled(false);
 
                 _createAppNameShowDropdownBtn.SetEnabled(false);
@@ -2203,7 +2193,6 @@ namespace Edgegap.Editor
                     }
                 }
 
-                _apiTokenVerifyBtn.SetEnabled(true);
                 _signOutBtn.SetEnabled(true);
                 UpdateUI();
             }
@@ -2218,7 +2207,6 @@ namespace Edgegap.Editor
                             + "calling GetAppVersionsAsync =>"
                     );
 
-                _apiTokenVerifyBtn.SetEnabled(false);
                 _signOutBtn.SetEnabled(false);
                 _deployAppVersionShowDropdownBtn.SetEnabled(false);
 
@@ -2234,7 +2222,6 @@ namespace Edgegap.Editor
                     }
                 }
 
-                _apiTokenVerifyBtn.SetEnabled(true);
                 _signOutBtn.SetEnabled(true);
             }
 
@@ -2432,7 +2419,7 @@ namespace Edgegap.Editor
             {
                 _deployAPI = new EdgegapDeploymentsApi(
                     EdgegapWindowMetadata.API_ENVIRONMENT,
-                    _apiTokenInput.value.Trim(),
+                    _apiToken,
                     EdgegapWindowMetadata.LOG_LEVEL
                 );
             }
