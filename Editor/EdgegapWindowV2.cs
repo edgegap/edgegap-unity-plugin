@@ -1307,7 +1307,10 @@ namespace Edgegap.Editor
                         _localImages.Add(shortImg);
                     }
                 },
-                error => Debug.LogError($"GetLocalDockerImages error: {error}")
+                error =>
+                    ShowErrorDialog(
+                        $"Couldn't find local docker images, please ensure Docker is running.\n\n{error}"
+                    )
             );
 
             UpdateUI();
