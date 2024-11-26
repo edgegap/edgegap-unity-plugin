@@ -1311,7 +1311,10 @@ namespace Edgegap.Editor
                         _localImages.Add(shortImg);
                     }
                 },
-                error => Debug.LogError($"GetLocalDockerImages error: {error}")
+                error =>
+                    ShowErrorDialog(
+                        $"Couldn't find local docker images, please ensure Docker is running.\n\n{error}"
+                    )
             );
 
             UpdateUI();
@@ -1843,7 +1846,7 @@ namespace Edgegap.Editor
             }
             catch (Exception e)
             {
-                OnCreateDeploymentStartServerFail(false, e.Message);
+                OnCreateDeploymentStartServerFail(e.Message);
             }
         }
 
@@ -1892,13 +1895,9 @@ namespace Edgegap.Editor
             // Request to deploy (it won't be active, yet) =>
             EdgegapHttpResult<CreateDeploymentResult> createDeploymentResponse =
                 await deployApi.CreateDeploymentAsync(createDeploymentReq);
-
             if (!createDeploymentResponse.IsResultCode200)
             {
-                OnCreateDeploymentStartServerFail(
-                    createDeploymentResponse.IsResultCode403,
-                    createDeploymentResponse.Error.ErrorMessage
-                );
+                OnCreateDeploymentStartServerFail(createDeploymentResponse.Error.ErrorMessage);
                 return;
             }
             else
@@ -1921,8 +1920,7 @@ namespace Edgegap.Editor
                 );
 
             // Process create deployment response
-            bool isSuccess = getDeploymentStatusResponse.IsResultCode200;
-            if (isSuccess)
+            if (string.IsNullOrEmpty(getDeploymentStatusResponse?.Error?.ErrorMessage))
             {
                 _deployResultLabel.text = EdgegapWindowMetadata.WrapRichTextInColor(
                     "Server deployed successfully. Don't forget to remove the deployment after testing.",
@@ -1932,10 +1930,7 @@ namespace Edgegap.Editor
             }
             else
             {
-                OnCreateDeploymentStartServerFail(
-                    getDeploymentStatusResponse.IsResultCode403,
-                    getDeploymentStatusResponse.Error.ErrorMessage
-                ); //403 = Maximum number of deployments reached
+                OnCreateDeploymentStartServerFail(getDeploymentStatusResponse.Error.ErrorMessage);
             }
         }
 
@@ -1944,28 +1939,16 @@ namespace Edgegap.Editor
         /// </summary>
         /// <param name="reachedNumDeploymentsHardcap">if maximum number of deployments was reached</param>
         /// <param name="message">error message to log</param>
-        private void OnCreateDeploymentStartServerFail(
-            bool reachedNumDeploymentsHardcap,
-            string message = null
-        )
+        private void OnCreateDeploymentStartServerFail(string message = null)
         {
-            _deployResultLabel.text = EdgegapWindowMetadata.WrapRichTextInColor(
-                "There was an issue, see Unity console for details.",
-                EdgegapWindowMetadata.StatusColors.Error
+            ShowErrorDialog(
+                message ?? "Unknown Error, see Unity Console.",
+                _deployResultLabel,
+                "There was an issue, see Unity console for details."
             );
-
-            _deployResultLabel.style.display = DisplayStyle.Flex;
-            ShowErrorDialog(message ?? "Unknown Error, see Unity Console.");
             Debug.Log(
-                "See deployment on Dashboard: https://app.edgegap.com/deployment-management/deployments/list"
+                "See deployments on Dashboard: https://app.edgegap.com/deployment-management/deployments/list"
             );
-
-            // Shake "Free Tier deployment limit" btn on maximum number of deployments reached
-            if (reachedNumDeploymentsHardcap)
-            {
-                ButtonShaker shaker = new ButtonShaker(_deployLimitLabelLink);
-                _ = shaker.ApplyShakeAsync();
-            }
         }
 
         /// <summary>
@@ -2074,7 +2057,8 @@ namespace Edgegap.Editor
 
             List<GetDeploymentResult> quickstartDeploys = getDeploymentsResponse
                 .Data.Data.Where(deploy =>
-                    deploy.Tags.Contains(EdgegapWindowMetadata.DEFAULT_DEPLOYMENT_TAG)
+                    deploy.Tags is not null
+                    && deploy.Tags.Contains(EdgegapWindowMetadata.DEFAULT_DEPLOYMENT_TAG)
                 )
                 .ToList();
             return quickstartDeploys.Select(deploy => deploy.RequestId).ToList();
