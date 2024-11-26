@@ -97,9 +97,9 @@ namespace Edgegap.Editor
         public const string DEFAULT_NEW_APPLICATION_LABEL = "Create New Application";
         public const string DEFAULT_DEPLOYMENT_TAG = "quickstart";
         public const string DEFAULT_VERSION_TAG = "{yy.MM.DD-HH.mm.ss}-UTC";
-        public const string LOADING_RICH_STR = "<i>Loading...</i>";
-        public const string PROCESSING_RICH_STR = "<i>Processing...</i>";
-        public const string DEPLOY_REQUEST_RICH_STR = "<i>Requesting Deploy...</i>";
+        public const string LOADING_RICH_STR = "Loading...";
+        public const string PROCESSING_RICH_STR = "Processing...";
+        public const string DEPLOY_REQUEST_RICH_STR = "Requesting Deploy...";
         public const string KEY_COMPILER_MACRO = "EDGEGAP_PLUGIN_SERVERS";
 
         #region Colors
