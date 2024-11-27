@@ -130,6 +130,14 @@ namespace Edgegap.Editor
             Error,
         }
 
+        public enum Netcodes
+        {
+            Fishnet,
+            Mirror,
+            Fusion,
+            Unity
+        }
+
         /// <returns>Wraps string in color rich text</returns>
         public static string WrapRichTextInColor(string str, StatusColors statusColor)
         {
@@ -152,6 +160,7 @@ namespace Edgegap.Editor
         #region Player Pref Key Ids for persistence
         /// <summary>Cached as base64</summary>
         public const string API_TOKEN_KEY_STR = "ApiToken";
+        public const string SELECTED_NETCODE_KEY_STR = "SelectedNetcode";
         #endregion // Editor Pref Key Ids for persistence
 
         #region UI Element Ids
@@ -177,6 +186,9 @@ namespace Edgegap.Editor
         public const string SERVER_BUILD_FOLDER_TXT_ID = "BuildFolderTxt";
         public const string SERVER_BUILD_BTN_ID = "ServerBuildBtn";
         public const string SERVER_BUILD_RESULT_LABEL_ID = "ServerBuildResultLabel";
+
+        public const string BOOTSTRAP_NETCODE_TXT_ID = "BootstrapNetcodeTxt";
+        public const string BOOTSTRAP_NETCODE_DROPDOWN_BTN_ID = "BootstrapNetcodeDropdownBtn";
 
         //3. Containerize your server
         public const string CONTAINERIZE_SERVER_FOLDOUT_ID = "ContainerizeServerFoldout";
