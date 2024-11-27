@@ -260,10 +260,6 @@ namespace Edgegap.Editor
             // Only show the rest of the form if apiToken is verified
             _postAuthContainer.SetEnabled(_isApiTokenVerified);
 
-            if (!string.IsNullOrEmpty(_apiToken))
-            {
-                await verifyApiTokenGetRegistryCreds();
-            }
             await InitializeState(); // API calls
 #endif
         }
@@ -2135,6 +2131,7 @@ namespace Edgegap.Editor
                     "syncFormWithObjectDynamicAsync: Found apiToken; "
                         + "calling verifyApiTokenGetRegistryCredsAsync =>"
                 );
+            await verifyApiTokenGetRegistryCreds();
 
             if (_isApiTokenVerified)
             {
