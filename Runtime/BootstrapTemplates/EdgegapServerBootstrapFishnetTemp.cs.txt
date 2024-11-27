@@ -1,0 +1,149 @@
+using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using FishNet.Transporting;
+
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private Dictionary<string, (ushort InternalPort, string[] Protocols)> _sceneTransportsData = new Dictionary<string, (ushort InternalPort, string[] Protocols)>();
+
+#if UNITY_EDITOR
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void AddBootstrapToScene()
+        {
+            string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
+
+            if (GameObject.Find(BootstrapObjectName) is null && File.Exists(assetFolderScriptPath))
+            {
+                GameObject bootstrapObj = new GameObject(BootstrapObjectName);
+                bootstrapObj.AddComponent(typeof(#SCRIPTNAME#));
+                EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+
+                Instance = bootstrapObj.GetComponent(typeof(#SCRIPTNAME#)) as EdgegapServerBootstrap;
+            }
+        }
+#endif
+
+        protected override void ValidatePortMapping()
+        {
+            List<Transport> transportObjs = FindObjectsOfType<Transport>().ToList();
+
+            foreach (Transport transport in transportObjs)
+            {
+                string transportName = transport.GetType().Name;
+
+                if (transportName != "Multipass")
+                {
+                    ushort internalPort = transport.GetPort();
+                    string[] protocols;
+
+                    switch (transportName)
+                    {
+                        case "Tugboat":
+                            {
+                                protocols = new string[] { EdgegapTransportProtocols.UDP.ToString() };
+                                _sceneTransportsData.Add(transportName, (internalPort, protocols));
+                                break;
+                            }
+                        case "Bayou":
+                            {
+                                protocols = new string[] { EdgegapTransportProtocols.WS.ToString(), EdgegapTransportProtocols.WSS.ToString() };
+                                _sceneTransportsData.Add(transportName, (internalPort, protocols));
+                                break;
+                            }
+                        case "FishyUnityTransport": 
+                            {
+                                protocols = new string[] { EdgegapTransportProtocols.UDP.ToString(), EdgegapTransportProtocols.WS.ToString(), EdgegapTransportProtocols.WSS.ToString() };
+                                _sceneTransportsData.Add(transportName, (internalPort, protocols));
+                                break;
+                            }
+                        case "FishyWebRTC": 
+                            {
+                                protocols = new string[] { EdgegapTransportProtocols.UDP.ToString() };
+                                _sceneTransportsData.Add(transportName, (internalPort, protocols));
+                                break; 
+                            }
+                        case "FishyRealtime": 
+                            {
+                                protocols = new string[] { EdgegapTransportProtocols.UDP.ToString(), EdgegapTransportProtocols.WS.ToString(), EdgegapTransportProtocols.WSS.ToString() };
+                                _sceneTransportsData.Add(transportName, (internalPort, protocols));
+                                break;
+                            }
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<string, (ushort InternalPort, string[] Protocols)> transportEntry in _sceneTransportsData)
+            {
+                string portsMappingMatchKey = null;
+
+                foreach (KeyValuePair<string, PortMappingData> portMapEntry in _arbitriumPortsMapping.ports)
+                {
+                    if (portMapEntry.Value.name == transportEntry.Key)
+                    {
+                        portsMappingMatchKey = portMapEntry.Key;
+                        break;
+                    }
+                }
+
+                if (portsMappingMatchKey is null)
+                {
+                    Debug.LogWarning($"WARNING: No port mapping entry matches the name of {transportEntry.Key} transport.\n" +
+                        $"Make sure to include it in your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                }
+                else
+                {
+                    PortMappingData portMap = _arbitriumPortsMapping.ports[portsMappingMatchKey];
+
+                    if (portMap.internalPort != transportEntry.Value.InternalPort)
+                    {
+                        Debug.LogWarning($"WARNING: The internal port values of the app version and the {transportEntry.Key} transport do not match.\n" +
+                            $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                    }
+
+                    if (!transportEntry.Value.Protocols.Contains(portMap.protocol))
+                    {
+                        string expectedProtocol;
+
+                        if (transportEntry.Value.Protocols.Length > 1)
+                        {
+                            expectedProtocol = $"either of the ";
+
+                            for (int i = 0; i < transportEntry.Value.Protocols.Length; ++i)
+                            {
+                                if (i == transportEntry.Value.Protocols.Length - 1)
+                                {
+                                    expectedProtocol += $"or {transportEntry.Value.Protocols[i]} protocols";
+                                }
+                                else
+                                {
+                                    expectedProtocol += $"{transportEntry.Value.Protocols[i]}, ";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            expectedProtocol = $"the {transportEntry.Value.Protocols[0]} protocol";
+                        }
+
+                        Debug.LogWarning($"WARNING: The wrong protocol has been selected in your app version's port mapping. " +
+                            $"The {transportEntry.Key} transport uses {expectedProtocol}.\n" +
+                            $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                    }
+                }
+            }
+            
+        }
+    }
+}
