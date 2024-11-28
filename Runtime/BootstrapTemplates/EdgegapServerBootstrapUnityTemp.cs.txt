@@ -1,0 +1,86 @@
+using Edgegap.Editor;
+using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Unity.Netcode.Transports.UTP;
+
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private (string Host, ushort InternalPort, string Protocol) _sceneTransportData;
+
+#if UNITY_EDITOR
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void AddBootstrapToScene()
+        {
+            string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
+
+            if (GameObject.Find(BootstrapObjectName) is null && File.Exists(assetFolderScriptPath))
+            {
+                GameObject bootstrapObj = new GameObject(BootstrapObjectName);
+                bootstrapObj.AddComponent(typeof(#SCRIPTNAME#));
+                EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+
+                Instance = bootstrapObj.GetComponent(typeof(#SCRIPTNAME#)) as EdgegapServerBootstrap;
+            }
+        }
+#endif
+
+        protected override void ValidatePortMapping()
+        {
+            UnityTransport transport = FindObjectOfType<UnityTransport>();
+            _sceneTransportData = (transport.ConnectionData.Address, transport.ConnectionData.Port, "UDP");
+
+            if (_sceneTransportData.Host != "127.0.0.1")
+            {
+                Debug.LogWarning("WARNING: The server's Network Address has not been set properly in the Transport. " +
+                    "The expected value is \"127.0.0.1\".\n" +
+                    "Make sure to rebuild and re-containerize your server after updating your Transport.");
+            }
+
+            string portsMappingMatchKey = null;
+
+            foreach (KeyValuePair<string, PortMappingData> portMapEntry in _arbitriumPortsMapping.ports)
+            {
+                if (portMapEntry.Value.name == "UnityTransport")
+                {
+                    portsMappingMatchKey = portMapEntry.Key;
+                    break;
+                }
+            }
+
+            if (portsMappingMatchKey is null)
+            {
+                Debug.LogWarning($"WARNING: No port mapping entry matches the name of UnityTransport.\n" +
+                    $"Make sure to include it in your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+            }
+            else
+            {
+                PortMappingData portMap = _arbitriumPortsMapping.ports[portsMappingMatchKey];
+
+                if (portMap.internalPort != _sceneTransportData.InternalPort)
+                {
+                    Debug.LogWarning($"WARNING: The internal port values of the app version and the Unity Transport do not match.\n" +
+                        $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                }
+
+                if (portMap.protocol != _sceneTransportData.Protocol)
+                {
+                    Debug.LogWarning($"WARNING: The wrong protocol has been selected in your app version's port mapping. " +
+                        $"The Unity Transport uses the {_sceneTransportData.Protocol} protocol.\n" +
+                        $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                }
+            }
+        }
+    }
+}
