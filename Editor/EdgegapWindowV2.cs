@@ -1678,7 +1678,6 @@ namespace Edgegap.Editor
                             _createAppNameInput.value,
                             "/versions/create/",
                             $"?name={HttpUtility.UrlEncode(_serverImageTagInput.value)}",
-                            $"&registry={HttpUtility.UrlEncode(_containerRegistryUrl)}",
                             $"&imageRepo={HttpUtility.UrlEncode(imageRepo)}",
                             $"&dockerTag={HttpUtility.UrlEncode(tag)}",
                             $"&vCPU=1",
