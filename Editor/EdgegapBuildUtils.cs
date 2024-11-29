@@ -150,9 +150,9 @@ namespace Edgegap
 #if UNITY_EDITOR_WIN
             await RunCommand("docker.exe", $"{runCommand} --name edgegap-server-test -d {extraParams} {image}",
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker {runCommand} --name edgegap-server-test {extraParams} {image}\"",
+            await RunCommand("/bin/bash", $"-c \"docker {runCommand} --name edgegap-server-test -d {extraParams} {image}\"",
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker {runCommand} --name edgegap-server-test {extraParams} {image}\"",
+            await RunCommand("/bin/bash", $"-c \"docker {runCommand} --name edgegap-server-test -d {extraParams} {image}\"",
 #endif
                 null,
                 (msg) =>
@@ -271,10 +271,11 @@ namespace Edgegap
                     onStatusUpdate(msg);
                 });
 
-            if(realErrorMessage != null)
+            if (realErrorMessage != null)
             {
                 throw new Exception(realErrorMessage);
-            } else if (!done)
+            }
+            else if (!done)
             {
                 throw new Exception("Couldn't complete containerization, see console log for details.");
             }
@@ -381,7 +382,7 @@ namespace Edgegap
 
         public static void UpdateEdgegapAppTag(string tag)
         {
-           // throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
 
         /// <summary>Run a Docker cmd with streaming log response. TODO: Plugin to other Docker cmds</summary>
@@ -404,13 +405,13 @@ namespace Edgegap
             try
             {
 #if UNITY_EDITOR_WIN
-            await RunCommand("cmd.exe", $"/c docker login -u \"{repoUsername}\" --password \"{repoPasswordToken}\" \"{registryUrl}\"", outputReciever, errorReciever);
+                await RunCommand("cmd.exe", $"/c docker login -u \"{repoUsername}\" --password \"{repoPasswordToken}\" \"{registryUrl}\"", outputReciever, errorReciever);
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker login -u \"{repoUsername}\" --password \"{repoPasswordToken}\" \"{registryUrl}\"\"", outputReciever, errorReciever);
+                await RunCommand("/bin/bash", $"-c \"docker login -u '{repoUsername}' --password '{repoPasswordToken}' '{registryUrl}'\"", outputReciever, errorReciever);
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker login -u \"{repoUsername}\" --password \"{repoPasswordToken}\" \"{registryUrl}\"\"", outputReciever, errorReciever);
+                await RunCommand("/bin/bash", $"-c \"docker login -u '{repoUsername}' --password '{repoPasswordToken}' '{registryUrl}'\"", outputReciever, errorReciever);
 #else
-            Debug.LogError("The platform is not supported yet.");
+                Debug.LogError("The platform is not supported yet.");
 #endif
             }
             catch (Exception e)
