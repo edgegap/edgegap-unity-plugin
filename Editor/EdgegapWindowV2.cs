@@ -14,13 +14,9 @@ using Edgegap.Editor.Api.Models;
 using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
 using Edgegap.Codice.Utils;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEditor;
-using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 using Application = UnityEngine.Application;
 
@@ -1831,7 +1827,7 @@ namespace Edgegap.Editor
 
             try
             {
-                _storedAppVersions.Clear();
+                _storedAppVersions?.Clear();
                 await GetAppVersions();
             }
             catch (Exception e)
