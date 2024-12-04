@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using FishNet.Transporting;
 
 #if UNITY_EDITOR
+using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
 
@@ -20,6 +21,17 @@ namespace Edgegap.Bootstrap
 
 #if UNITY_EDITOR
         [UnityEditor.Callbacks.DidReloadScripts]
+        private static void AwaitCompileDone()
+        {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+            {
+                EditorApplication.delayCall += AwaitCompileDone;
+                return;
+            }
+
+            EditorApplication.delayCall += AddBootstrapToScene;
+        }
+
         private static void AddBootstrapToScene()
         {
             string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
