@@ -111,8 +111,8 @@ namespace Edgegap.Bootstrap
 
                 if (portsMappingMatchKey is null)
                 {
-                    Debug.LogWarning($"WARNING: No port mapping entry matches the name of {transportEntry.Key} transport.\n" +
-                        $"Make sure to include it in your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                    Debug.LogWarning($"WARNING: No port mapping entry matches the name of the \"{transportEntry.Key}\" transport.\n" +
+                        $"Make sure to update your app version to include an entry named \"{transportEntry.Key}\".\n{APP_VERSION_PAGE}");
                 }
                 else
                 {
