@@ -134,7 +134,6 @@ namespace Edgegap.Editor
         {
             Fishnet,
             Mirror,
-            Fusion,
             Unity
         }
 
