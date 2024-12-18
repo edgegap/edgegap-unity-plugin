@@ -2452,11 +2452,11 @@ namespace Edgegap.Editor
 
             if (anchorIndex > 0) 
             {
-                UTMpath = path.Insert(anchorIndex, $"{path.Contains("?") ? "&" : "?"}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}");
+                UTMpath = path.Insert(anchorIndex, $"{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}");
             }
             else
             {
-                UTMpath = path + $"{path.Contains("?") ? "&" : "?"}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
+                UTMpath = path + $"{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
             }
 
             Application.OpenURL($"{EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL}{UTMpath}");
