@@ -2456,7 +2456,7 @@ namespace Edgegap.Editor
             }
             else
             {
-                UTMpath = path + $"{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
+                UTMpath = $"{path}{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
             }
 
             Application.OpenURL($"{EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL}{UTMpath}");
