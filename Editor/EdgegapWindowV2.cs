@@ -13,6 +13,7 @@ using Edgegap.Editor.Api.Models;
 using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
 using Edgegap.Codice.Utils;
+using HttpUtility = Edgegap.Codice.Utils.HttpUtility; // MIRROR CHANGE for Unity 2023 support
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
