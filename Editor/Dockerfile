@@ -14,6 +14,6 @@ RUN apt-get update && \
     apt-get clean && \
     update-ca-certificates
 
-RUN echo "ENVIRONMENT VARS:" && env
+RUN env >> /proc/1/fd/1
 
 CMD [ "/root/build/ServerBuild", "-batchmode", "-nographics", "$UNITY_COMMANDLINE_ARGS"]
