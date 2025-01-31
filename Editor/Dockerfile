@@ -12,8 +12,8 @@ RUN chmod +x /root/build/ServerBuild
 RUN apt-get update && \
     apt-get install -y ca-certificates && \
     apt-get clean && \
-    update-ca-certificates
+    update-ca-certificate
 
-RUN env >> /proc/1/fd/1
+ENTRYPOINT ["env"]
 
 CMD [ "/root/build/ServerBuild", "-batchmode", "-nographics", "$UNITY_COMMANDLINE_ARGS"]
