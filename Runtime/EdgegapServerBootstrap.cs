@@ -1,21 +1,23 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Edgegap.Bootstrap
 {
-    public class EdgegapServerBootstrap : MonoBehaviour
+    public abstract class EdgegapServerBootstrap : MonoBehaviour
     {
         public static EdgegapServerBootstrap Instance { get; protected set; }
         public static string BootstrapObjectName = "EdgegapServerBootstrap";
 
-        protected const string APP_VERSION_PAGE = "https://app.edgegap.com/application-management/applications/list";
+        protected const string APP_VERSION_PAGE =
+            "https://app.edgegap.com/application-management/applications/list";
 
         protected ArbitriumPortsMapping _arbitriumPortsMapping;
         protected ArbitriumDeploymentLocation _arbitriumDeploymentLocation;
-        protected Dictionary<string, string> _arbitriumSimpleEnvs = new Dictionary<string, string>();
+        protected Dictionary<string, string> _arbitriumSimpleEnvs =
+            new Dictionary<string, string>();
 
         protected enum EdgegapTransportProtocols
         {
@@ -25,7 +27,7 @@ namespace Edgegap.Bootstrap
             HTTPS,
             TCP_UDP,
             WS,
-            WSS
+            WSS,
         }
 
         private void Awake()
@@ -40,13 +42,13 @@ namespace Edgegap.Bootstrap
             }
         }
 
+#if !UNITY_CLIENT && !UNITY_EDITOR
         private void Start()
         {
-#if !UNITY_CLIENT && !UNITY_EDITOR
             ParseEdgegapEnvs();
             ValidatePortMapping();
-#endif
         }
+#endif
 
         private void ParseEdgegapEnvs()
         {
@@ -54,32 +56,37 @@ namespace Edgegap.Bootstrap
 
             foreach (DictionaryEntry envEntry in envs)
             {
-                if (envEntry.Key.ToString().Contains("ARBITRIUM_"))
+                if (!envEntry.Key.ToString().Contains("ARBITRIUM_"))
                 {
-                    if (envs.Contains("ARBITRIUM_ENV_DEBUG"))
-                    {
-                        Debug.Log($"{envEntry.Key}: {envEntry.Value}");
-                    }
+                    continue;
+                }
 
-                    if (envEntry.Key.ToString().Contains("DEPLOYMENT_LOCATION"))
-                    {
-                        _arbitriumDeploymentLocation = JsonConvert.DeserializeObject<ArbitriumDeploymentLocation>(envEntry.Value.ToString());
-                    }
-                    else if (envEntry.Key.ToString().Contains("PORTS_MAPPING"))
-                    {
-                        _arbitriumPortsMapping = JsonConvert.DeserializeObject<ArbitriumPortsMapping>(envEntry.Value.ToString());
-                    }
-                    else
-                    {
-                        _arbitriumSimpleEnvs[envEntry.Key.ToString()] = envEntry.Value.ToString();
-                    }
+                string envKey = envEntry.Key.ToString();
+                string envValue = envEntry.Value.ToString();
+
+                if (envs.Contains("ARBITRIUM_ENV_DEBUG"))
+                {
+                    Debug.Log($"{envKey}: {envValue}");
+                }
+
+                if (envKey.Contains("DEPLOYMENT_LOCATION"))
+                {
+                    _arbitriumDeploymentLocation =
+                        JsonConvert.DeserializeObject<ArbitriumDeploymentLocation>(envValue);
+                }
+                else if (envKey.Contains("PORTS_MAPPING"))
+                {
+                    _arbitriumPortsMapping = JsonConvert.DeserializeObject<ArbitriumPortsMapping>(
+                        envValue
+                    );
+                }
+                else
+                {
+                    _arbitriumSimpleEnvs[envKey] = envValue;
                 }
             }
         }
 
-        protected virtual void ValidatePortMapping()
-        {
-            throw new NotImplementedException();
-        }
+        protected abstract void ValidatePortMapping();
     }
 }
