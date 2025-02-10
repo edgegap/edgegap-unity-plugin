@@ -347,7 +347,6 @@ namespace Edgegap.Editor
                 EdgegapWindowMetadata.BOOTSTRAP_NETCODE_DROPDOWN_BTN_ID
             );
 
-
             _containerizeFoldout = rootVisualElement.Q<Foldout>(
                 EdgegapWindowMetadata.CONTAINERIZE_SERVER_FOLDOUT_ID
             );
@@ -1037,14 +1036,13 @@ namespace Edgegap.Editor
 
         private void OnBootstrapNetcodeDropdownClick()
         {
-            List<string> netcodes = Enum.GetValues(typeof(EdgegapWindowMetadata.Netcodes)).Cast<EdgegapWindowMetadata.Netcodes>().Select(v => v.ToString()).ToList();
+            List<string> netcodes = Enum.GetValues(typeof(EdgegapWindowMetadata.Netcodes))
+                .Cast<EdgegapWindowMetadata.Netcodes>()
+                .Select(v => v.ToString())
+                .ToList();
             UnityEditor.PopupWindow.Show(
                 _bootstrapNetcodeShowDropdownBtn.worldBound,
-                new CustomPopupContent(
-                    netcodes,
-                    OnDropdownBootstrapNetcodeSelect,
-                    ""
-                )
+                new CustomPopupContent(netcodes, OnDropdownBootstrapNetcodeSelect, "")
             );
         }
 
