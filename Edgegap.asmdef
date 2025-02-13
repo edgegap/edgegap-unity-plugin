@@ -1,7 +1,9 @@
 {
     "name": "Edgegap",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:02d6592ab05a444498a83be4f8722ca2"
+    ],
     "includePlatforms": [
         "Editor"
     ],
