@@ -9,7 +9,6 @@ namespace Edgegap.Bootstrap
     public abstract class EdgegapServerBootstrap : MonoBehaviour
     {
         public static EdgegapServerBootstrap Instance { get; protected set; }
-        public static string BootstrapObjectName = "EdgegapServerBootstrap";
 
         protected const string APP_VERSION_PAGE =
             "https://app.edgegap.com/application-management/applications/list";

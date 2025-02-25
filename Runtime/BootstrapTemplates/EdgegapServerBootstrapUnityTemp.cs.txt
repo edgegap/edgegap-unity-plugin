@@ -11,6 +11,7 @@ using Unity.Netcode.Transports.UTP;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using Edgegap.Editor;
 #endif
 
 namespace Edgegap.Bootstrap
@@ -34,11 +35,11 @@ namespace Edgegap.Bootstrap
 
         private static void AddBootstrapToScene()
         {
-            string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
+            string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
 
-            if (GameObject.Find(BootstrapObjectName) is null && File.Exists(assetFolderScriptPath))
+            if (GameObject.Find(EdgegapServerBootstrapMenu.BootstrapObjectName) is null && File.Exists(assetFolderScriptPath))
             {
-                GameObject bootstrapObj = new GameObject(BootstrapObjectName);
+                GameObject bootstrapObj = new GameObject(EdgegapServerBootstrapMenu.BootstrapObjectName);
                 bootstrapObj.AddComponent(typeof(#SCRIPTNAME#));
                 EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
 
