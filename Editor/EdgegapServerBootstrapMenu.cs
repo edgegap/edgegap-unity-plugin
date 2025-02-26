@@ -27,12 +27,6 @@ namespace Edgegap.Editor
         [MenuItem("Assets/Create/Edgegap/Server Bootstrap", priority = 35)]
         public static void InstantiateEdgegapBootstrap()
         {
-            if (GameObject.Find(BootstrapObjectName) is not null)
-            {
-                Debug.Log("Edgegap Server Bootstrap is already present in the scene.");
-                return;
-            }
-
             string netcode = EditorPrefs.GetString(EdgegapWindowMetadata.SELECTED_NETCODE_KEY_STR);
 
             if (string.IsNullOrEmpty(netcode))
@@ -43,8 +37,31 @@ namespace Edgegap.Editor
                 return;
             }
 
+            GameObject bootstrapInScene = GameObject.Find(BootstrapObjectName);
+
+            if (bootstrapInScene is not null)
+            {
+                Component bootstrapComponent = bootstrapInScene.GetComponents<Component>()[1];
+                string bootstrapType = bootstrapComponent.GetType().ToString();
+
+                if (bootstrapType.Contains(netcode))
+                {
+                    Debug.Log(
+                        $"Edgegap Server {netcode} Bootstrap is already present in the scene."
+                    );
+                    return;
+                }
+
+                // Delete gameObject + old bootstrap script
+                string scriptName = bootstrapType.Split(".")[2];
+                bool success = AssetDatabase.DeleteAsset(
+                    $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}{scriptName}.cs"
+                );
+                UnityEngine.Object.DestroyImmediate(bootstrapInScene);
+            }
+
             string assetBootstrapFolderPath =
-                $"{ProjectRootPath}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}/EdgegapServerBootstrap";
+                $"{ProjectRootPath}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap";
 
             if (!Directory.Exists(assetBootstrapFolderPath))
             {
@@ -81,10 +98,8 @@ namespace Edgegap.Editor
             // Initialize each required API models
             foreach (string model in BootstrapModels)
             {
-                string modelBootstrapAssetFolderPath =
-                    $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}Models";
                 string modelBootstrapFullInitPath =
-                    $"{ProjectRootPath}{Path.DirectorySeparatorChar}{modelBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{model}.cs";
+                    $"{ProjectRootPath}{Path.DirectorySeparatorChar}{baseBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{model}.cs";
 
                 if (!File.Exists(modelBootstrapFullInitPath))
                 {
@@ -95,7 +110,7 @@ namespace Edgegap.Editor
                         !InitTemplateScript(
                             modelTempScriptPath,
                             model,
-                            modelBootstrapAssetFolderPath
+                            baseBootstrapAssetFolderPath
                         )
                     )
                     {
