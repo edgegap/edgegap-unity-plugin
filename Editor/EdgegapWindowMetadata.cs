@@ -132,6 +132,7 @@ namespace Edgegap.Editor
 
         public enum Netcodes
         {
+            Custom,
             Fishnet,
             Mirror,
             Unity

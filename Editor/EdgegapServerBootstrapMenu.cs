@@ -36,6 +36,13 @@ namespace Edgegap.Editor
                 );
                 return;
             }
+            else if (netcode == EdgegapWindowMetadata.Netcodes.Custom.ToString())
+            {
+                Debug.Log(
+                    "Custom netcode selected; For information on netcodes not yet supported by the server bootstrap, contact the Edgegap support team."
+                );
+                return;
+            }
 
             GameObject bootstrapInScene = GameObject.Find(BootstrapObjectName);
 
@@ -54,9 +61,11 @@ namespace Edgegap.Editor
 
                 // Delete gameObject + old bootstrap script
                 string scriptName = bootstrapType.Split(".")[2];
+
                 bool success = AssetDatabase.DeleteAsset(
                     $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}{scriptName}.cs"
                 );
+
                 UnityEngine.Object.DestroyImmediate(bootstrapInScene);
             }
 
@@ -70,8 +79,10 @@ namespace Edgegap.Editor
 
             // Initialize base bootstrap script
             string baseBootstrapInitScriptName = "EdgegapServerBootstrap";
+
             string baseBootstrapAssetFolderPath =
                 $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap";
+
             string baseBootstrapFullInitPath =
                 $"{ProjectRootPath}{Path.DirectorySeparatorChar}{baseBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{baseBootstrapInitScriptName}.cs";
 
@@ -80,19 +91,11 @@ namespace Edgegap.Editor
                 string baseTempScriptPath =
                     $"{EdgegapBootstrapRuntimeFolderPath}{Path.DirectorySeparatorChar}EdgegapServerBootstrapTemp.cs.txt";
 
-                if (
-                    !InitTemplateScript(
-                        baseTempScriptPath,
-                        baseBootstrapInitScriptName,
-                        baseBootstrapAssetFolderPath
-                    )
-                )
-                {
-                    Debug.LogWarning(
-                        $"Template not found, could not initialize base bootstrap script."
-                    );
-                    return;
-                }
+                InitTemplateScript(
+                    baseTempScriptPath,
+                    baseBootstrapInitScriptName,
+                    baseBootstrapAssetFolderPath
+                );
             }
 
             // Initialize each required API models
@@ -106,26 +109,16 @@ namespace Edgegap.Editor
                     string modelTempScriptPath =
                         $"{EdgegapBootstrapRuntimeFolderPath}{Path.DirectorySeparatorChar}Models{Path.DirectorySeparatorChar}{model}Temp.cs.txt";
 
-                    if (
-                        !InitTemplateScript(
-                            modelTempScriptPath,
-                            model,
-                            baseBootstrapAssetFolderPath
-                        )
-                    )
-                    {
-                        Debug.LogWarning(
-                            $"Template not found, could not initialize {model} model script."
-                        );
-                        return;
-                    }
+                    InitTemplateScript(modelTempScriptPath, model, baseBootstrapAssetFolderPath);
                 }
             }
 
             // Initialize netcode-specific bootstrap script
             string netcodeBootstrapScriptName = $"EdgegapServerBootstrap{netcode}";
+
             string netcodeBootstrapAssetFolderPath =
                 $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap";
+
             string netcodeBootstrapFullInitPath =
                 $"{ProjectRootPath}{Path.DirectorySeparatorChar}{netcodeBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{netcodeBootstrapScriptName}.cs";
 
@@ -134,19 +127,11 @@ namespace Edgegap.Editor
                 string netcodeBootstrapTempScriptPath =
                     $"{EdgegapBootstrapRuntimeFolderPath}{Path.DirectorySeparatorChar}BootstrapTemplates{Path.DirectorySeparatorChar}{netcodeBootstrapScriptName}Temp.cs.txt";
 
-                if (
-                    !InitTemplateScript(
-                        netcodeBootstrapTempScriptPath,
-                        netcodeBootstrapScriptName,
-                        netcodeBootstrapAssetFolderPath
-                    )
-                )
-                {
-                    Debug.LogWarning(
-                        $"Template not found, could not initialize {netcode} bootstrap script."
-                    );
-                    return;
-                }
+                InitTemplateScript(
+                    netcodeBootstrapTempScriptPath,
+                    netcodeBootstrapScriptName,
+                    netcodeBootstrapAssetFolderPath
+                );
 
                 Event recompileEvent = new Event();
                 recompileEvent.keyCode = KeyCode.Return;
@@ -166,7 +151,7 @@ namespace Edgegap.Editor
             }
         }
 
-        private static bool InitTemplateScript(
+        private static void InitTemplateScript(
             string tempScriptPath,
             string initScriptName,
             string initAssetPath
@@ -174,7 +159,9 @@ namespace Edgegap.Editor
         {
             if (!File.Exists(tempScriptPath))
             {
-                return false;
+                throw new Exception(
+                    "Template file not found; Contact the Edgegap support team about a plugin fix."
+                );
             }
 
             UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath(
@@ -196,8 +183,6 @@ namespace Edgegap.Editor
                 )
                 .Invoke(null, new object[] { tempScriptPath, $"{initScriptName}.cs" });
 #endif
-
-            return true;
         }
     }
 }
