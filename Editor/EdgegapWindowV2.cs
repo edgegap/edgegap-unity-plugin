@@ -13,6 +13,7 @@ using Edgegap.Editor.Api.Models;
 using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
 using Edgegap.Codice.Utils;
+using HttpUtility = Edgegap.Codice.Utils.HttpUtility; // MIRROR CHANGE for Unity 2023 support
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -2445,9 +2446,22 @@ namespace Edgegap.Editor
                 $"{URL}{(URL.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}"
             );
 
-        private void OpenEdgegapDocsURL(string path) =>
-            // TODO: append "?{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}"
-            Application.OpenURL($"{EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL}{path}");
+        private void OpenEdgegapDocsURL(string path)
+        {
+            string UTMpath;
+            int anchorIndex = path.IndexOf("#");
+
+            if (anchorIndex > 0) 
+            {
+                UTMpath = path.Insert(anchorIndex, $"{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}");
+            }
+            else
+            {
+                UTMpath = $"{path}{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
+            }
+
+            Application.OpenURL($"{EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL}{UTMpath}");
+        }
         #endregion
 
         #region Utility / HTTP
