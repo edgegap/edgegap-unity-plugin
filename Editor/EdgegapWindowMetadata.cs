@@ -69,7 +69,7 @@ namespace Edgegap.Editor
         public const string LOCAL_TEST_CONNECT_INFO_PATH =
             "learn/unity-games/getting-started-with-servers#4-test-your-server-locally";
         public const string EDGEGAP_DOC_APP_INFO_PATH =
-            "learn/unity-games/getting-started-with-servers#5-create-an-edgegap-application";
+            "learn/unity-games/getting-started-with-servers#5-upload-to-edgegap";
         public const string EDGEGAP_CREATE_APP_BASE_URL =
             "https://app.edgegap.com/application-management/applications/";
         public const string EDGEGAP_DOC_DEPLOY_GUIDE_PATH =
