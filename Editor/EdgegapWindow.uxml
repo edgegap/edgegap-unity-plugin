@@ -45,6 +45,10 @@
                 <ui:VisualElement name="BuildFolderRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
                     <ui:TextField name="BuildFolderTxt" label="Build Folder Name" password="false" view-data-key="BuildFolderTxt" class="text-edgegap label-right-padding" />
                 </ui:VisualElement>
+                <ui:VisualElement name="BootstrapNetcodeRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
+                    <ui:TextField name="BootstrapNetcodeTxt" label="Netcode (optional, for Server Bootstrap)" password="false" view-data-key="BootstrapNetcodeTxt" readonly="true" class="text-edgegap label-right-padding" />
+                    <ui:Button name="BootstrapNetcodeDropdownBtn" text="▼" class="text-edgegap btn-show-dropdown" style="margin-left: 0; max-width: 250px; width: auto; min-width: auto;" />
+                </ui:VisualElement>
                 <ui:VisualElement name="ServerBuildClickRow" style="flex-grow: 1; flex-direction: row;">
                     <ui:Button name="ServerBuildBtn" text="Build server" class="button-edgegap text-edgegap" style="flex-direction: row; -unity-text-align: middle-center; margin-left: 0; max-width: 250px; min-width: 100px;" />
                     <ui:Label tabindex="-1" text="{ServerBuildResultLabel}" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ServerBuildResultLabel" class="text-edgegap" style="color: rgb(138, 238, 140); align-items: stretch; justify-content: flex-start; align-self: center;" />
