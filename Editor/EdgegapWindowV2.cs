@@ -45,7 +45,7 @@ namespace Edgegap.Editor
         public static bool IsLogLevelDebug =>
             EdgegapWindowMetadata.LOG_LEVEL == EdgegapWindowMetadata.LogLevel.Debug;
         private bool _isApiTokenVerified; // Toggles the rest of the UI
-        private bool _isVerifyingToken = false;
+        private bool _isVerifyingToken;
 
         private GetRegistryCredentialsResult _credentials;
         private string _userExternalIp;
@@ -777,12 +777,6 @@ namespace Edgegap.Editor
                 {
                     _isVerifyingToken = true;
                     VerifyApiToken();
-                    _isVerifyingToken = false;
-                }
-                else
-                {
-                    //takes locally stored value and continues as if it called the wizard API
-                    Debug.Log("Already verifying - focusOut");
                 }
             }
         }
@@ -793,12 +787,6 @@ namespace Edgegap.Editor
             {
                 _isVerifyingToken = true;
                 VerifyApiToken();
-                _isVerifyingToken = false;
-            }
-            else
-            {
-                //takes locally stored value and continues as if it called the wizard API
-                Debug.Log("Already verifying - btnClick");
             }
         }
 
@@ -834,6 +822,7 @@ namespace Edgegap.Editor
 
             _signOutBtn.SetEnabled(true);
             _isApiTokenVerified = initQuickStartResultCode.IsResultCode204;
+            _isVerifyingToken = false;
 
             if (!_isApiTokenVerified)
             {
@@ -2477,13 +2466,17 @@ namespace Edgegap.Editor
             string UTMpath;
             int anchorIndex = path.IndexOf("#");
 
-            if (anchorIndex > 0) 
+            if (anchorIndex > 0)
             {
-                UTMpath = path.Insert(anchorIndex, $"{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}");
+                UTMpath = path.Insert(
+                    anchorIndex,
+                    $"{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}"
+                );
             }
             else
             {
-                UTMpath = $"{path}{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
+                UTMpath =
+                    $"{path}{(path.Contains("?") ? "&" : "?")}{EdgegapWindowMetadata.DEFAULT_UTM_TAGS}";
             }
 
             Application.OpenURL($"{EdgegapWindowMetadata.EDGEGAP_DOC_BASE_URL}{UTMpath}");
