@@ -45,6 +45,7 @@ namespace Edgegap.Editor
         public static bool IsLogLevelDebug =>
             EdgegapWindowMetadata.LOG_LEVEL == EdgegapWindowMetadata.LogLevel.Debug;
         private bool _isApiTokenVerified; // Toggles the rest of the UI
+        private bool _isVerifyingToken = false;
 
         private GetRegistryCredentialsResult _credentials;
         private string _userExternalIp;
@@ -772,11 +773,36 @@ namespace Edgegap.Editor
             // Toggle "Verify" btn on 1+ char entered
             if (_apiToken.Length > 0)
             {
-                onApiTokenVerifyBtnClick();
+                if (!_isVerifyingToken)
+                {
+                    _isVerifyingToken = true;
+                    VerifyApiToken();
+                    _isVerifyingToken = false;
+                }
+                else
+                {
+                    //takes locally stored value and continues as if it called the wizard API
+                    Debug.Log("Already verifying - focusOut");
+                }
             }
         }
 
         private void onApiTokenVerifyBtnClick()
+        {
+            if (!_isVerifyingToken)
+            {
+                _isVerifyingToken = true;
+                VerifyApiToken();
+                _isVerifyingToken = false;
+            }
+            else
+            {
+                //takes locally stored value and continues as if it called the wizard API
+                Debug.Log("Already verifying - btnClick");
+            }
+        }
+
+        private void VerifyApiToken()
         {
             ResetState();
             initToggleDynamicUI();
