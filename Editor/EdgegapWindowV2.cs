@@ -766,18 +766,13 @@ namespace Edgegap.Editor
         {
             _apiTokenInput.isPasswordField = true;
 
-            if (!_isVerifyingToken)
+            if (!_isVerifyingToken && _apiToken.Length > 0)
             {
+                _isVerifyingToken = true;
                 _isApiTokenVerified = false;
                 _postAuthContainer.SetEnabled(false);
                 closeDisableGroups();
-
-                // Toggle "Verify" btn on 1+ char entered
-                if (_apiToken.Length > 0)
-                {
-                    _isVerifyingToken = true;
-                    VerifyApiToken();
-                }
+                VerifyApiToken();
             }
         }
 
@@ -809,7 +804,6 @@ namespace Edgegap.Editor
             // Disable most ui while we verify
             _isApiTokenVerified = false;
             _signOutBtn.SetEnabled(false);
-            _apiTokenVerifyBtn.SetEnabled(false);
             UpdateUI();
             hideResultLabels();
 
@@ -822,12 +816,11 @@ namespace Edgegap.Editor
 
             _signOutBtn.SetEnabled(true);
             _isApiTokenVerified = initQuickStartResultCode.IsResultCode204;
+            _isVerifyingToken = false;
 
             if (!_isApiTokenVerified)
             {
                 UpdateUI();
-                _isVerifyingToken = false;
-                _apiTokenVerifyBtn.SetEnabled(true);
                 return;
             }
 
@@ -865,8 +858,6 @@ namespace Edgegap.Editor
 
             // Unlock the rest of the form, whether we prefill the container registry or not
             UpdateUI();
-            _isVerifyingToken = false;
-            _apiTokenVerifyBtn.SetEnabled(true);
         }
 
         /// <summary>
