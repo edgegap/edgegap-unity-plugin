@@ -1518,7 +1518,7 @@ namespace Edgegap.Editor
             string appName = Tokenize(name);
             _createAppNameInput.value = appName;
             _uploadImageCreateAppBtn.SetEnabled(CheckFilledCreateAppInputs());
-            _rebuildFromSrcBtn.SetEnabled(_createAppNameInput.value.Length > 0);
+            _rebuildFromSrcBtn.SetEnabled(!string.IsNullOrEmpty(_createAppNameInput.value));
             _serverImageNameInput.Focus();
         }
 
