@@ -158,6 +158,7 @@ namespace Edgegap.Editor
         private Button _uploadImageCreateAppBtn;
         private Button _appInfoLabelLink;
         private Button _createAppNameShowDropdownBtn;
+        private Button _rebuildFromSrcBtn;
         #endregion
 
         #region UI / Deploy
@@ -446,6 +447,9 @@ namespace Edgegap.Editor
             _appInfoLabelLink = rootVisualElement.Q<Button>(
                 EdgegapWindowMetadata.EDGEGAP_APP_LABEL_LINK_ID
             );
+            _rebuildFromSrcBtn = rootVisualElement.Q<Button>(
+                EdgegapWindowMetadata.REBUILD_FROM_SRC_BTN_ID
+            );
 
             _deployAppFoldout = rootVisualElement.Q<Foldout>(
                 EdgegapWindowMetadata.DEPLOY_APP_FOLDOUT_ID
@@ -550,7 +554,7 @@ namespace Edgegap.Editor
             );
             _dockerfilePathResetBtn.clickable.clicked += OnResetDockerfilePathBtnClick;
             _dockerfilePathInput.RegisterCallback<FocusInEvent>(OnDockerfilePathInputFocusIn);
-            _containerizeServerBtn.clickable.clicked += OnContainerizeBtnClickAsync;
+            _containerizeServerBtn.clickable.clicked += OnContainerizeBtnClick;
 
             _localTestImageInput.RegisterValueChangedCallback(OnLocalTestInputsChanged);
             _localTestImageShowDropdownBtn.clickable.clicked += OnLocalTestImageDropdownClick;
@@ -568,8 +572,9 @@ namespace Edgegap.Editor
             _serverImageNameInput.RegisterValueChangedCallback(OnCreateInputsChanged);
             _serverImageTagInput.RegisterValueChangedCallback(OnCreateInputsChanged);
             _portMappingLabelLink.clickable.clicked += OnPortsMappingLinkClick;
-            _uploadImageCreateAppBtn.clickable.clicked += OnUploadImageCreateAppBtnClickAsync;
+            _uploadImageCreateAppBtn.clickable.clicked += OnUploadImageCreateAppBtnClick;
             _appInfoLabelLink.clickable.clicked += OnYourAppLinkClick;
+            _rebuildFromSrcBtn.clickable.clicked += OnRebuildFromSrcBtnClickAsync;
 
             _deployAppNameInput.RegisterCallback<FocusInEvent>(OnDeployAppNameInputFocusIn);
             _deployAppNameInput.RegisterValueChangedCallback(OnDeployAppNameInputChanged);
@@ -631,7 +636,7 @@ namespace Edgegap.Editor
             );
             _dockerfilePathResetBtn.clickable.clicked -= OnResetDockerfilePathBtnClick;
             _dockerfilePathInput.UnregisterCallback<FocusInEvent>(OnDockerfilePathInputFocusIn);
-            _containerizeServerBtn.clickable.clicked -= OnContainerizeBtnClickAsync;
+            _containerizeServerBtn.clickable.clicked -= OnContainerizeBtnClick;
 
             _localTestImageInput.UnregisterCallback<FocusInEvent>(OnLocalTestInputFocusIn);
             _localTestImageInput.UnregisterValueChangedCallback(OnLocalTestInputsChanged);
@@ -649,8 +654,9 @@ namespace Edgegap.Editor
             _serverImageNameInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
             _serverImageTagInput.UnregisterValueChangedCallback(OnCreateInputsChanged);
             _portMappingLabelLink.clickable.clicked -= OnPortsMappingLinkClick;
-            _uploadImageCreateAppBtn.clickable.clicked -= OnUploadImageCreateAppBtnClickAsync;
+            _uploadImageCreateAppBtn.clickable.clicked -= OnUploadImageCreateAppBtnClick;
             _appInfoLabelLink.clickable.clicked -= OnYourAppLinkClick;
+            _rebuildFromSrcBtn.clickable.clicked -= OnRebuildFromSrcBtnClickAsync;
 
             _deployAppNameInput.UnregisterCallback<FocusInEvent>(OnDeployAppNameInputFocusIn);
             _deployAppNameInput.UnregisterValueChangedCallback(OnDeployAppNameInputChanged);
@@ -1243,7 +1249,12 @@ namespace Edgegap.Editor
         /// "Containerize with Docker" btn click
         /// Process UI + validation before/after API logic
         /// </summary>
-        private async void OnContainerizeBtnClickAsync()
+        private void OnContainerizeBtnClick()
+        {
+            _ = ContainerizeServerAsync();
+        }
+
+        private async Task ContainerizeServerAsync()
         {
             if (!string.IsNullOrEmpty(await ValidateDockerRequirement()))
             {
@@ -1555,6 +1566,8 @@ namespace Edgegap.Editor
         {
             string appName = Tokenize(name);
             _createAppNameInput.value = appName;
+            _uploadImageCreateAppBtn.SetEnabled(CheckFilledCreateAppInputs());
+            _rebuildFromSrcBtn.SetEnabled(!string.IsNullOrEmpty(_createAppNameInput.value));
             _serverImageNameInput.Focus();
         }
 
@@ -1566,7 +1579,9 @@ namespace Edgegap.Editor
         private void OnCreateAppNameInputFocusOut(FocusOutEvent evt)
         {
             // Validate: Only allow alphanumeric, underscore, dash, plus, period
-            if (!_appNameAllowedCharsRegex.IsMatch(_createAppNameInput.value))
+            bool validAppName = _appNameAllowedCharsRegex.IsMatch(_createAppNameInput.value);
+            
+            if (!validAppName)
             {
                 ShowErrorDialog(
                     "Your app name contains invalid characters. Only characters [a-zA-Z0-9_-+.] are allowed."
@@ -1574,6 +1589,10 @@ namespace Edgegap.Editor
             }
 
             _uploadImageCreateAppBtn.SetEnabled(CheckFilledCreateAppInputs());
+            _rebuildFromSrcBtn.SetEnabled(
+                validAppName
+                && !string.IsNullOrEmpty(_createAppNameInput.value)
+            );
         }
 
         /// <summary>
@@ -1599,11 +1618,17 @@ namespace Edgegap.Editor
         /// "Upload image and Create app version" btn click
         /// Process UI + validation before/after API logic
         /// </summary>
-        private async void OnUploadImageCreateAppBtnClickAsync()
+        private void OnUploadImageCreateAppBtnClick()
+        {
+            _ = UploadImageCreateAppAsync();
+        }
+
+        private async Task UploadImageCreateAppAsync()
         {
             try
             {
                 _uploadImageCreateAppBtn.SetEnabled(false);
+                _rebuildFromSrcBtn.SetEnabled(false);
                 hideResultLabels();
 
                 // upload image
@@ -1715,6 +1740,7 @@ namespace Edgegap.Editor
             {
                 EditorUtility.ClearProgressBar();
                 _uploadImageCreateAppBtn.SetEnabled(true);
+                _rebuildFromSrcBtn.SetEnabled(true);
             }
         }
 
@@ -1738,6 +1764,42 @@ namespace Edgegap.Editor
 
         private void OnYourAppLinkClick() =>
             OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_APP_INFO_PATH);
+
+        private async void OnRebuildFromSrcBtnClickAsync()
+        {
+            hideResultLabels();
+
+            //Build
+            OnBuildServerBtnClick();
+
+            if (_serverBuildResultLabel.text.Contains(EdgegapWindowMetadata.FAIL_COLOR_HEX))
+            {
+                _serverBuildFoldout.SetValueWithoutNotify(true);
+                return;
+            }
+
+            //Containerize
+            if (_containerizeImageTagInput.value.ToString() != _containerizeImageTagInputDefault)
+            {
+                _containerizeImageTagInput.SetValueWithoutNotify(_containerizeImageTagInputDefault);
+            }
+
+            await ContainerizeServerAsync();
+
+            if (
+                _containerizeServerResultLabel.text.Contains(EdgegapWindowMetadata.FAIL_COLOR_HEX)
+                || _dockerRequirementsResultLabel.text.Contains(
+                    EdgegapWindowMetadata.FAIL_COLOR_HEX
+                )
+            )
+            {
+                _containerizeFoldout.SetValueWithoutNotify(true);
+                return;
+            }
+
+            //Upload
+            await UploadImageCreateAppAsync();
+        }
         #endregion
 
         #region Fns / Deploy

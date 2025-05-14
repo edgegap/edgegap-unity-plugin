@@ -225,6 +225,7 @@ namespace Edgegap.Editor
         public const string PORT_MAPPING_LABEL_LINK_ID = "PortMappingLink";
         public const string PUSH_IMAGE_CREATE_APP_BTN_ID = "ImagePushAppCreateBtn";
         public const string EDGEGAP_APP_LABEL_LINK_ID = "EdgegapAppLink";
+        public const string REBUILD_FROM_SRC_BTN_ID = "RebuildFromSrcBtn";
 
         //6. Deploy a server on Edgegap
         public const string DEPLOY_APP_FOLDOUT_ID = "ServerDeploymentFoldout";
