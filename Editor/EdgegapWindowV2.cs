@@ -1540,7 +1540,10 @@ namespace Edgegap.Editor
             }
 
             _uploadImageCreateAppBtn.SetEnabled(CheckFilledCreateAppInputs());
-            _rebuildFromSrcBtn.SetEnabled(validAppName && _createAppNameInput.value.Length > 0);
+            _rebuildFromSrcBtn.SetEnabled(
+                validAppName
+                && !string.IsNullOrEmpty(_createAppNameInput.value)
+            );
         }
 
         /// <summary>
