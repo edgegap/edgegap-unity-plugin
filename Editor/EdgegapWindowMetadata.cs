@@ -135,6 +135,7 @@ namespace Edgegap.Editor
             Custom,
             Fishnet,
             Mirror,
+            Fusion,
             Unity
         }
 

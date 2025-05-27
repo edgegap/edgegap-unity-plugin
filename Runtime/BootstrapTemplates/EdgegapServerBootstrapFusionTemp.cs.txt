@@ -1,0 +1,101 @@
+using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using Edgegap.Editor;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private (NetAddress Address, string Protocol) _sceneTransportData;
+
+#if UNITY_EDITOR
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void AwaitCompileDone()
+        {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+            {
+                EditorApplication.delayCall += AwaitCompileDone;
+                return;
+            }
+
+            EditorApplication.delayCall += AddBootstrapToScene;
+        }
+
+        private static void AddBootstrapToScene()
+        {
+            string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
+
+            if (GameObject.Find(EdgegapServerBootstrapMenu.BootstrapObjectName) is null && File.Exists(assetFolderScriptPath))
+            {
+                GameObject bootstrapObj = new GameObject(EdgegapServerBootstrapMenu.BootstrapObjectName);
+                bootstrapObj.AddComponent(typeof(#SCRIPTNAME#));
+                EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+
+                Instance = bootstrapObj.GetComponent(typeof(#SCRIPTNAME#)) as EdgegapServerBootstrap;
+            }
+        }
+#endif
+
+        protected override void ValidatePortMapping()
+        {
+            NetworkRunner runnerInstance = FindFirstObjectByType<NetworkRunner>();
+            _sceneTransportData = (runnerInstance.LocalAddress, "UDP");
+            string portsMappingMatchKey = null;
+
+            foreach (
+                KeyValuePair<string, PortMappingData> portMapEntry in _arbitriumPortsMapping.ports
+            )
+            {
+                if (portMapEntry.Value.name.Contains("Fusion"))
+                {
+                    portsMappingMatchKey = portMapEntry.Key;
+                    break;
+                }
+            }
+
+            if (portsMappingMatchKey is null)
+            {
+                Debug.LogWarning(
+                    $"WARNING: No port mapping entry matches the name of \"Fusion\".\n"
+                        + $"Make sure to update your app version to include an entry whose name contains \"Fusion\".\n{APP_VERSION_PAGE}"
+                );
+            }
+            else
+            {
+                PortMappingData portMap = _arbitriumPortsMapping.ports[portsMappingMatchKey];
+
+                if (
+                    !_sceneTransportData.Address.Equals(
+                        NetAddress.Any((ushort)portMap.internalPort)
+                    )
+                )
+                {
+                    Debug.LogWarning(
+                        $"WARNING: The server's internal address should be set using NetAddress.Any({portMap.internalPort}) in the StartGameArgs.\n"
+                            + "Make sure to rebuild and re-containerize your server after updating your StartGameArgs."
+                    );
+                }
+
+                if (portMap.protocol != _sceneTransportData.Protocol)
+                {
+                    Debug.LogWarning(
+                        $"WARNING: The wrong protocol has been selected in your app version's port mapping. "
+                            + $"Photon Fusion uses the {_sceneTransportData.Protocol} protocol.\n"
+                            + $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}"
+                    );
+                }
+            }
+        }
+    }
+}
