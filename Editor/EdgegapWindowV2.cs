@@ -184,11 +184,11 @@ namespace Edgegap.Editor
         #endregion
 
         #region Unity Integration
-        [MenuItem("Tools/Edgegap Hosting")]
+        [MenuItem("Tools/Edgegap Server Hosting")]
         public static void ShowEdgegapToolWindow()
         {
             EdgegapWindowV2 window = GetWindow<EdgegapWindowV2>();
-            window.titleContent = new GUIContent("Edgegap Hosting"); // MIRROR CHANGE: 'Edgegap Server Management' is too long for the tab space
+            window.titleContent = new GUIContent("Edgegap Server Hosting");
             window.maxSize = new Vector2(600, 900);
             window.minSize = window.maxSize;
         }
@@ -1580,7 +1580,7 @@ namespace Edgegap.Editor
         {
             // Validate: Only allow alphanumeric, underscore, dash, plus, period
             bool validAppName = _appNameAllowedCharsRegex.IsMatch(_createAppNameInput.value);
-            
+
             if (!validAppName)
             {
                 ShowErrorDialog(
@@ -1590,8 +1590,7 @@ namespace Edgegap.Editor
 
             _uploadImageCreateAppBtn.SetEnabled(CheckFilledCreateAppInputs());
             _rebuildFromSrcBtn.SetEnabled(
-                validAppName
-                && !string.IsNullOrEmpty(_createAppNameInput.value)
+                validAppName && !string.IsNullOrEmpty(_createAppNameInput.value)
             );
         }
 
