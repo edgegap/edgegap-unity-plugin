@@ -103,8 +103,6 @@ namespace Edgegap.Editor
         private Button _buildParamsBtn;
         private TextField _buildFolderNameInput;
         internal string _buildFolderNameInputDefault => "EdgegapServer";
-        private TextField _bootstrapNetcodeInput;
-        private Button _bootstrapNetcodeShowDropdownBtn;
         private Button _serverBuildBtn;
         private Label _serverBuildResultLabel;
         #endregion
@@ -347,12 +345,6 @@ namespace Edgegap.Editor
             _serverBuildResultLabel = rootVisualElement.Q<Label>(
                 EdgegapWindowMetadata.SERVER_BUILD_RESULT_LABEL_ID
             );
-            _bootstrapNetcodeInput = rootVisualElement.Q<TextField>(
-                EdgegapWindowMetadata.BOOTSTRAP_NETCODE_TXT_ID
-            );
-            _bootstrapNetcodeShowDropdownBtn = rootVisualElement.Q<Button>(
-                EdgegapWindowMetadata.BOOTSTRAP_NETCODE_DROPDOWN_BTN_ID
-            );
 
             _containerizeFoldout = rootVisualElement.Q<Foldout>(
                 EdgegapWindowMetadata.CONTAINERIZE_SERVER_FOLDOUT_ID
@@ -536,8 +528,6 @@ namespace Edgegap.Editor
             _buildParamsBtn.clickable.clicked += OnOpenBuildParamsBtnClick;
             _buildFolderNameInput.RegisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
             _serverBuildBtn.clickable.clicked += OnBuildServerBtnClick;
-            _bootstrapNetcodeInput.RegisterValueChangedCallback(OnNetcodeInputChanged);
-            _bootstrapNetcodeShowDropdownBtn.clickable.clicked += OnBootstrapNetcodeDropdownClick;
 
             _infoDockerRequirementsBtn.clickable.clicked += OnDockerInfoClick;
             _validateDockerRequirementsBtn.clickable.clicked += OnValidateDockerBtnClick;
@@ -619,8 +609,6 @@ namespace Edgegap.Editor
             _buildParamsBtn.clickable.clicked -= OnOpenBuildParamsBtnClick;
             _buildFolderNameInput.UnregisterCallback<FocusOutEvent>(OnFolderNameInputFocusOut);
             _serverBuildBtn.clickable.clicked -= OnBuildServerBtnClick;
-            _bootstrapNetcodeInput.UnregisterValueChangedCallback(OnNetcodeInputChanged);
-            _bootstrapNetcodeShowDropdownBtn.clickable.clicked -= OnBootstrapNetcodeDropdownClick;
 
             _infoDockerRequirementsBtn.clickable.clicked -= OnDockerInfoClick;
             _validateDockerRequirementsBtn.clickable.clicked -= OnValidateDockerBtnClick;
@@ -707,7 +695,6 @@ namespace Edgegap.Editor
             // reset input values
             _buildFolderNameInput.SetValueWithoutNotify("");
             _buildPathInput.SetValueWithoutNotify("");
-            _bootstrapNetcodeInput.SetValueWithoutNotify("");
             _containerizeImageNameInput.SetValueWithoutNotify("");
             _containerizeImageTagInput.SetValueWithoutNotify("");
             _dockerfilePathInput.SetValueWithoutNotify("");
@@ -1057,28 +1044,6 @@ namespace Edgegap.Editor
                 EditorUtility.ClearProgressBar();
                 _serverBuildBtn.SetEnabled(true);
             }
-        }
-
-        private void OnBootstrapNetcodeDropdownClick()
-        {
-            List<string> netcodes = Enum.GetValues(typeof(EdgegapWindowMetadata.Netcodes))
-                .Cast<EdgegapWindowMetadata.Netcodes>()
-                .Select(v => v.ToString())
-                .ToList();
-            UnityEditor.PopupWindow.Show(
-                _bootstrapNetcodeShowDropdownBtn.worldBound,
-                new CustomPopupContent(netcodes, OnDropdownBootstrapNetcodeSelect, "")
-            );
-        }
-
-        private void OnDropdownBootstrapNetcodeSelect(string netcode)
-        {
-            _bootstrapNetcodeInput.value = netcode;
-        }
-
-        private void OnNetcodeInputChanged(ChangeEvent<string> evt)
-        {
-            EditorPrefs.SetString(EdgegapWindowMetadata.SELECTED_NETCODE_KEY_STR, evt.newValue);
         }
         #endregion
 

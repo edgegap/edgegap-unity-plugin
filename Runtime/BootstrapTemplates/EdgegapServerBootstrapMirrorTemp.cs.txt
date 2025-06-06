@@ -1,14 +1,13 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using Mirror;
 using Mirror.SimpleWeb;
-
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -19,7 +18,8 @@ namespace Edgegap.Bootstrap
 {
     public class #SCRIPTNAME# : EdgegapServerBootstrap
     {
-        private Dictionary<string, (ushort InternalPort, string Protocol)> _sceneTransportsData = new Dictionary<string, (ushort InternalPort, string Protocol)>();
+        private Dictionary<string, (ushort InternalPort, string Protocol)> _sceneTransportsData =
+            new Dictionary<string, (ushort InternalPort, string Protocol)>();
 
 #if UNITY_EDITOR
         [UnityEditor.Callbacks.DidReloadScripts]
@@ -36,45 +36,64 @@ namespace Edgegap.Bootstrap
 
         private static void AddBootstrapToScene()
         {
-            string assetFolderScriptPath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
+            string assetFolderScriptPath =
+                $"{EdgegapServerBootstrapMenu.AbsoluteBootstrapFolderPath}{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
 
-            if (GameObject.Find(EdgegapServerBootstrapMenu.BootstrapObjectName) is null && File.Exists(assetFolderScriptPath))
+            if (
+                GameObject.Find(EdgegapServerBootstrapMenu.BootstrapID) is null
+                && File.Exists(assetFolderScriptPath)
+            )
             {
-                GameObject bootstrapObj = new GameObject(EdgegapServerBootstrapMenu.BootstrapObjectName);
+                GameObject bootstrapObj = new GameObject(EdgegapServerBootstrapMenu.BootstrapID);
                 bootstrapObj.AddComponent(typeof(#SCRIPTNAME#));
                 EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
 
-                Instance = bootstrapObj.GetComponent(typeof(#SCRIPTNAME#)) as EdgegapServerBootstrap;
+                Instance =
+                    bootstrapObj.GetComponent(typeof(#SCRIPTNAME#))
+                    as EdgegapServerBootstrap;
             }
         }
 #endif
 
         protected override void ValidatePortMapping()
         {
-            List<Transport> transportObjs = FindObjectsOfType<Transport>().ToList();
-            NetworkManager networkManager = FindObjectOfType<NetworkManager>();
+            List<Transport> transportObjs = FindObjectsByType<Transport>(
+                    FindObjectsSortMode.InstanceID
+                )
+                .ToList();
+            NetworkManager networkManager = FindFirstObjectByType<NetworkManager>();
 
             foreach (Transport transport in transportObjs)
             {
                 string transportName = transport.GetType().Name;
 
-                if (transport is PortTransport portTransport && transportName != "MultiplexTransport")
+                if (
+                    transport is PortTransport portTransport
+                    && transportName != "MultiplexTransport"
+                )
                 {
                     ushort internalPort = portTransport.Port;
                     string protocol = null;
 
                     switch (transportName)
                     {
-                        case "KcpTransport": protocol = EdgegapTransportProtocols.UDP.ToString(); break;
-                        case "EdgegapKcpTransport": protocol = EdgegapTransportProtocols.UDP.ToString(); break;
+                        case "KcpTransport":
+                            protocol = EdgegapTransportProtocols.UDP.ToString();
+                            break;
+                        case "EdgegapKcpTransport":
+                            protocol = EdgegapTransportProtocols.UDP.ToString();
+                            break;
                         case "SimpleWebTransport":
-                            {
-                                SimpleWebTransport webTransport = transport as SimpleWebTransport;
-                                protocol = webTransport.clientUseWss ? EdgegapTransportProtocols.WSS.ToString() :
-                                    EdgegapTransportProtocols.WS.ToString();
-                                break;
-                            }
-                        case "TelepathyTransport": protocol = EdgegapTransportProtocols.TCP.ToString(); break;
+                        {
+                            SimpleWebTransport webTransport = transport as SimpleWebTransport;
+                            protocol = webTransport.clientUseWss
+                                ? EdgegapTransportProtocols.WSS.ToString()
+                                : EdgegapTransportProtocols.WS.ToString();
+                            break;
+                        }
+                        case "TelepathyTransport":
+                            protocol = EdgegapTransportProtocols.TCP.ToString();
+                            break;
                     }
 
                     _sceneTransportsData.Add(transportName, (internalPort, protocol));
@@ -85,15 +104,27 @@ namespace Edgegap.Bootstrap
 
             if (host != "localhost" && host != "127.0.0.1")
             {
-                Debug.LogWarning("WARNING: The server's Network Address has not been set properly in the Network Manager. The expected value is either \"127.0.0.1\" or \"localhost\".\n" +
-                    "Make sure to rebuild and re-containerize your server after updating your Network Manager.");
+                Debug.LogWarning(
+                    "WARNING: The server's Network Address has not been set properly in the Network Manager. The expected value is either \"127.0.0.1\" or \"localhost\".\n"
+                        + "Make sure to rebuild and re-containerize your server after updating your Network Manager."
+                );
             }
 
-            foreach (KeyValuePair<string, (ushort InternalPort, string Protocol)> transportEntry in _sceneTransportsData)
+            foreach (
+                KeyValuePair<
+                    string,
+                    (ushort InternalPort, string Protocol)
+                > transportEntry in _sceneTransportsData
+            )
             {
                 string portsMappingMatchKey = null;
 
-                foreach (KeyValuePair<string, PortMappingData> portMapEntry in _arbitriumPortsMapping.ports)
+                foreach (
+                    KeyValuePair<
+                        string,
+                        PortMappingData
+                    > portMapEntry in _arbitriumPortsMapping.ports
+                )
                 {
                     if (portMapEntry.Value.name == transportEntry.Key)
                     {
@@ -104,8 +135,10 @@ namespace Edgegap.Bootstrap
 
                 if (portsMappingMatchKey is null)
                 {
-                    Debug.LogWarning($"WARNING: No port mapping entry matches the name of the \"{transportEntry.Key}\" transport.\n" +
-                        $"Make sure to update your app version to include an entry named \"{transportEntry.Key}\".\n{APP_VERSION_PAGE}");
+                    Debug.LogWarning(
+                        $"WARNING: No port mapping entry matches the name of the \"{transportEntry.Key}\" transport.\n"
+                            + $"Make sure to update your app version to include an entry named \"{transportEntry.Key}\".\n{APP_VERSION_PAGE}"
+                    );
                 }
                 else
                 {
@@ -113,15 +146,19 @@ namespace Edgegap.Bootstrap
 
                     if (portMap.internalPort != transportEntry.Value.InternalPort)
                     {
-                        Debug.LogWarning($"WARNING: The internal port values of the app version and the {transportEntry.Key} do not match.\n" +
-                            $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                        Debug.LogWarning(
+                            $"WARNING: The internal port values of the app version and the {transportEntry.Key} do not match.\n"
+                                + $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}"
+                        );
                     }
 
                     if (portMap.protocol != transportEntry.Value.Protocol)
                     {
-                        Debug.LogWarning($"WARNING: The wrong protocol has been selected in your app version's port mapping. " +
-                            $"{transportEntry.Key} uses the {transportEntry.Value.Protocol} protocol.\n" +
-                            $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}");
+                        Debug.LogWarning(
+                            $"WARNING: The wrong protocol has been selected in your app version's port mapping. "
+                                + $"{transportEntry.Key} uses the {transportEntry.Value.Protocol} protocol.\n"
+                                + $"Make sure to update your port mapping on your app version's page.\n{APP_VERSION_PAGE}"
+                        );
                     }
                 }
             }
