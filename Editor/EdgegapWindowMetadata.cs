@@ -130,14 +130,6 @@ namespace Edgegap.Editor
             Error,
         }
 
-        public enum Netcodes
-        {
-            Custom,
-            Fishnet,
-            Mirror,
-            Unity,
-        }
-
         /// <returns>Wraps string in color rich text</returns>
         public static string WrapRichTextInColor(string str, StatusColors statusColor)
         {
@@ -248,8 +240,6 @@ namespace Edgegap.Editor
         public const string NEXT_STEPS_ADV_MATCHMAKER_LABEL_LINK_ID = "AdvMMLinkTxt";
         public const string NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID = "LifecycleManageTxt";
         #endregion // UI Element Ids
-
-
 
         //[Obsolete("Hard-coded; not from UI. TODO: Get from UI")] // MIRROR CHANGE: comment this out to avoid import warnings
         public const ApiEnvironment API_ENVIRONMENT = ApiEnvironment.Console;

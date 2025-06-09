@@ -31,10 +31,14 @@ namespace Edgegap.Editor
         [MenuItem("GameObject/Edgegap/Port Verification - Unity NGO", priority = 35)]
         public static void ImportBootstrapUnityNGO() => ImportBootstrapToProject("UnityNGO");
 
-        [MenuItem("GameObject/Edgegap/Port Verification - Mirror", priority = 36)]
+        [MenuItem("GameObject/Edgegap/Port Verification - Photon Fusion 2", priority = 36)]
+        public static void ImportBootstrapPhotonFusion2() =>
+            ImportBootstrapToProject("PhotonFusion2");
+
+        [MenuItem("GameObject/Edgegap/Port Verification - Mirror", priority = 37)]
         public static void ImportBootstrapMirror() => ImportBootstrapToProject("Mirror");
 
-        [MenuItem("GameObject/Edgegap/Port Verification - FishNet", priority = 37)]
+        [MenuItem("GameObject/Edgegap/Port Verification - FishNet", priority = 38)]
         public static void ImportBootstrapFishNet() => ImportBootstrapToProject("FishNet");
 
         public static void ImportBootstrapToProject(string netcode)
@@ -44,32 +48,34 @@ namespace Edgegap.Editor
                 Log("No netcode selected, host and port validation skipped.", true);
                 return;
             }
-            else if (netcode == EdgegapWindowMetadata.Netcodes.Custom.ToString())
-            {
-                Log("Custom netcode selected, Contact Edgegap to add support for your netcode.");
-                return;
-            }
 
             GameObject bootstrapInScene = GameObject.Find(BootstrapID);
 
             if (bootstrapInScene is not null)
             {
-                string bootstrapType = bootstrapInScene
-                    .GetComponents<Component>()[1]
-                    .GetType()
-                    .ToString();
+                Component[] bootstrapComponents = bootstrapInScene.GetComponents<Component>();
+                string bootstrapType =
+                    bootstrapComponents.Length >= 2
+                        ? bootstrapComponents[1]?.GetType().ToString()
+                        : null;
 
-                if (bootstrapType.Contains(netcode))
+                if (bootstrapType is not null && !bootstrapType.Contains(netcode))
                 {
-                    Log($"{netcode} verification already present in current scene.");
-                    return;
+                    // switched to different netcode
+                    AssetDatabase.DeleteAsset(
+                        $"{ImportedBootstrapFolderPath}{Path.DirectorySeparatorChar}{bootstrapType.Split(".")[2]}.cs"
+                    );
                 }
 
-                // Delete gameObject + old bootstrap script
-                AssetDatabase.DeleteAsset(
-                    $"{ImportedBootstrapFolderPath}{Path.DirectorySeparatorChar}{bootstrapType.Split(".")[2]}.cs"
-                );
-                UnityEngine.Object.DestroyImmediate(bootstrapInScene);
+                if (bootstrapType is null || !bootstrapType.Contains(netcode))
+                {
+                    // deleted script asset but left behind gameobject in scene
+                    UnityEngine.Object.DestroyImmediate(bootstrapInScene);
+                }
+                else
+                {
+                    Log($"{netcode} verification already present in current scene.");
+                }
             }
 
             if (!Directory.Exists(AbsoluteBootstrapFolderPath))
@@ -140,7 +146,7 @@ namespace Edgegap.Editor
         {
             string fullTempScriptPath =
                 $"{PluginRuntimeFolderPath}{Path.DirectorySeparatorChar}{sourcePath}{templateScriptName}";
-            Log(fullTempScriptPath);
+
             if (!File.Exists(fullTempScriptPath))
             {
                 throw new Exception(
