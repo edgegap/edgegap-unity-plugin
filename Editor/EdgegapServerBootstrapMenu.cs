@@ -28,17 +28,20 @@ namespace Edgegap.Editor
         //        "PortMappingData",
         //    };
 
-        [MenuItem("GameObject/Edgegap/Port Verification - Unity NGO", priority = 35)]
+        [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - Unity NGO", priority = 35)]
         public static void ImportBootstrapUnityNGO() => ImportBootstrapToProject("UnityNGO");
 
-        [MenuItem("GameObject/Edgegap/Port Verification - Photon Fusion 2", priority = 36)]
+        [MenuItem(
+            "GameObject/Edgegap Server Hosting/Port Verification - Photon Fusion 2",
+            priority = 36
+        )]
         public static void ImportBootstrapPhotonFusion2() =>
             ImportBootstrapToProject("PhotonFusion2");
 
-        [MenuItem("GameObject/Edgegap/Port Verification - Mirror", priority = 37)]
+        [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - Mirror", priority = 37)]
         public static void ImportBootstrapMirror() => ImportBootstrapToProject("Mirror");
 
-        [MenuItem("GameObject/Edgegap/Port Verification - FishNet", priority = 38)]
+        [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - FishNet", priority = 38)]
         public static void ImportBootstrapFishNet() => ImportBootstrapToProject("FishNet");
 
         public static void ImportBootstrapToProject(string netcode)
