@@ -21,7 +21,7 @@ namespace Edgegap.Bootstrap
         private Dictionary<string, (ushort InternalPort, string Protocol)> _sceneTransportsData =
             new Dictionary<string, (ushort InternalPort, string Protocol)>();
 
-#if UNITY_EDITOR
+#if UNITY_EDITORX
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void AwaitCompileDone()
         {

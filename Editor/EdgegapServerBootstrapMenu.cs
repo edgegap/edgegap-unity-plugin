@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace Edgegap.Editor
 {
-    public static class EdgegapServerBootstrapMenu
+    public class EdgegapServerBootstrapMenu : AssetPostprocessor
     {
         public const string BootstrapID = "EdgegapServerBootstrap";
         public static string ProjectRootPath => Directory.GetCurrentDirectory();
@@ -44,13 +44,51 @@ namespace Edgegap.Editor
         [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - FishNet", priority = 38)]
         public static void ImportBootstrapFishNet() => ImportBootstrapToProject("FishNet");
 
-        public static void ImportBootstrapToProject(string netcode)
+        /*[UnityEditor.Callbacks.DidReloadScripts]
+        private static void AwaitCompileDone()
         {
-            if (string.IsNullOrEmpty(netcode))
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
             {
-                Log("No netcode selected, host and port validation skipped.", true);
+                EditorApplication.delayCall += AwaitCompileDone;
                 return;
             }
+
+            EditorApplication.delayCall += AddBootstrapToScene;
+        }*/
+
+        public static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths,
+            bool didDomainReload
+        )
+        {
+            if (!didDomainReload || importedAssets.Length == 0)
+            {
+                return;
+            }
+
+            string[] importedFiles = importedAssets
+                .Where(file => file.Contains($"{BootstrapID}/{BootstrapID}"))
+                .ToArray();
+
+            if (importedFiles.Length == 0)
+            {
+                return;
+            }
+
+            string netcodeFilePath = importedFiles
+                .OrderByDescending(fileName => fileName.Length)
+                .First();
+
+            Debug.Log(netcodeFilePath + "\n" + string.Join(",", importedFiles));
+            AttachScriptComponent(netcodeFilePath);
+        }
+
+        public static void ImportBootstrapToProject(string netcode)
+        {
+            Debug.Log($"reload={DateTime.Now}");
 
             GameObject bootstrapInScene = GameObject.Find(BootstrapID);
 
@@ -77,7 +115,10 @@ namespace Edgegap.Editor
                 }
                 else
                 {
-                    Log($"{netcode} verification already present in current scene.");
+                    Log(
+                        $"Edgegap: {netcode} Verification script already included in current scene."
+                    );
+                    return;
                 }
             }
 
@@ -126,22 +167,10 @@ namespace Edgegap.Editor
                     $"BootstrapTemplates{Path.DirectorySeparatorChar}",
                     $"{netcodeScriptName}Temp.cs.txt"
                 );
-
-                Event recompileEvent = new Event();
-                recompileEvent.keyCode = KeyCode.Return;
-                recompileEvent.type = EventType.KeyDown;
-                EditorWindow.focusedWindow.SendEvent(recompileEvent);
             }
             else
             {
-                Type scriptType = TypeCache
-                    .GetTypesDerivedFrom<Component>()
-                    .Where(t => t.Name == netcodeScriptName)
-                    .First();
-
-                GameObject bootstrapObj = new GameObject(BootstrapID);
-                bootstrapObj.AddComponent(scriptType);
-                EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+                AttachScriptComponent(netcodeScriptName);
             }
         }
 
@@ -169,6 +198,25 @@ namespace Edgegap.Editor
                 fullTempScriptPath,
                 targetScriptName
             );
+
+            Event confirmEvent = new Event();
+            confirmEvent.keyCode = KeyCode.Return;
+            confirmEvent.type = EventType.KeyDown;
+            EditorWindow.focusedWindow.SendEvent(confirmEvent);
+        }
+
+        private static void AttachScriptComponent(string filePath)
+        {
+            Type scriptType = TypeCache
+                .GetTypesDerivedFrom<Component>()
+                .Where(type =>
+                    type.Name != "EdgegapServerBootstrap" && filePath.Contains(type.Name)
+                )
+                .First();
+
+            GameObject bootstrapObj = new GameObject(BootstrapID);
+            bootstrapObj.AddComponent(scriptType);
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
         }
 
         private static void Log(string msg, bool warning = false)
