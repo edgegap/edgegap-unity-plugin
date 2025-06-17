@@ -20,40 +20,6 @@ namespace Edgegap.Bootstrap
     {
         private (NetAddress Address, string Protocol) _sceneTransportData;
 
-#if UNITY_EDITOR
-        [UnityEditor.Callbacks.DidReloadScripts]
-        private static void AwaitCompileDone()
-        {
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                EditorApplication.delayCall += AwaitCompileDone;
-                return;
-            }
-
-            EditorApplication.delayCall += AddBootstrapToScene;
-        }
-
-        private static void AddBootstrapToScene()
-        {
-            string assetFolderScriptPath =
-                $"{EdgegapServerBootstrapMenu.AbsoluteBootstrapFolderPath}{Path.DirectorySeparatorChar}#SCRIPTNAME#.cs";
-
-            if (
-                GameObject.Find(EdgegapServerBootstrapMenu.BootstrapID) is null
-                && File.Exists(assetFolderScriptPath)
-            )
-            {
-                GameObject bootstrapObj = new GameObject(EdgegapServerBootstrapMenu.BootstrapID);
-                bootstrapObj.AddComponent(typeof(#SCRIPTNAME#));
-                EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
-
-                Instance =
-                    bootstrapObj.GetComponent(typeof(#SCRIPTNAME#))
-                    as EdgegapServerBootstrap;
-            }
-        }
-#endif
-
         protected override void ValidatePortMapping()
         {
             NetworkRunner runnerInstance = FindFirstObjectByType<NetworkRunner>();
@@ -63,6 +29,14 @@ namespace Edgegap.Bootstrap
             if (!_arbitriumPortsMapping.ports.TryGetValue("gameport", out portMap))
             {
                 portMap = _arbitriumPortsMapping.ports.First().Value;
+            }
+
+            if (portMap is null)
+            {
+                Debug.LogWarning(
+                    $"WARNING: No Edgegap Port Mapping found. Please add your game port in your app version. {APP_VERSION_PAGE}"
+                );
+                return;
             }
 
             if (!_sceneTransportData.Address.Equals(NetAddress.Any((ushort)portMap.internalPort)))
@@ -78,13 +52,6 @@ namespace Edgegap.Bootstrap
                 Debug.LogWarning(
                     $"WARNING: Expecting network protocol `{portMap.protocol}` but got `{_sceneTransportData.Protocol}`."
                         + $"Change your protocol in Fusion 2 settings or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
-                );
-            }
-
-            if (portMap is null)
-            {
-                Debug.LogWarning(
-                    $"WARNING: No Edgegap Port Mapping found. Please add your game port in your app version. {APP_VERSION_PAGE}"
                 );
             }
         }
