@@ -69,7 +69,7 @@ namespace Edgegap.Bootstrap
 
             string host = FindFirstObjectByType<NetworkManager>().networkAddress;
 
-            if (host != "localhost" && host != "0.0.0.0")
+            if (!string.IsNullOrEmpty(host) && host != "localhost" && host != "0.0.0.0")
             {
                 Debug.LogWarning(
                     $"WARNING: Expecting network address `localhost` but got `{host}` in NetworkManager. "

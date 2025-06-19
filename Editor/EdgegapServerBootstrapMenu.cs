@@ -20,14 +20,6 @@ namespace Edgegap.Editor
         public static string PluginRuntimeFolderPath =>
             $"{Directory.GetParent(Directory.GetFiles(ProjectRootPath, "Edgegap.asmdef", SearchOption.AllDirectories)[0]).FullName}{Path.DirectorySeparatorChar}Runtime";
 
-        //internal static List<string> BootstrapModels =>
-        //    new List<string>
-        //    {
-        //        "ArbitriumDeploymentLocation",
-        //        "ArbitriumPortsMapping",
-        //        "PortMappingData",
-        //    };
-
         [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - Unity NGO", priority = 35)]
         public static void ImportBootstrapUnityNGO() => ImportBootstrapToProject("UnityNGO");
 
@@ -43,18 +35,6 @@ namespace Edgegap.Editor
 
         [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - FishNet", priority = 38)]
         public static void ImportBootstrapFishNet() => ImportBootstrapToProject("FishNet");
-
-        /*[UnityEditor.Callbacks.DidReloadScripts]
-        private static void AwaitCompileDone()
-        {
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                EditorApplication.delayCall += AwaitCompileDone;
-                return;
-            }
-
-            EditorApplication.delayCall += AddBootstrapToScene;
-        }*/
 
         public static void OnPostprocessAllAssets(
             string[] importedAssets,
@@ -82,14 +62,11 @@ namespace Edgegap.Editor
                 .OrderByDescending(fileName => fileName.Length)
                 .First();
 
-            Debug.Log(netcodeFilePath + "\n" + string.Join(",", importedFiles));
             AttachScriptComponent(netcodeFilePath);
         }
 
         public static void ImportBootstrapToProject(string netcode)
         {
-            Debug.Log($"reload={DateTime.Now}");
-
             GameObject bootstrapInScene = GameObject.Find(BootstrapID);
 
             if (bootstrapInScene is not null)
@@ -136,23 +113,6 @@ namespace Edgegap.Editor
             {
                 CloneTemplateScript("", $"{BootstrapID}Temp.cs.txt");
             }
-
-            // @todo maybe not needed? => remove
-            // Initialize each required API models
-            //foreach (string model in BootstrapModels)
-            //{
-            //    if (
-            //        !File.Exists(
-            //            $"{AbsoluteBootstrapFolderPath}{Path.DirectorySeparatorChar}{model}.cs"
-            //        )
-            //    )
-            //    {
-            //        CloneTemplateScript(
-            //            $"Models{Path.DirectorySeparatorChar}",
-            //            $"{model}Temp.cs.txt"
-            //        );
-            //    }
-            //}
 
             // Initialize netcode-specific bootstrap script
             string netcodeScriptName = $"{BootstrapID}{netcode}";
