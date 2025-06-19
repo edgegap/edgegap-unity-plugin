@@ -45,6 +45,10 @@
                 <ui:VisualElement name="BuildFolderRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
                     <ui:TextField name="BuildFolderTxt" label="Build Folder Name" password="false" view-data-key="BuildFolderTxt" class="text-edgegap label-right-padding" />
                 </ui:VisualElement>
+                <ui:VisualElement name="BootstrapNetcodeRow" class="container-row" style="flex-grow: 1; align-items: center; flex-direction: row; justify-content: flex-start; align-self: auto;">
+                    <ui:TextField name="BootstrapNetcodeTxt" label="Netcode (optional, for Server Bootstrap)" password="false" view-data-key="BootstrapNetcodeTxt" readonly="true" class="text-edgegap label-right-padding" />
+                    <ui:Button name="BootstrapNetcodeDropdownBtn" text="▼" class="text-edgegap btn-show-dropdown" style="margin-left: 0; max-width: 250px; width: auto; min-width: auto;" />
+                </ui:VisualElement>
                 <ui:VisualElement name="ServerBuildClickRow" style="flex-grow: 1; flex-direction: row;">
                     <ui:Button name="ServerBuildBtn" text="Build server" class="button-edgegap text-edgegap" style="flex-direction: row; -unity-text-align: middle-center; margin-left: 0; max-width: 250px; min-width: 100px;" />
                     <ui:Label tabindex="-1" text="{ServerBuildResultLabel}" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ServerBuildResultLabel" class="text-edgegap" style="color: rgb(138, 238, 140); align-items: stretch; justify-content: flex-start; align-self: center;" />
@@ -115,9 +119,13 @@
                         <ui:TextField name="ServerImageTagTxt" label="Server Image Tag" password="false" view-data-key="ServerImageTagTxt" class="text-edgegap label-right-padding" style="height: 39px;" />
                     </ui:VisualElement>
                     <ui:Button name="PortMappingLink" text="Port mapping: your external port for clients will be assigned randomly to improve security. ⓘ" class="text-edgegap btn-text-link" style="margin-left: 5px; width: auto; min-width: 600px; padding-left: 0; left: 0; -unity-text-align: middle-left;" />
-                    <ui:VisualElement name="ContainerBuildAndPushHorizRow" style="flex-grow: 1; flex-direction: row;">
+                    <ui:VisualElement name="ContainerBuildAndPushHorizRow" style="flex-grow: 1; flex-direction: row; margin-bottom: 5px;">
                         <ui:Button name="ImagePushAppCreateBtn" text="Upload image and Create app version" class="button-edgegap text-edgegap" style="margin-left: 0; max-width: 250px; width: auto; min-width: 220px;" />
                         <ui:Button name="EdgegapAppLink" text="Your application on Edgegap. ⓘ" class="text-edgegap btn-text-link" style="margin-left: 0; max-width: 200px; width: auto; min-width: 175px; padding-left: 0; left: auto;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="RebuildFromSrcHorizRow" style="flex-grow: 1; flex-direction: row;">
+                        <ui:Button name="RebuildFromSrcBtn" text="Rebuild from Source" class="button-edgegap text-edgegap" style="margin-left: 0; max-width: none; width: auto; min-width: 135px;" />
+                        <ui:Button name="RebuildFromSrcLabelTxt" text="Build, Containerize, and Upload" enable-rich-text="true" class="text-edgegap btn-label" style="margin-left: 0; max-width: 200px; width: auto; min-width: 175px; padding-left: 2px; left: auto;" />
                     </ui:VisualElement>
                 </ui:Foldout>
             </ui:VisualElement>
