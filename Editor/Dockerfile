@@ -14,4 +14,4 @@ RUN apt-get update && \
     apt-get clean && \
     update-ca-certificates
 
-CMD [ "/root/build/ServerBuild", "-batchmode", "-nographics", "$UNITY_COMMANDLINE_ARGS"]
+CMD ["/bin/bash", "-c", "env;/root/build/ServerBuild -batchmode -nographics $UNITY_COMMANDLINE_ARGS"]
