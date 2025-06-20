@@ -26,7 +26,7 @@ namespace Edgegap.Bootstrap
             _sceneTransportData = (runnerInstance.LocalAddress, "UDP");
 
             PortMappingData portMap;
-            if (!_arbitriumPortsMapping.ports.TryGetValue("gameport", out portMap))
+            if (_arbitriumPortsMapping.ports is null || !_arbitriumPortsMapping.ports.TryGetValue("gameport", out portMap))
             {
                 portMap = _arbitriumPortsMapping.ports.First().Value;
             }

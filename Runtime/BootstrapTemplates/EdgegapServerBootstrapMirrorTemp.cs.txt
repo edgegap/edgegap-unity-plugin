@@ -77,7 +77,7 @@ namespace Edgegap.Bootstrap
                 );
             }
 
-            if (_arbitriumPortsMapping.ports.Count == 0)
+            if (_arbitriumPortsMapping.ports is null || _arbitriumPortsMapping.ports.Count == 0)
             {
                 Debug.LogWarning(
                     $"WARNING: Expecting at least 1 Edgegap Port Mapping entry. Add port mapping in your app version. {APP_VERSION_PAGE}"
