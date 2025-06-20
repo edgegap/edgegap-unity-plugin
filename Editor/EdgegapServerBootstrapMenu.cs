@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -10,179 +9,187 @@ using UnityEngine.SceneManagement;
 
 namespace Edgegap.Editor
 {
-    public static class EdgegapServerBootstrapMenu
+    public class EdgegapServerBootstrapMenu : AssetPostprocessor
     {
-        public const string BootstrapObjectName = "EdgegapServerBootstrap";
-        internal static string ProjectRootPath => Directory.GetCurrentDirectory();
-        internal static string EdgegapBootstrapRuntimeFolderPath =>
+        public const string BootstrapID = "EdgegapServerBootstrap";
+        public static string ProjectRootPath => Directory.GetCurrentDirectory();
+        public static string ImportedBootstrapFolderPath =
+            $"Assets{Path.DirectorySeparatorChar}{BootstrapID}";
+        public static string AbsoluteBootstrapFolderPath =
+            $"{ProjectRootPath}{Path.DirectorySeparatorChar}{ImportedBootstrapFolderPath}";
+        public static string PluginRuntimeFolderPath =>
             $"{Directory.GetParent(Directory.GetFiles(ProjectRootPath, "Edgegap.asmdef", SearchOption.AllDirectories)[0]).FullName}{Path.DirectorySeparatorChar}Runtime";
-        internal static List<string> BootstrapModels =>
-            new List<string>
-            {
-                "ArbitriumDeploymentLocation",
-                "ArbitriumPortsMapping",
-                "PortMappingData",
-            };
 
-        [MenuItem("Assets/Create/Edgegap/Server Bootstrap", priority = 35)]
-        public static void InstantiateEdgegapBootstrap()
+        [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - Unity NGO", priority = 35)]
+        public static void ImportBootstrapUnityNGO() => ImportBootstrapToProject("UnityNGO");
+
+        [MenuItem(
+            "GameObject/Edgegap Server Hosting/Port Verification - Photon Fusion 2",
+            priority = 36
+        )]
+        public static void ImportBootstrapPhotonFusion2() =>
+            ImportBootstrapToProject("PhotonFusion2");
+
+        [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - Mirror", priority = 37)]
+        public static void ImportBootstrapMirror() => ImportBootstrapToProject("Mirror");
+
+        [MenuItem("GameObject/Edgegap Server Hosting/Port Verification - FishNet", priority = 38)]
+        public static void ImportBootstrapFishNet() => ImportBootstrapToProject("FishNet");
+
+        public static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths,
+            bool didDomainReload
+        )
         {
-            string netcode = EditorPrefs.GetString(EdgegapWindowMetadata.SELECTED_NETCODE_KEY_STR);
-
-            if (string.IsNullOrEmpty(netcode))
+            if (!didDomainReload || importedAssets.Length == 0)
             {
-                Debug.LogWarning(
-                    "No netcode currently selected in the Edgegap plugin, host and port validation skipped."
-                );
-                return;
-            }
-            else if (netcode == EdgegapWindowMetadata.Netcodes.Custom.ToString())
-            {
-                Debug.Log(
-                    "Custom netcode selected; For information on netcodes not yet supported by the server bootstrap, contact the Edgegap support team."
-                );
                 return;
             }
 
-            GameObject bootstrapInScene = GameObject.Find(BootstrapObjectName);
+            string[] importedFiles = importedAssets
+                .Where(file => file.Contains($"{BootstrapID}/{BootstrapID}"))
+                .ToArray();
+
+            if (importedFiles.Length == 0)
+            {
+                return;
+            }
+
+            string netcodeFilePath = importedFiles
+                .OrderByDescending(fileName => fileName.Length)
+                .First();
+
+            AttachScriptComponent(netcodeFilePath);
+        }
+
+        public static void ImportBootstrapToProject(string netcode)
+        {
+            GameObject bootstrapInScene = GameObject.Find(BootstrapID);
 
             if (bootstrapInScene is not null)
             {
-                Component bootstrapComponent = bootstrapInScene.GetComponents<Component>()[1];
-                string bootstrapType = bootstrapComponent.GetType().ToString();
+                Component[] bootstrapComponents = bootstrapInScene.GetComponents<Component>();
+                string bootstrapType =
+                    bootstrapComponents.Length >= 2
+                        ? bootstrapComponents[1]?.GetType().ToString()
+                        : null;
 
-                if (bootstrapType.Contains(netcode))
+                if (bootstrapType is not null && !bootstrapType.Contains(netcode))
                 {
-                    Debug.Log(
-                        $"Edgegap Server {netcode} Bootstrap is already present in the scene."
+                    // switched to different netcode
+                    AssetDatabase.DeleteAsset(
+                        $"{ImportedBootstrapFolderPath}{Path.DirectorySeparatorChar}{bootstrapType.Split(".")[2]}.cs"
+                    );
+                }
+
+                if (bootstrapType is null || !bootstrapType.Contains(netcode))
+                {
+                    // deleted script asset but left behind gameobject in scene
+                    UnityEngine.Object.DestroyImmediate(bootstrapInScene);
+                }
+                else
+                {
+                    Log(
+                        $"Edgegap: {netcode} Verification script already included in current scene."
                     );
                     return;
                 }
-
-                // Delete gameObject + old bootstrap script
-                string scriptName = bootstrapType.Split(".")[2];
-
-                bool success = AssetDatabase.DeleteAsset(
-                    $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap{Path.DirectorySeparatorChar}{scriptName}.cs"
-                );
-
-                UnityEngine.Object.DestroyImmediate(bootstrapInScene);
             }
 
-            string assetBootstrapFolderPath =
-                $"{ProjectRootPath}{Path.DirectorySeparatorChar}Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap";
-
-            if (!Directory.Exists(assetBootstrapFolderPath))
+            if (!Directory.Exists(AbsoluteBootstrapFolderPath))
             {
-                AssetDatabase.CreateFolder("Assets", "EdgegapServerBootstrap");
+                AssetDatabase.CreateFolder("Assets", BootstrapID);
             }
 
             // Initialize base bootstrap script
-            string baseBootstrapInitScriptName = "EdgegapServerBootstrap";
-
-            string baseBootstrapAssetFolderPath =
-                $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap";
-
-            string baseBootstrapFullInitPath =
-                $"{ProjectRootPath}{Path.DirectorySeparatorChar}{baseBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{baseBootstrapInitScriptName}.cs";
-
-            if (!File.Exists(baseBootstrapFullInitPath))
+            if (
+                !File.Exists(
+                    $"{AbsoluteBootstrapFolderPath}{Path.DirectorySeparatorChar}{BootstrapID}.cs"
+                )
+            )
             {
-                string baseTempScriptPath =
-                    $"{EdgegapBootstrapRuntimeFolderPath}{Path.DirectorySeparatorChar}EdgegapServerBootstrapTemp.cs.txt";
-
-                InitTemplateScript(
-                    baseTempScriptPath,
-                    baseBootstrapInitScriptName,
-                    baseBootstrapAssetFolderPath
-                );
-            }
-
-            // Initialize each required API models
-            foreach (string model in BootstrapModels)
-            {
-                string modelBootstrapFullInitPath =
-                    $"{ProjectRootPath}{Path.DirectorySeparatorChar}{baseBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{model}.cs";
-
-                if (!File.Exists(modelBootstrapFullInitPath))
-                {
-                    string modelTempScriptPath =
-                        $"{EdgegapBootstrapRuntimeFolderPath}{Path.DirectorySeparatorChar}Models{Path.DirectorySeparatorChar}{model}Temp.cs.txt";
-
-                    InitTemplateScript(modelTempScriptPath, model, baseBootstrapAssetFolderPath);
-                }
+                CloneTemplateScript("", $"{BootstrapID}Temp.cs.txt");
             }
 
             // Initialize netcode-specific bootstrap script
-            string netcodeBootstrapScriptName = $"EdgegapServerBootstrap{netcode}";
+            string netcodeScriptName = $"{BootstrapID}{netcode}";
 
-            string netcodeBootstrapAssetFolderPath =
-                $"Assets{Path.DirectorySeparatorChar}EdgegapServerBootstrap";
-
-            string netcodeBootstrapFullInitPath =
-                $"{ProjectRootPath}{Path.DirectorySeparatorChar}{netcodeBootstrapAssetFolderPath}{Path.DirectorySeparatorChar}{netcodeBootstrapScriptName}.cs";
-
-            if (!File.Exists(netcodeBootstrapFullInitPath))
+            if (
+                !File.Exists(
+                    $"{AbsoluteBootstrapFolderPath}{Path.DirectorySeparatorChar}{netcodeScriptName}.cs"
+                )
+            )
             {
-                string netcodeBootstrapTempScriptPath =
-                    $"{EdgegapBootstrapRuntimeFolderPath}{Path.DirectorySeparatorChar}BootstrapTemplates{Path.DirectorySeparatorChar}{netcodeBootstrapScriptName}Temp.cs.txt";
-
-                InitTemplateScript(
-                    netcodeBootstrapTempScriptPath,
-                    netcodeBootstrapScriptName,
-                    netcodeBootstrapAssetFolderPath
+                CloneTemplateScript(
+                    $"BootstrapTemplates{Path.DirectorySeparatorChar}",
+                    $"{netcodeScriptName}Temp.cs.txt"
                 );
-
-                Event recompileEvent = new Event();
-                recompileEvent.keyCode = KeyCode.Return;
-                recompileEvent.type = EventType.KeyDown;
-                EditorWindow.focusedWindow.SendEvent(recompileEvent);
             }
             else
             {
-                Type scriptType = TypeCache
-                    .GetTypesDerivedFrom<Component>()
-                    .Where(t => t.Name == netcodeBootstrapScriptName)
-                    .First();
-
-                GameObject bootstrapObj = new GameObject(BootstrapObjectName);
-                bootstrapObj.AddComponent(scriptType);
-                EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+                AttachScriptComponent(netcodeScriptName);
             }
         }
 
-        private static void InitTemplateScript(
-            string tempScriptPath,
-            string initScriptName,
-            string initAssetPath
-        )
+        private static void CloneTemplateScript(string sourcePath, string templateScriptName)
         {
-            if (!File.Exists(tempScriptPath))
+            string fullTempScriptPath =
+                $"{PluginRuntimeFolderPath}{Path.DirectorySeparatorChar}{sourcePath}{templateScriptName}";
+
+            if (!File.Exists(fullTempScriptPath))
             {
                 throw new Exception(
-                    "Template file not found; Contact the Edgegap support team about a plugin fix."
+                    "Edgegap: Verification script template file not found; Contact the Edgegap support team for a bugfix."
                 );
             }
 
             UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath(
-                initAssetPath,
+                ImportedBootstrapFolderPath,
                 typeof(UnityEngine.Object)
             );
             AssetDatabase.OpenAsset(obj);
 
-#if UNITY_2019_1_OR_NEWER
+            string targetScriptName = templateScriptName.Replace("Temp", "").Replace(".txt", "");
+
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(
-                tempScriptPath,
-                $"{initScriptName}.cs"
+                fullTempScriptPath,
+                targetScriptName
             );
-#else
-            typeof(UnityEditor.ProjectWindowUtil)
-                .GetMethod(
-                    "CreateScriptAsset",
-                    System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic
+
+            Event confirmEvent = new Event();
+            confirmEvent.keyCode = KeyCode.Return;
+            confirmEvent.type = EventType.KeyDown;
+            EditorWindow.focusedWindow.SendEvent(confirmEvent);
+        }
+
+        private static void AttachScriptComponent(string filePath)
+        {
+            Type scriptType = TypeCache
+                .GetTypesDerivedFrom<Component>()
+                .Where(type =>
+                    type.Name != "EdgegapServerBootstrap" && filePath.Contains(type.Name)
                 )
-                .Invoke(null, new object[] { tempScriptPath, $"{initScriptName}.cs" });
-#endif
+                .First();
+
+            GameObject bootstrapObj = new GameObject(BootstrapID);
+            bootstrapObj.AddComponent(scriptType);
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+        }
+
+        private static void Log(string msg, bool warning = false)
+        {
+            string fullMessage = $"Edgegap: {msg}";
+            if (warning)
+            {
+                Debug.LogWarning(fullMessage);
+            }
+            else
+            {
+                Debug.Log($"Edgegap: {msg}");
+            }
         }
     }
 }
