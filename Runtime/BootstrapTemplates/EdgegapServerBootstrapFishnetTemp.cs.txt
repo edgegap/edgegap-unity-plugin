@@ -1,0 +1,140 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using FishNet.Managing;
+using FishNet.Transporting;
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using Edgegap.Editor;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private Dictionary<
+            string,
+            (ushort InternalPort, string[] Protocols, string Host)
+        > _sceneTransportsData =
+            new Dictionary<string, (ushort InternalPort, string[] Protocols, string Host)>();
+
+        protected override void ValidatePortMapping()
+        {
+            List<Transport> transportObjs = FindObjectsByType<Transport>(
+                    FindObjectsSortMode.InstanceID
+                )
+                .ToList();
+
+            foreach (Transport transport in transportObjs)
+            {
+                string transportName = transport.GetType().Name;
+
+                if (transportName == "Multipass")
+                {
+                    continue;
+                }
+
+                ushort internalPort = transport.GetPort();
+                string[] protocols;
+                string host = transport.GetServerBindAddress(IPAddressType.IPv4);
+
+                switch (transportName)
+                {
+                    case "Tugboat":
+                        protocols = new string[] { EdgegapTransportProtocols.UDP.ToString() };
+                        break;
+                    case "Bayou":
+                        protocols = new string[]
+                        {
+                            EdgegapTransportProtocols.WS.ToString(),
+                            EdgegapTransportProtocols.WSS.ToString(),
+                        };
+                        break;
+                    case "FishyUnityTransport":
+                        protocols = new string[]
+                        {
+                            EdgegapTransportProtocols.UDP.ToString(),
+                            EdgegapTransportProtocols.WS.ToString(),
+                            EdgegapTransportProtocols.WSS.ToString(),
+                        };
+                        break;
+                    case "FishyWebRTC":
+                        protocols = new string[] { EdgegapTransportProtocols.UDP.ToString() };
+                        break;
+                    case "FishyRealtime":
+                        protocols = new string[]
+                        {
+                            EdgegapTransportProtocols.UDP.ToString(),
+                            EdgegapTransportProtocols.WS.ToString(),
+                            EdgegapTransportProtocols.WSS.ToString(),
+                        };
+                        break;
+                    default:
+                        Debug.LogWarning(
+                            "WARNING: Transport not recognized, please contact Edgegap team for support."
+                        );
+                        return;
+                }
+                _sceneTransportsData.Add(transportName, (internalPort, protocols, host));
+            }
+
+            if (_arbitriumPortsMapping.ports is null || _arbitriumPortsMapping.ports.Count == 0)
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting at least 1 Edgegap Port Mapping entry. Add port mapping in your app version. {APP_VERSION_PAGE}"
+                );
+                return;
+            }
+
+            foreach (
+                KeyValuePair<
+                    string,
+                    (ushort InternalPort, string[] Protocols, string Host)
+                > transportEntry in _sceneTransportsData
+            )
+            {
+                PortMappingData portMap = _arbitriumPortsMapping
+                    .ports.FirstOrDefault(portEntry =>
+                        portEntry.Value.internalPort == transportEntry.Value.InternalPort
+                    )
+                    .Value;
+
+                if (
+                    !string.IsNullOrEmpty(transportEntry.Value.Host)
+                    && transportEntry.Value.Host != "localhost"
+                    && transportEntry.Value.Host != "0.0.0.0"
+                )
+                {
+                    Debug.LogWarning(
+                        $"WARNING: Expecting bind address `localhost` but got `{transportEntry.Value.Host}` in NetworkManager. "
+                            + "Change your bind address in FishNet NetworkManager."
+                    );
+                }
+
+                if (portMap == null)
+                {
+                    Debug.LogWarning(
+                        $"WARNING: No Edgegap Port Mapping for FishNet Transport {transportEntry.Key} with port `{transportEntry.Value.InternalPort}` found. "
+                            + $"Change your port in FishNet Transport {transportEntry.Key} or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                    );
+                    return;
+                }
+
+                if (!transportEntry.Value.Protocols.Contains(portMap.protocol))
+                {
+                    Debug.LogWarning(
+                        $"WARNING: Expected Edgegap Port Mapping protocol to be one of `[{string.Join(", ", transportEntry.Value.Protocols)}]` "
+                            + $"for FishNet Transport {transportEntry.Key}, but got `{portMap.protocol}`. "
+                            + $"Change your protocol for FishNet Transport {transportEntry.Key} in Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                    );
+                }
+            }
+        }
+    }
+}
