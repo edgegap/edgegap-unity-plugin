@@ -110,14 +110,21 @@ namespace Edgegap.Bootstrap
                     && transportEntry.Value.Host != "localhost"
                     && transportEntry.Value.Host != "0.0.0.0"
                 )
-                    if (portMap == null)
-                    {
-                        Debug.LogWarning(
-                            $"WARNING: No Edgegap Port Mapping for FishNet Transport {transportEntry.Key} with port `{transportEntry.Value.InternalPort}` found. "
-                                + $"Change your port in FishNet Transport {transportEntry.Key} or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
-                        );
-                        return;
-                    }
+                {
+                    Debug.LogWarning(
+                        $"WARNING: Expecting bind address `localhost` but got `{transportEntry.Value.Host}` in NetworkManager. "
+                            + "Change your bind address in FishNet NetworkManager."
+                    );
+                }
+
+                if (portMap == null)
+                {
+                    Debug.LogWarning(
+                        $"WARNING: No Edgegap Port Mapping for FishNet Transport {transportEntry.Key} with port `{transportEntry.Value.InternalPort}` found. "
+                            + $"Change your port in FishNet Transport {transportEntry.Key} or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                    );
+                    return;
+                }
 
                 if (!transportEntry.Value.Protocols.Contains(portMap.protocol))
                 {
