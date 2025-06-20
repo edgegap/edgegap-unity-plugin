@@ -62,6 +62,8 @@ namespace Edgegap.Editor
         public const string EDGEGAP_GET_A_TOKEN_URL = "https://app.edgegap.com/?oneClick=true";
         public const string EDGEGAP_DISCORD_URL = "https://discord.com/invite/MmJf8fWjnt";
         public const string EDGEGAP_DOC_BASE_URL = "https://docs.edgegap.com/";
+        public const string EDGEGAP_GETTING_STARTED_PATH =
+            "learn/unity-games/getting-started-with-servers";
         public const string EDGEGAP_DOC_PLUGIN_GUIDE_PATH =
             "learn/unity-games/developer-tools#usage-requirements";
         public const string EDGEGAP_DOC_USAGE_REQUIREMENTS_PATH =
@@ -78,10 +80,8 @@ namespace Edgegap.Editor
             "https://app.edgegap.com/deployment-management/deployments/list";
         public const string EDGEGAP_FREE_TIER_INFO_URL =
             "https://app.edgegap.com/user-settings?tab=memberships";
-        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "docs/category/unity-netcodes";
-        public const string EDGEGAP_DOC_LOBBY_PATH = "docs/lobby/service";
-        public const string EDGEGAP_DOC_MANAGED_MATCHMAKER_PATH = "docs/gen2-matchmaker";
-        public const string EDGEGAP_DOC_ADV_MATCHMAKER_PATH = "docs/matchmaker/advanced";
+        public const string CONNECT_TO_DEPLOYMENT_INFO_URL = "docs/sample-projects/unity-netcodes";
+        public const string EDGEGAP_DOC_MATCHMAKER_PATH = "learn/matchmaking/getting-started";
         public const string SCALING_LIFECYCLE_INFO_URL = "learn/advanced-features/deployments";
 
         private const string DEFAULT_UTM_SOURCE_TAG = "sample-unity-ngo";
@@ -152,10 +152,12 @@ namespace Edgegap.Editor
         #region Player Pref Key Ids for persistence
         /// <summary>Cached as base64</summary>
         public const string API_TOKEN_KEY_STR = "ApiToken";
+        public const string SELECTED_NETCODE_KEY_STR = "SelectedNetcode";
         #endregion // Editor Pref Key Ids for persistence
 
         #region UI Element Ids
         //1. Connect your Edgegap account
+        public const string HEADER_IMAGE_ID = "HeaderLogoImage";
         public const string DEBUG_BTN_ID = "DebugBtn";
         public const string API_TOKEN_TXT_ID = "ApiTokenMaskedTxt";
         public const string API_TOKEN_VERIFY_BTN_ID = "ApiTokenVerifyBtn";
@@ -177,6 +179,9 @@ namespace Edgegap.Editor
         public const string SERVER_BUILD_FOLDER_TXT_ID = "BuildFolderTxt";
         public const string SERVER_BUILD_BTN_ID = "ServerBuildBtn";
         public const string SERVER_BUILD_RESULT_LABEL_ID = "ServerBuildResultLabel";
+
+        public const string BOOTSTRAP_NETCODE_TXT_ID = "BootstrapNetcodeTxt";
+        public const string BOOTSTRAP_NETCODE_DROPDOWN_BTN_ID = "BootstrapNetcodeDropdownBtn";
 
         //3. Containerize your server
         public const string CONTAINERIZE_SERVER_FOLDOUT_ID = "ContainerizeServerFoldout";
@@ -213,6 +218,7 @@ namespace Edgegap.Editor
         public const string PORT_MAPPING_LABEL_LINK_ID = "PortMappingLink";
         public const string PUSH_IMAGE_CREATE_APP_BTN_ID = "ImagePushAppCreateBtn";
         public const string EDGEGAP_APP_LABEL_LINK_ID = "EdgegapAppLink";
+        public const string REBUILD_FROM_SRC_BTN_ID = "RebuildFromSrcBtn";
 
         //6. Deploy a server on Edgegap
         public const string DEPLOY_APP_FOLDOUT_ID = "ServerDeploymentFoldout";
@@ -234,8 +240,6 @@ namespace Edgegap.Editor
         public const string NEXT_STEPS_ADV_MATCHMAKER_LABEL_LINK_ID = "AdvMMLinkTxt";
         public const string NEXT_STEPS_LIFECYCLE_LABEL_LINK_ID = "LifecycleManageTxt";
         #endregion // UI Element Ids
-
-
 
         //[Obsolete("Hard-coded; not from UI. TODO: Get from UI")] // MIRROR CHANGE: comment this out to avoid import warnings
         public const ApiEnvironment API_ENVIRONMENT = ApiEnvironment.Console;

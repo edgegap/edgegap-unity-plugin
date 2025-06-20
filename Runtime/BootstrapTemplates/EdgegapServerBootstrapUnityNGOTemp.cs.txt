@@ -1,0 +1,76 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Newtonsoft.Json;
+using Unity.Netcode.Transports.UTP;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using Edgegap.Editor;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private (ushort InternalPort, string Protocol, string Host) _sceneTransportData;
+
+        protected override void ValidatePortMapping()
+        {
+            UnityTransport transport = FindFirstObjectByType<UnityTransport>();
+            _sceneTransportData = (
+                transport.ConnectionData.Port,
+                "UDP",
+                transport.ConnectionData.Address
+            );
+
+            if (
+                !string.IsNullOrEmpty(_sceneTransportData.Host)
+                && _sceneTransportData.Host != "localhost"
+                && _sceneTransportData.Host != "0.0.0.0"
+            )
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting address `localhost` but got `{_sceneTransportData.Host}` in UnityTransport. "
+                        + "Change your address in UnityTransport."
+                );
+            }
+
+            if (_arbitriumPortsMapping.ports is null || _arbitriumPortsMapping.ports.Count == 0)
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting at least 1 Edgegap Port Mapping entry. Add port mapping in your app version. {APP_VERSION_PAGE}"
+                );
+                return;
+            }
+
+            PortMappingData portMap = _arbitriumPortsMapping
+                .ports.FirstOrDefault(portEntry =>
+                    portEntry.Value.internalPort == _sceneTransportData.InternalPort
+                )
+                .Value;
+
+            if (portMap is null)
+            {
+                Debug.LogWarning(
+                    $"WARNING: No Edgegap Port Mapping for UnityTransport with port `{_sceneTransportData.InternalPort}` found. "
+                        + $"Change your port in UnityTransport or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                );
+                return;
+            }
+
+            if (_sceneTransportData.Protocol != portMap.protocol)
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expected Edgegap Port Mapping protocol `{_sceneTransportData.Protocol}` "
+                        + $"for UnityTransport, but got `{portMap.protocol}`. "
+                        + $"Change your protocol for UnityTransport in Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                );
+            }
+        }
+    }
+}
