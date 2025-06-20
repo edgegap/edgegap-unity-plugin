@@ -263,6 +263,20 @@ Toggle > #unity-checkmark {
     color: rgb(23, 190, 235);
 }
 
+.btn-label {
+    background-color: rgba(0, 0, 0, 0);
+    border-top-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+    color: rgb(200, 200, 200);
+    height: 27px;
+    -unity-font-style: bold;
+    min-width: 170px;
+    max-width: 500px;
+    left: -5px;
+}
+
 .btn-text-link {
     background-color: rgba(0, 0, 0, 0);
     border-top-width: 0px;
