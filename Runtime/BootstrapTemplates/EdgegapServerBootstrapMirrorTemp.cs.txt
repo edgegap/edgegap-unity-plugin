@@ -1,0 +1,121 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Mirror;
+using Mirror.SimpleWeb;
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using Edgegap.Editor;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private Dictionary<string, (ushort InternalPort, string Protocol)> _sceneTransportsData =
+            new Dictionary<string, (ushort InternalPort, string Protocol)>();
+
+        protected override void ValidatePortMapping()
+        {
+            List<Transport> transportObjs = FindObjectsByType<Transport>(
+                    FindObjectsSortMode.InstanceID
+                )
+                .ToList();
+
+            foreach (Transport transport in transportObjs)
+            {
+                string transportName = transport.GetType().Name;
+
+                if (transport is not PortTransport || transportName == "MultiplexTransport")
+                {
+                    continue;
+                }
+
+                ushort internalPort = ((PortTransport)transport).Port;
+                string protocol;
+
+                switch (transportName)
+                {
+                    case "KcpTransport":
+                        protocol = EdgegapTransportProtocols.UDP.ToString();
+                        break;
+                    case "EdgegapKcpTransport":
+                        protocol = EdgegapTransportProtocols.UDP.ToString();
+                        break;
+                    case "SimpleWebTransport":
+                        SimpleWebTransport webTransport = transport as SimpleWebTransport;
+                        protocol = webTransport.clientUseWss
+                            ? EdgegapTransportProtocols.WSS.ToString()
+                            : EdgegapTransportProtocols.WS.ToString();
+                        break;
+                    case "TelepathyTransport":
+                        protocol = EdgegapTransportProtocols.TCP.ToString();
+                        break;
+                    default:
+                        Debug.LogWarning(
+                            "WARNING: Transport not recognized, please contact Edgegap team for support."
+                        );
+                        return;
+                }
+
+                _sceneTransportsData.Add(transportName, (internalPort, protocol));
+            }
+
+            string host = FindFirstObjectByType<NetworkManager>().networkAddress;
+
+            if (!string.IsNullOrEmpty(host) && host != "localhost" && host != "0.0.0.0")
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting network address `localhost` but got `{host}` in NetworkManager. "
+                        + "Change your network address in Mirror NetworkManager."
+                );
+            }
+
+            if (_arbitriumPortsMapping.ports is null || _arbitriumPortsMapping.ports.Count == 0)
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting at least 1 Edgegap Port Mapping entry. Add port mapping in your app version. {APP_VERSION_PAGE}"
+                );
+                return;
+            }
+
+            foreach (
+                KeyValuePair<
+                    string,
+                    (ushort InternalPort, string Protocol)
+                > transportEntry in _sceneTransportsData
+            )
+            {
+                PortMappingData portMap = _arbitriumPortsMapping
+                    .ports.FirstOrDefault(portEntry =>
+                        portEntry.Value.internalPort == transportEntry.Value.InternalPort
+                    )
+                    .Value;
+
+                if (portMap is null)
+                {
+                    Debug.LogWarning(
+                        $"WARNING: No Edgegap Port Mapping for Mirror Transport {transportEntry.Key} with port `{transportEntry.Value.InternalPort}` found. "
+                            + $"Change your port in Mirror Transport {transportEntry.Key} or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                    );
+                    return;
+                }
+
+                if (transportEntry.Value.Protocol != portMap.protocol)
+                {
+                    Debug.LogWarning(
+                        $"WARNING: Expected Edgegap Port Mapping protocol `{transportEntry.Value.Protocol}` "
+                            + $"for Mirror Transport {transportEntry.Key}, but got `{portMap.protocol}`. "
+                            + $"Change your protocol for Mirror Transport {transportEntry.Key} in Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                    );
+                }
+            }
+        }
+    }
+}
