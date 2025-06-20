@@ -1,0 +1,59 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Fusion;
+using Fusion.Sockets;
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using Edgegap.Editor;
+#endif
+
+namespace Edgegap.Bootstrap
+{
+    public class #SCRIPTNAME# : EdgegapServerBootstrap
+    {
+        private (NetAddress Address, string Protocol) _sceneTransportData;
+
+        protected override void ValidatePortMapping()
+        {
+            NetworkRunner runnerInstance = FindFirstObjectByType<NetworkRunner>();
+            _sceneTransportData = (runnerInstance.LocalAddress, "UDP");
+
+            PortMappingData portMap;
+            if (_arbitriumPortsMapping.ports is null || !_arbitriumPortsMapping.ports.TryGetValue("gameport", out portMap))
+            {
+                portMap = _arbitriumPortsMapping.ports.First().Value;
+            }
+
+            if (portMap is null)
+            {
+                Debug.LogWarning(
+                    $"WARNING: No Edgegap Port Mapping found. Please add your game port in your app version. {APP_VERSION_PAGE}"
+                );
+                return;
+            }
+
+            if (!_sceneTransportData.Address.Equals(NetAddress.Any((ushort)portMap.internalPort)))
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting server internal address `NetAddress.Any({portMap.internalPort})` in StartGameArgs."
+                        + $"Change your internal port in Fusion 2 StartGameArgs or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                );
+            }
+
+            if (portMap.protocol != _sceneTransportData.Protocol)
+            {
+                Debug.LogWarning(
+                    $"WARNING: Expecting network protocol `{portMap.protocol}` but got `{_sceneTransportData.Protocol}`."
+                        + $"Change your protocol in Fusion 2 settings or Edgegap Port Mapping (app version). {APP_VERSION_PAGE}"
+                );
+            }
+        }
+    }
+}
