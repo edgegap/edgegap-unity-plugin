@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" editor-extension-mode="True">
     <Style src="project://database/Assets/edgegap-unity-plugin/Editor/EdgegapWindow.uss?fileID=7433441132597879392&amp;guid=b1a2e4572c5de8840ac8d98377d409ae&amp;type=3#EdgegapWindow" />
     <ui:VisualElement class="content" style="height: 176px; padding: 0; flex-grow: 1; flex-direction: row; background-color: rgb(37, 37, 37); left: 0;">
-            <ui:Image name="HeaderLogoImage" style="cursor: link; height: 176px; flex-direction: row; --unity-image: url(&apos;project://database/Assets/edgegap-unity-plugin/Editor/Images/banner.png?fileID=2800000&amp;guid=55a59a5ea0f2df3478eef1836828f341&apos;); -unity-background-scale-mode: scale-to-fit; align-self: center;" />
+            <ui:Image name="HeaderLogoImage" style="cursor: link; height: 176px; flex-direction: row; --unity-image: url(&apos;project://database/Assets/edgegap-unity-plugin/Editor/Images/banner.png?fileID=2800000&amp;guid=55a59a5ea0f2df3478eef1836828f341&amp;type=3#banner&apos;); -unity-background-scale-mode: scale-to-fit; align-self: center;" />
             <ui:Button text="DEBUG" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DebugBtn" tooltip="Hide me @ EdgegapWindowMetadata.SHOW_DEBUG_BTN" style="-unity-text-align: middle-left; white-space: normal; text-overflow: clip; justify-content: flex-start; align-self: flex-end; position: absolute; right: 0; top: 0; padding-top: 3px;" />
     </ui:VisualElement>
     <ui:ScrollView name="BodyScrollView" style="background-color: rgb(37, 37, 37); height: 1132px; justify-content: flex-end;">
