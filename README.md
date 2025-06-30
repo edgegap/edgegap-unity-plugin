@@ -14,7 +14,7 @@ This plugin does not need to be included in your builds, as it's only a developm
 
 ### Benefits
 
-- Installing our plugin this way will ensure you get the freshest updates the moment they come out, see [the update guide](#update-the-plugin-in-unity).
+- Get the freshest updates the moment they come out, see [the update guide](#update-the-plugin-in-unity).
 
 ### Caveats
 
