@@ -3,34 +3,27 @@ using Newtonsoft.Json;
 namespace Edgegap.Editor.Api.Models.Requests
 {
     /// <summary>
-    /// Request model for `POST v1/deploy`.
+    /// Request model for `POST v2/deployments`.
     /// API Doc | https://docs.edgegap.com/api/#tag/Deployments/operation/deploy
     /// </summary>
     public class CreateDeploymentRequest
     {
         #region Required
         /// <summary>*Required: The name of the App you want to deploy.</summary>
-        [JsonProperty("app_name")]
+        [JsonProperty("application")]
         public string AppName { get; set; }
 
         /// <summary>
         /// *Required: The name of the App Version you want to deploy;
-        /// if not present, the last version created is picked.
         /// </summary>
-        [JsonProperty("version_name")]
+        [JsonProperty("version")]
         public string VersionName { get; set; }
 
         /// <summary>
-        /// *Required: The List of IP of your user.
+        /// *Required: The list of IP/location of your user.
         /// </summary>
-        [JsonProperty("ip_list")]
-        public string[] IpList { get; set; }
-
-        /// <summary>
-        /// *Required: The list of IP of your user with their location (latitude, longitude).
-        /// </summary>
-        [JsonProperty("geo_ip_list")]
-        public string[] GeoIpList { get; set; } = { };
+        [JsonProperty("users")]
+        public UserLocation[] Users { get; set; }
         #endregion // Required
 
         /// <summary>
@@ -53,7 +46,17 @@ namespace Edgegap.Editor.Api.Models.Requests
         {
             this.AppName = appName;
             this.VersionName = versionName;
-            this.IpList = new[] { externalIp };
+            
+            UserLocation user = new UserLocation()
+            {
+                UserType = "ip_address",
+                UserData = new UserLocationData()
+                {
+                    IpAddress = externalIp
+                }
+            };
+
+            this.Users = new[] { user };
         }
 
         /// <summary>Parse to json str</summary>
