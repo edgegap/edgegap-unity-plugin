@@ -31,7 +31,7 @@ namespace Edgegap.Editor.Api
         /// </summary>
         /// <returns>
         /// Http info with CreateDeploymentResult data model
-        /// - Success: 200
+        /// - Success: 202
         /// </returns>
         public async Task<EdgegapHttpResult<CreateDeploymentResult>> CreateDeploymentAsync(
             CreateDeploymentRequest request

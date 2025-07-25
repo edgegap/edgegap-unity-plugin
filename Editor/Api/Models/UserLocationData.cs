@@ -12,5 +12,20 @@ namespace Edgegap.Editor.Api.Models
             
         [JsonProperty("longitude")]
         public double Longitude { get; set; }
+
+        public bool ShouldSerializeIpAddress()
+        {
+            return (IpAddress != null);
+        }
+
+        public bool ShouldSerializeLatitude()
+        {
+            return (IpAddress == null);
+        }
+
+        public bool ShouldSerializeLongitude()
+        {
+            return (IpAddress == null);
+        }
     }
 }
