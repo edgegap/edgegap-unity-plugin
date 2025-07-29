@@ -39,6 +39,9 @@ namespace Edgegap.Editor.Api.Models.Results
         /// <summary>OK</summary>
         public bool IsResultCode200 => StatusCode == HttpStatusCode.OK;
 
+        /// <summary>Accepted</summary>
+        public bool IsResultCode202 => StatusCode == HttpStatusCode.Accepted;
+
         /// <summary>NoContent</summary>
         public bool IsResultCode204 => StatusCode == HttpStatusCode.NoContent;
 
