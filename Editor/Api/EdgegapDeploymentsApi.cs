@@ -11,8 +11,8 @@ using UnityEngine.Assertions;
 namespace Edgegap.Editor.Api
 {
     /// <summary>
-    /// Wraps the v1/[deploy | status | stop] API endpoints: Deployments Control API.
-    /// - API Doc | https://docs.edgegap.com/api/#tag/Deployments
+    /// Wraps the v2/deployments & v1/[status | stop] API endpoints: Deployments Control API.
+    /// - API Doc | https://docs.edgegap.com/api/dedicated-servers
     /// </summary>
     public class EdgegapDeploymentsApi : EdgegapApiBase
     {
@@ -25,19 +25,19 @@ namespace Edgegap.Editor.Api
 
         #region API Methods
         /// <summary>
-        /// POST v1/deploy
+        /// POST v2/deployments
         /// - Create a new deployment. Deployment is a server instance of your application version.
-        /// - API Doc | https://docs.edgegap.com/api/#tag/Deployments
+        /// - API Doc | https://docs.edgegap.com/api/dedicated-servers#post-deployments
         /// </summary>
         /// <returns>
         /// Http info with CreateDeploymentResult data model
-        /// - Success: 200
+        /// - Success: 202
         /// </returns>
         public async Task<EdgegapHttpResult<CreateDeploymentResult>> CreateDeploymentAsync(
             CreateDeploymentRequest request
         )
         {
-            HttpResponseMessage response = await PostAsync("v1/deploy", request.ToString());
+            HttpResponseMessage response = await PostAsync("v2/deployments", request.ToString());
             EdgegapHttpResult<CreateDeploymentResult> result =
                 new EdgegapHttpResult<CreateDeploymentResult>(response); // MIRROR CHANGE: 'new()' not supported in Unity 2020
 
@@ -115,7 +115,7 @@ namespace Edgegap.Editor.Api
 
         #region Chained API Methods
         /// <summary>
-        /// POST v1/deploy => GET v1/status/{requestId}
+        /// POST v2/deployments => GET v1/status/{requestId}
         /// - Create a new deployment. Deployment is a server instance of your application version.
         /// - Then => await READY status.
         /// - API Doc | https://docs.edgegap.com/api/#tag/Deployments
