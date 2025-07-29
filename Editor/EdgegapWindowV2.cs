@@ -1973,7 +1973,7 @@ namespace Edgegap.Editor
             // Request to deploy (it won't be active, yet) =>
             EdgegapHttpResult<CreateDeploymentResult> createDeploymentResponse =
                 await deployApi.CreateDeploymentAsync(createDeploymentReq);
-            if (!createDeploymentResponse.IsResultCode200)
+            if (!createDeploymentResponse.IsResultCode202)
             {
                 OnCreateDeploymentStartServerFail(createDeploymentResponse.Error.ErrorMessage);
                 return;
