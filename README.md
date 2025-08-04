@@ -56,9 +56,6 @@ The only other official distribution channels for this plugin are:
 - [Mirror Networking source](https://github.com/MirrorNetworking/Mirror)
 - [Mirror Networking free package](https://assetstore.unity.com/packages/tools/network/mirror-129321)
 - [Mirror Networking LTS package](https://assetstore.unity.com/packages/tools/network/mirror-lts-102631)
-- [Fish Networking source](https://github.com/FirstGearGames/FishNet)
-- [Fish Networking free package](https://assetstore.unity.com/packages/tools/network/fishnet-networking-evolved-207815)
-- [Fish Networking Pro package](https://assetstore.unity.com/packages/tools/network/fishnet-pro-networking-evolved-287711)
 
 ## Next Steps
 
