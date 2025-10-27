@@ -52,7 +52,6 @@ This plugin does not need to be included in your builds, as it's only a developm
 
 The only other official distribution channels for this plugin are:
 
-- [Edgegap's Unity Asset Store package](https://assetstore.unity.com/packages/tools/network/edgegap-game-server-hosting-212563)
 - [Mirror Networking source](https://github.com/MirrorNetworking/Mirror)
 - [Mirror Networking free package](https://assetstore.unity.com/packages/tools/network/mirror-129321)
 - [Mirror Networking LTS package](https://assetstore.unity.com/packages/tools/network/mirror-lts-102631)
