@@ -1,5 +1,10 @@
 # Edgegap Unity plugin for Dedicated Servers quickstart
 
+[Follow our Unity Plugin Guide to get your first dedicated server deployed.](https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide)
+
+[![Watch the video](https://img.youtube.com/vi/AIFPkHol1a4/0.jpg)](https://www.youtube.com/watch?v=AIFPkHol1a4)
+
+
 This plugin has been tested, and supports Unity versions 2021.2+, including all LTS releases, Unity 2023, and Unity 6.
 
 This plugin is intended to help you:
