@@ -253,9 +253,9 @@ namespace Edgegap
 #if UNITY_EDITOR_WIN
             await RunCommand("docker.exe", $"{buildCommand} -f \"{dockerfilePath}\" -t \"{registry}/{imageRepo}:{tag}\" \"{projectPath}\"", onStatusUpdate,
 #elif UNITY_EDITOR_OSX
-            await RunCommand("/bin/bash", $"-c \"docker {buildCommand} -f {dockerfilePath} -t {registry}/{imageRepo}:{tag} {projectPath}\"", onStatusUpdate,
+            await RunCommand("/bin/bash", $"-c \"docker {buildCommand} -f '{dockerfilePath}' -t '{registry}/{imageRepo}:{tag}' '{projectPath}'\"", onStatusUpdate,
 #elif UNITY_EDITOR_LINUX
-            await RunCommand("/bin/bash", $"-c \"docker {buildCommand} -f {dockerfilePath} -t {registry}/{imageRepo}:{tag} {projectPath}\"", onStatusUpdate,
+            await RunCommand("/bin/bash", $"-c \"docker {buildCommand} -f '{dockerfilePath}' -t '{registry}/{imageRepo}:{tag}' '{projectPath}'\"", onStatusUpdate,
 #endif
                 (msg) =>
                 {
