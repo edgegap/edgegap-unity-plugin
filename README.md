@@ -1,5 +1,9 @@
 # Edgegap Unity plugin for Dedicated Servers quickstart
 
+[Follow our Unity Plugin Guide to get your first dedicated server deployed.](https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide)
+
+[![Watch the video](https://img.youtube.com/vi/AIFPkHol1a4/0.jpg)](https://www.youtube.com/watch?v=AIFPkHol1a4)
+
 This plugin has been tested, and supports Unity versions 2021.2+, including all LTS releases, Unity 2023, and Unity 6.
 
 This plugin is intended to help you:
@@ -52,10 +56,13 @@ This plugin does not need to be included in your builds, as it's only a developm
 
 The only other official distribution channels for this plugin are:
 
-- [Unity Asset Store package](https://assetstore.unity.com/packages/tools/network/edgegap-game-server-hosting-212563)
+- [OpenUPM source](https://openupm.com/packages/com.edgegap.unity-servers-plugin/)
 - [Mirror Networking source](https://github.com/MirrorNetworking/Mirror)
 - [Mirror Networking free package](https://assetstore.unity.com/packages/tools/network/mirror-129321)
 - [Mirror Networking LTS package](https://assetstore.unity.com/packages/tools/network/mirror-lts-102631)
+- [PurrNet Networking source](https://github.com/PurrNet/PurrNet)
+- [PurrNet Networking on Unity Asset Store](https://assetstore.unity.com/packages/tools/network/purrnet-multiplayer-networking-297320)
+- [PurrNet Networking on OpenUPM](https://openupm.com/packages/dev.purrnet.purrnet/)
 
 ## Next Steps
 
