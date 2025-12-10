@@ -58,7 +58,11 @@ namespace Edgegap
             await RunCommand_DockerVersion(msg => output = msg,
                 (msg) =>
                 {
-                    if (msg.ToLowerInvariant().Contains("error") || msg.ToLowerInvariant().Contains("invalid"))
+                    if (
+                        msg.ToLowerInvariant().Contains("error")
+                        || msg.ToLowerInvariant().Contains("invalid")
+                        || msg.ToLowerInvariant().Contains("failed to connect")
+                    )
                     {
                         error = msg;
                     }
