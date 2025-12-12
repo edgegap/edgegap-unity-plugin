@@ -12,8 +12,6 @@ using Edgegap.Editor.Api;
 using Edgegap.Editor.Api.Models;
 using Edgegap.Editor.Api.Models.Requests;
 using Edgegap.Editor.Api.Models.Results;
-using Edgegap.Codice.Utils;
-using HttpUtility = Edgegap.Codice.Utils.HttpUtility; // MIRROR CHANGE for Unity 2023 support
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -1685,9 +1683,9 @@ namespace Edgegap.Editor
                             EdgegapWindowMetadata.EDGEGAP_CREATE_APP_BASE_URL,
                             _createAppNameInput.value,
                             "/versions/create/",
-                            $"?name={HttpUtility.UrlEncode(_serverImageTagInput.value)}",
-                            $"&imageRepo={HttpUtility.UrlEncode(imageRepo)}",
-                            $"&dockerTag={HttpUtility.UrlEncode(tag)}",
+                            $"?name={_serverImageTagInput.value}",
+                            $"&imageRepo={imageRepo}",
+                            $"&dockerTag={tag}",
                             $"&vCPU=1",
                             $"&memory=1",
                         }
