@@ -6,8 +6,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-// using Codice.Utils; // MIRROR CHANGE
-using Edgegap.Codice.Utils; // MIRROR CHANGE
 using UnityEngine;
 
 namespace Edgegap.Editor.Api
@@ -131,26 +129,20 @@ namespace Edgegap.Editor.Api
         /// GET | We already added "https://api.edgegap.com/" (or similar) BaseAddress via constructor.
         /// </summary>
         /// <param name="relativePath"></param>
-        /// <param name="customQuery">
-        /// To append to the URL; eg: "foo=0&bar=1"
-        /// (!) First query key should prefix nothing, as shown</param>
         /// <returns>
         /// - Success => returns HttpResponseMessage result
         /// - Error => Catches errs => returns null (no rethrow)
         /// </returns>
-        protected async Task<HttpResponseMessage> GetAsync(
-            string relativePath = "",
-            string customQuery = ""
-        )
+        protected async Task<HttpResponseMessage> GetAsync(string relativePath = "")
         {
-            string completeRelativeUri = prepareEdgegapUriWithQuery(relativePath, customQuery);
+            Uri uri = new Uri(_httpClient.BaseAddress, relativePath);
 
             if (IsLogLevelDebug)
-                Debug.Log($"GetAsync to: `{completeRelativeUri} with customQuery: `{customQuery}`");
+                Debug.Log($"GetAsync to: `{uri}`");
 
             try
             {
-                return await ExecuteRequestAsync(() => _httpClient.GetAsync(completeRelativeUri));
+                return await ExecuteRequestAsync(() => _httpClient.GetAsync(uri));
             }
             catch (Exception e)
             {
@@ -163,30 +155,20 @@ namespace Edgegap.Editor.Api
         /// DELETE | We already added "https://api.edgegap.com/" (or similar) BaseAddress via constructor.
         /// </summary>
         /// <param name="relativePath"></param>
-        /// <param name="customQuery">
-        /// To append to the URL; eg: "foo=0&bar=1"
-        /// (!) First query key should prefix nothing, as shown</param>
         /// <returns>
         /// - Success => returns HttpResponseMessage result
         /// - Error => Catches errs => returns null (no rethrow)
         /// </returns>
-        protected async Task<HttpResponseMessage> DeleteAsync(
-            string relativePath = "",
-            string customQuery = ""
-        )
+        protected async Task<HttpResponseMessage> DeleteAsync(string relativePath = "")
         {
-            string completeRelativeUri = prepareEdgegapUriWithQuery(relativePath, customQuery);
+            Uri uri = new Uri(_httpClient.BaseAddress, relativePath);
 
             if (IsLogLevelDebug)
-                Debug.Log(
-                    $"DeleteAsync to: `{completeRelativeUri} with customQuery: `{customQuery}`"
-                );
+                Debug.Log($"DeleteAsync to: `{uri}`");
 
             try
             {
-                return await ExecuteRequestAsync(
-                    () => _httpClient.DeleteAsync(completeRelativeUri)
-                );
+                return await ExecuteRequestAsync(() => _httpClient.DeleteAsync(uri));
             }
             catch (Exception e)
             {
@@ -259,40 +241,6 @@ namespace Edgegap.Editor.Api
 
         private static HttpResponseMessage CreateUnknown500Err() =>
             new HttpResponseMessage(HttpStatusCode.InternalServerError); // 500 - Unknown // MIRROR CHANGE: 'new()' not supported in Unity 2020
-
-        /// <summary>
-        /// Merges Edgegap-required query params (source) -> merges with custom query -> normalizes.
-        /// </summary>
-        /// <param name="relativePath"></param>
-        /// <param name="customQuery"></param>
-        /// <returns></returns>
-        private string prepareEdgegapUriWithQuery(string relativePath, string customQuery)
-        {
-            // Create UriBuilder using the BaseAddress
-            UriBuilder uriBuilder = new UriBuilder(_httpClient.BaseAddress);
-
-            // Add the relative path to the UriBuilder's path
-            uriBuilder.Path += relativePath;
-
-            // Parse the existing query from the UriBuilder
-            NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-
-            // Add default "source=unity" param
-            query["source"] = "unity";
-
-            // Parse and merge the custom query parameters
-            NameValueCollection customParams = HttpUtility.ParseQueryString(customQuery);
-            foreach (string key in customParams)
-            {
-                query[key] = customParams[key];
-            }
-
-            // Set the merged query back to the UriBuilder
-            uriBuilder.Query = query.ToString();
-
-            // Extract the complete relative URI and return it
-            return uriBuilder.Uri.PathAndQuery;
-        }
         #endregion // Utils
     }
 }
