@@ -18,7 +18,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.VSAttribution.Edgegap;
 using Application = UnityEngine.Application;
-using Codice.Client.Common.GameUI;
 #if !EDGEGAP_PLUGIN_SERVERS
 using UnityEditor.Build;
 #endif
