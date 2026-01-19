@@ -908,13 +908,12 @@ namespace Edgegap.Editor
                 { "button_name", "1. Connect Edgegap Account > Sign out" },
                 { "utm_source", "plugin_unity" },
             };
-            string distinctId = getDistinctId();
+            await analyticsApi.PostAsync(properties);
 
             EditorPrefs.DeleteKey(EdgegapWindowMetadata.API_TOKEN_KEY_STR);
             EditorPrefs.DeleteKey(EdgegapWindowMetadata.SELECTED_NETCODE_KEY_STR);
             _apiTokenInput.SetValueWithoutNotify("");
             ResetState();
-            await analyticsApi.PostAsync(properties);
         }
 
         /// <summary>
@@ -1020,7 +1019,6 @@ namespace Edgegap.Editor
                 { "button_name", buttonName },
                 { "utm_source", "plugin_unity" },
             };
-
             if (buttonName.Contains("Rebuild from Source"))
             {
                 properties.Add("rebuild_step", "Build");
@@ -1056,10 +1054,15 @@ namespace Edgegap.Editor
                 if (buildResult.summary.result != BuildResult.Succeeded)
                 {
                     Debug.LogWarning(buildResult.summary.result.ToString());
+
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", buildResult.summary.result.ToString());
+                    await analyticsApi.PostAsync(properties);
                 }
                 else
                 {
                     OnBuildContainerizeUploadSuccess(_serverBuildResultLabel, "Build succeeded.");
+
                     properties.Add("succeeded", true.ToString());
                     await analyticsApi.PostAsync(properties);
                 }
@@ -1118,12 +1121,12 @@ namespace Edgegap.Editor
             catch (Exception e)
             {
                 error = e.Message;
-                properties.Add("succeeded", false.ToString());
-                properties.Add("error_message", e.Message);
-                properties.Add("stack_trace", e.StackTrace);
-
+                
                 if (runAnalytics)
                 {
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", e.Message);
+                    properties.Add("stack_trace", e.StackTrace);
                     await analyticsApi.PostAsync(properties);
                 }
             }
@@ -1162,10 +1165,10 @@ namespace Edgegap.Editor
                     _dockerRequirementsResultLabel,
                     "Docker is running."
                 );
-                properties.Add("succeeded", true.ToString());
 
                 if (runAnalytics)
                 {
+                    properties.Add("succeeded", true.ToString());
                     await analyticsApi.PostAsync(properties);
                 }
             }
@@ -1293,22 +1296,20 @@ namespace Edgegap.Editor
         )
         {
             AnalyticsApi analyticsApi = getAnalyticsApi();
-            Dictionary<string, string> properties = new Dictionary<string, string>()
-            {
-                { "button_name", buttonName },
-                { "utm_source", "plugin_unity" },
-                { "docker_params", _optionalDockerParamsInput.value },
-            };
-
-            if (buttonName.Contains("Rebuild from Source"))
-            {
-                properties.Add("rebuild_step", "Containerize");
-            }
-
+            
             if (!string.IsNullOrEmpty(await ValidateDockerRequirement(false)))
             {
-                properties.Add("succeeded", false.ToString());
-                properties.Add("error_message", "Docker validation failed");
+                Dictionary<string, string> properties = new Dictionary<string, string>()
+                {
+                    { "button_name", buttonName },
+                    { "utm_source", "plugin_unity" },
+                    { "succeeded", false.ToString() },
+                    { "error_message", "Docker validation failed"}
+                };
+                if (buttonName.Contains("Rebuild from Source"))
+                {
+                    properties.Add("rebuild_step", "Containerize");
+                }
                 await analyticsApi.PostAsync(properties);
 
                 return;
@@ -1352,8 +1353,6 @@ namespace Edgegap.Editor
                     _containerizeImageTagInput.value == _containerizeImageTagInputDefault
                         ? nowUTC
                         : _containerizeImageTagInput.value;
-                properties.Add("image_name", imageName);
-                properties.Add("image_tag", tag);
 
                 await EdgegapBuildUtils.RunCommand_DockerBuild(
                     dockerfilePath,
@@ -1385,14 +1384,44 @@ namespace Edgegap.Editor
                     _localTestImageShowDropdownBtn.SetEnabled(true);
                 }
 
-                properties.Add("succeeded", true.ToString());
+                Dictionary<string, string> properties = new Dictionary<string, string>()
+                {
+                    { "button_name", buttonName },
+                    { "utm_source", "plugin_unity" },
+                    { "docker_params", _optionalDockerParamsInput.value },
+                    { "image_name", imageName },
+                    { "image_tag", tag },
+                    { "succeeded", true.ToString() }
+                };
+                if (buttonName.Contains("Rebuild from Source"))
+                {
+                    properties.Add("rebuild_step", "Containerize");
+                }
                 await analyticsApi.PostAsync(properties);
             }
             catch (Exception e)
             {
-                properties.Add("succeeded", false.ToString());
-                properties.Add("error_message", e.Message);
-                properties.Add("stack_trace", e.StackTrace);
+                string imageName = Tokenize(_containerizeImageNameInput.value);
+                string tag =
+                    _containerizeImageTagInput.value == _containerizeImageTagInputDefault
+                        ? nowUTC
+                        : _containerizeImageTagInput.value;
+
+                Dictionary<string, string> properties = new Dictionary<string, string>()
+                {
+                    { "button_name", buttonName },
+                    { "utm_source", "plugin_unity" },
+                    { "docker_params", _optionalDockerParamsInput.value },
+                    { "image_name", imageName },
+                    { "image_tag", tag },
+                    { "succeeded", false.ToString() },
+                    { "error_message", e.Message },
+                    { "stack_trace", e.StackTrace }
+                };
+                if (buttonName.Contains("Rebuild from Source"))
+                {
+                    properties.Add("rebuild_step", "Containerize");
+                }
                 await analyticsApi.PostAsync(properties);
 
                 Debug.LogError($"Containerization Error: {e}");
@@ -1530,6 +1559,7 @@ namespace Edgegap.Editor
                     true
                 );
                 _createAppFoldout.SetValueWithoutNotify(true);
+
                 properties.Add("succeeded", true.ToString());
                 await analyticsApi.PostAsync(properties);
             }
@@ -1547,6 +1577,7 @@ namespace Edgegap.Editor
                     labelMsg =
                         "There was an issue while deploying. See more in Docker Desktop or Docker CLI.";
                     Debug.LogError($"OnLocalTestDeploy Error: {e}");
+
                     properties.Add("succeeded", false.ToString());
                     properties.Add("error_message", e.Message);
                     properties.Add("stack_trace", e.StackTrace);
@@ -1577,8 +1608,8 @@ namespace Edgegap.Editor
 
                 await EdgegapBuildUtils.RunCommand_DockerStop();
                 OnLocalDeploymentResult("Container terminated successfully.", true);
-
                 _createAppFoldout.SetValueWithoutNotify(true);
+
                 properties.Add("succeeded", true.ToString());
                 await analyticsApi.PostAsync(properties);
             }
@@ -1595,6 +1626,7 @@ namespace Edgegap.Editor
                         "There was an issue while terminating. See more in Docker Desktop or Docker CLI.",
                         false
                     );
+
                     properties.Add("succeeded", false.ToString());
                     properties.Add("error_message", e.Message);
                     properties.Add("stack_trace", e.StackTrace);
@@ -1728,7 +1760,6 @@ namespace Edgegap.Editor
                 { "image_name", _serverImageNameInput.value },
                 { "image_tag", _serverImageTagInput.value },
             };
-
             if (buttonName.Contains("Rebuild from Source"))
             {
                 properties.Add("rebuild_step", "Upload and Create App");
@@ -2077,15 +2108,6 @@ namespace Edgegap.Editor
         /// </summary>
         private async Task CreateDeploymentStartServer()
         {
-            AnalyticsApi analyticsApi = getAnalyticsApi();
-            Dictionary<string, string> properties = new Dictionary<string, string>()
-            {
-                { "button_name", "6. Deploy > Start" },
-                { "utm_source", "plugin_unity" },
-                { "app_name", _deployAppNameInput.value },
-                { "app_version", _deployAppVersionInput.value },
-            };
-
             if (IsLogLevelDebug)
                 Debug.Log("createDeploymentStartServerAsync");
 
@@ -2126,6 +2148,16 @@ namespace Edgegap.Editor
             // Request to deploy (it won't be active, yet) =>
             EdgegapHttpResult<CreateDeploymentResult> createDeploymentResponse =
                 await deployApi.CreateDeploymentAsync(createDeploymentReq);
+            
+            AnalyticsApi analyticsApi = getAnalyticsApi();
+            Dictionary<string, string> properties = new Dictionary<string, string>()
+            {
+                { "button_name", "6. Deploy > Start" },
+                { "utm_source", "plugin_unity" },
+                { "app_name", _deployAppNameInput.value },
+                { "app_version", _deployAppVersionInput.value },
+            };
+            
             if (!createDeploymentResponse.IsResultCode202)
             {
                 properties.Add("succeeded", false.ToString());
@@ -2162,6 +2194,7 @@ namespace Edgegap.Editor
                     EdgegapWindowMetadata.StatusColors.Success
                 );
                 _deployResultLabel.style.display = DisplayStyle.Flex;
+
                 properties.Add("succeeded", true.ToString());
                 await analyticsApi.PostAsync(properties);
             }
