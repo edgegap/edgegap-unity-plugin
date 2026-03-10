@@ -3,13 +3,6 @@ guid: 7b18949555c60224384ab80e57e1fd68
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 
-  assetPath: Assets/edgegap-unity-plugin/Editor/Fonts/Spartan-SemiBold SDF.asset
-  uploadId: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

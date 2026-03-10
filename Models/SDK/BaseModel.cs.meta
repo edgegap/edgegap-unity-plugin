@@ -6,13 +6,6 @@ MonoImporter:
   defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 
-  assetPath: Assets/edgegap-unity-plugin/Models/SDK/BaseModel.cs
-  uploadId: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:
