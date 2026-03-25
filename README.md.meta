@@ -2,13 +2,6 @@ fileFormatVersion: 2
 guid: a22cebde73b10534b99d20367fda7b1f
 TextScriptImporter:
   externalObjects: {}
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 
-  assetPath: Assets/edgegap-unity-plugin/README.md
-  uploadId: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

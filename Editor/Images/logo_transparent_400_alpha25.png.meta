@@ -84,20 +84,13 @@ TextureImporter:
     spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
-    indices: 
+    indices:
     edges: []
     weights: []
     secondaryTextures: []
-  spritePackingTag: 
+  spritePackingTag:
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 96.0.1
-  assetPath: Assets/edgegap-unity-plugin/Editor/Images/logo_transparent_400_alpha25.png
-  uploadId: 736421
+  userData:
+  assetBundleName:
+  assetBundleVariant:

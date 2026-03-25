@@ -11,18 +11,12 @@ TrueTypeFontImporter:
   fontNames:
   - Spartan
   fallbackFontReferences: []
-  customCharacters: 
+  customCharacters:
   fontRenderingMode: 0
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   shouldRoundAdvanceValue: 1
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 96.0.1
-  assetPath: Assets/edgegap-unity-plugin/Editor/Fonts/Src/Spartan/Spartan-Regular.ttf
-  uploadId: 736421
+  userData:
+  assetBundleName:
+  assetBundleVariant:
+
