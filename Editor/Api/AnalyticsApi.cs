@@ -12,10 +12,9 @@ namespace Edgegap.Editor.Api
     public class AnalyticsApi
     {
         private readonly HttpClient _httpClient = new HttpClient();
-        private string _url = "https://us.i.posthog.com/i/v0/e/";
+        private string _url = "https://r.edgegap.net/";
         private string _Key = "phc_sjDOXB5OakYZu0h70u4GLcFR7hZ55XfnnDef5xaeDws";
         private string _Event = "Plugin Button Click";
-        private string _DistinctId;
 
         private class AnalyticsPayload
         {
@@ -47,18 +46,20 @@ namespace Edgegap.Editor.Api
             public override string ToString() => JsonConvert.SerializeObject(this);
         }
 
-        public AnalyticsApi(string distinctId)
+        public AnalyticsApi()
         {
             this._httpClient.BaseAddress = new Uri(_url);
             this._httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
             );
-            this._DistinctId = distinctId;
         }
 
-        public async Task<HttpResponseMessage> PostAsync(Dictionary<string, string> properties)
+        public async Task<HttpResponseMessage> PostAsync(
+            string distinctId,
+            Dictionary<string, string> properties
+        )
         {
-            AnalyticsPayload payload = new AnalyticsPayload(_Key, _Event, _DistinctId, properties);
+            AnalyticsPayload payload = new AnalyticsPayload(_Key, _Event, distinctId, properties);
             StringContent stringContent = new StringContent(
                 payload.ToString(),
                 Encoding.UTF8,
