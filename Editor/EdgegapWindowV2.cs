@@ -921,7 +921,7 @@ namespace Edgegap.Editor
                     { "identifier", _organizationInfo.Identifier },
                     { "provider", _organizationInfo.Provider },
                     { "button_name", "1. Connect Edgegap Account > Sign out" },
-                    { "utm_source", "plugin_unity" },
+                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 };
                 await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
@@ -1001,7 +1001,7 @@ namespace Edgegap.Editor
                     { "identifier", _organizationInfo.Identifier },
                     { "provider", _organizationInfo.Provider },
                     { "button_name", "2. Build Game Server > Edit Settings" },
-                    { "utm_source", "plugin_unity" },
+                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 };
                 await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
@@ -1038,7 +1038,7 @@ namespace Edgegap.Editor
             Dictionary<string, string> properties = new Dictionary<string, string>()
             {
                 { "button_name", buttonName },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
             };
             if (buttonName.Contains("Rebuild from Source"))
             {
@@ -1141,7 +1141,7 @@ namespace Edgegap.Editor
             Dictionary<string, string> properties = new Dictionary<string, string>()
             {
                 { "button_name", "3. Containerize Server > Validate Docker" },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
             };
             if (_organizationInfo is not null)
             {
@@ -1346,7 +1346,7 @@ namespace Edgegap.Editor
                         { "identifier", _organizationInfo.Identifier },
                         { "provider", _organizationInfo.Provider },
                         { "button_name", buttonName },
-                        { "utm_source", "plugin_unity" },
+                        { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                         { "succeeded", false.ToString() },
                         { "error_message", "Docker validation failed" },
                     };
@@ -1436,7 +1436,7 @@ namespace Edgegap.Editor
                         { "identifier", _organizationInfo.Identifier },
                         { "provider", _organizationInfo.Provider },
                         { "button_name", buttonName },
-                        { "utm_source", "plugin_unity" },
+                        { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                         { "docker_params", _optionalDockerParamsInput.value },
                         { "image_name", imageName },
                         { "image_tag", tag },
@@ -1464,7 +1464,7 @@ namespace Edgegap.Editor
                         { "identifier", _organizationInfo.Identifier },
                         { "provider", _organizationInfo.Provider },
                         { "button_name", buttonName },
-                        { "utm_source", "plugin_unity" },
+                        { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                         { "docker_params", _optionalDockerParamsInput.value },
                         { "image_name", imageName },
                         { "image_tag", tag },
@@ -1574,7 +1574,7 @@ namespace Edgegap.Editor
                 { "identifier", _organizationInfo.Identifier },
                 { "provider", _organizationInfo.Provider },
                 { "button_name", "4. Test Locally > Deploy" },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "server_image", _localTestImageInput.value },
                 { "docker_params", _localTestDockerRunInput.value },
             };
@@ -1664,7 +1664,7 @@ namespace Edgegap.Editor
                 { "identifier", _organizationInfo.Identifier },
                 { "provider", _organizationInfo.Provider },
                 { "button_name", "4. Test Locally > Terminate" },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "server_image", _localTestImageInput.value },
                 { "docker_params", _localTestDockerRunInput.value },
             };
@@ -1838,7 +1838,7 @@ namespace Edgegap.Editor
                 { "identifier", _organizationInfo.Identifier },
                 { "provider", _organizationInfo.Provider },
                 { "button_name", buttonName },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "app_name", _createAppNameInput.value },
                 { "image_name", _serverImageNameInput.value },
                 { "image_tag", _serverImageTagInput.value },
@@ -2249,7 +2249,7 @@ namespace Edgegap.Editor
                 { "identifier", _organizationInfo.Identifier },
                 { "provider", _organizationInfo.Provider },
                 { "button_name", "6. Deploy > Start" },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "app_name", _deployAppNameInput.value },
                 { "app_version", _deployAppVersionInput.value },
             };
@@ -2347,7 +2347,7 @@ namespace Edgegap.Editor
                 { "identifier", _organizationInfo.Identifier },
                 { "provider", _organizationInfo.Provider },
                 { "button_name", "6. Deploy > Stop" },
-                { "utm_source", "plugin_unity" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "app_name", _deployAppNameInput.value },
                 { "app_version", _deployAppVersionInput.value },
             };
