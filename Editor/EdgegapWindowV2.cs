@@ -872,6 +872,7 @@ namespace Edgegap.Editor
                 if (getOrganizationInformationResult.IsResultCode200)
                 {
                     _organizationInfo = getOrganizationInformationResult.Data;
+                    Debug.Log($"DistincId: {_organizationInfo.DistinctId}"); //TODO remove after testing
                 }
             }
             else
@@ -913,18 +914,15 @@ namespace Edgegap.Editor
         /// </summary>
         private async void OnSignOutBtnClickAsync()
         {
-            if (_organizationInfo is not null)
+            AnalyticsApi analyticsApi = getAnalyticsApi();
+            Dictionary<string, string> properties = new Dictionary<string, string>()
             {
-                AnalyticsApi analyticsApi = getAnalyticsApi();
-                Dictionary<string, string> properties = new Dictionary<string, string>()
-                {
-                    { "identifier", _organizationInfo.Identifier },
-                    { "provider", _organizationInfo.Provider },
-                    { "button_name", "1. Connect Edgegap Account > Sign out" },
-                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
-                };
-                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-            }
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
+                { "button_name", "1. Connect Edgegap Account > Sign out" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+            };
+            await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
             EditorPrefs.DeleteKey(EdgegapWindowMetadata.API_TOKEN_KEY_STR);
             EditorPrefs.DeleteKey(EdgegapWindowMetadata.SELECTED_NETCODE_KEY_STR);
@@ -993,18 +991,15 @@ namespace Edgegap.Editor
         /// </summary>
         private async void OnOpenBuildParamsBtnClick()
         {
-            if (_organizationInfo is not null)
+            AnalyticsApi analyticsApi = getAnalyticsApi();
+            Dictionary<string, string> properties = new Dictionary<string, string>()
             {
-                AnalyticsApi analyticsApi = getAnalyticsApi();
-                Dictionary<string, string> properties = new Dictionary<string, string>()
-                {
-                    { "identifier", _organizationInfo.Identifier },
-                    { "provider", _organizationInfo.Provider },
-                    { "button_name", "2. Build Game Server > Edit Settings" },
-                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
-                };
-                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-            }
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
+                { "button_name", "2. Build Game Server > Edit Settings" },
+                { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+            };
+            await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
 #if UNITY_2021_3_OR_NEWER
             EditorWindow.GetWindow(
@@ -1039,16 +1034,9 @@ namespace Edgegap.Editor
             {
                 { "button_name", buttonName },
                 { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (buttonName.Contains("Rebuild from Source"))
-            {
-                properties.Add("rebuild_step", "Build");
-            }
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             try
             {
@@ -1081,22 +1069,16 @@ namespace Edgegap.Editor
                 {
                     Debug.LogWarning(buildResult.summary.result.ToString());
 
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", false.ToString());
-                        properties.Add("error_message", buildResult.summary.result.ToString());
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", buildResult.summary.result.ToString());
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
                 }
                 else
                 {
                     OnBuildContainerizeUploadSuccess(_serverBuildResultLabel, "Build succeeded.");
 
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", true.ToString());
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", true.ToString());
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
                 }
 
                 _containerizeFoldout.SetValueWithoutNotify(true);
@@ -1104,13 +1086,10 @@ namespace Edgegap.Editor
             }
             catch (Exception e)
             {
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", e.Message);
-                    properties.Add("stack_trace", e.StackTrace);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", false.ToString());
+                properties.Add("error_message", e.Message);
+                properties.Add("stack_trace", e.StackTrace);
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 Debug.LogError($"OnBuildServerBtnClick Error: {e}");
                 ShowErrorDialog(e.Message, _serverBuildResultLabel, "Build failed (see logs).");
@@ -1142,12 +1121,9 @@ namespace Edgegap.Editor
             {
                 { "button_name", "3. Containerize Server > Validate Docker" },
                 { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             _validateDockerRequirementsBtn.SetEnabled(false);
             hideResultLabels();
@@ -1162,13 +1138,10 @@ namespace Edgegap.Editor
             {
                 error = e.Message;
 
-                if (runAnalytics && _organizationInfo is not null)
-                {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", e.Message);
-                    properties.Add("stack_trace", e.StackTrace);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", false.ToString());
+                properties.Add("error_message", e.Message);
+                properties.Add("stack_trace", e.StackTrace);
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
             _validateDockerRequirementsBtn.SetEnabled(true);
 
@@ -1206,11 +1179,8 @@ namespace Edgegap.Editor
                     "Docker is running."
                 );
 
-                if (runAnalytics && _organizationInfo is not null)
-                {
-                    properties.Add("succeeded", true.ToString());
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", true.ToString());
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
             return null;
         }
@@ -1336,26 +1306,20 @@ namespace Edgegap.Editor
         )
         {
             AnalyticsApi analyticsApi = getAnalyticsApi();
+            string validateDockerError = await ValidateDockerRequirement(false);
 
-            if (!string.IsNullOrEmpty(await ValidateDockerRequirement(false)))
+            if (!string.IsNullOrEmpty(validateDockerError))
             {
-                if (_organizationInfo is not null)
+                Dictionary<string, string> properties = new Dictionary<string, string>()
                 {
-                    Dictionary<string, string> properties = new Dictionary<string, string>()
-                    {
-                        { "identifier", _organizationInfo.Identifier },
-                        { "provider", _organizationInfo.Provider },
-                        { "button_name", buttonName },
-                        { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
-                        { "succeeded", false.ToString() },
-                        { "error_message", "Docker validation failed" },
-                    };
-                    if (buttonName.Contains("Rebuild from Source"))
-                    {
-                        properties.Add("rebuild_step", "Containerize");
-                    }
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                    { "identifier", _organizationInfo.Identifier },
+                    { "provider", _organizationInfo.Provider },
+                    { "button_name", buttonName },
+                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+                    { "succeeded", false.ToString() },
+                    { "error_message", $"Docker validation failed: {validateDockerError}" }, //TODO test
+                };
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 return;
             }
@@ -1429,25 +1393,18 @@ namespace Edgegap.Editor
                     _localTestImageShowDropdownBtn.SetEnabled(true);
                 }
 
-                if (_organizationInfo is not null)
+                Dictionary<string, string> properties = new Dictionary<string, string>()
                 {
-                    Dictionary<string, string> properties = new Dictionary<string, string>()
-                    {
-                        { "identifier", _organizationInfo.Identifier },
-                        { "provider", _organizationInfo.Provider },
-                        { "button_name", buttonName },
-                        { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
-                        { "docker_params", _optionalDockerParamsInput.value },
-                        { "image_name", imageName },
-                        { "image_tag", tag },
-                        { "succeeded", true.ToString() },
-                    };
-                    if (buttonName.Contains("Rebuild from Source"))
-                    {
-                        properties.Add("rebuild_step", "Containerize");
-                    }
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                    { "identifier", _organizationInfo.Identifier },
+                    { "provider", _organizationInfo.Provider },
+                    { "button_name", buttonName },
+                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+                    { "docker_params", _optionalDockerParamsInput.value },
+                    { "image_name", imageName },
+                    { "image_tag", tag },
+                    { "succeeded", true.ToString() },
+                };
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
             catch (Exception e)
             {
@@ -1457,27 +1414,20 @@ namespace Edgegap.Editor
                         ? nowUTC
                         : _containerizeImageTagInput.value;
 
-                if (_organizationInfo is not null)
+                Dictionary<string, string> properties = new Dictionary<string, string>()
                 {
-                    Dictionary<string, string> properties = new Dictionary<string, string>()
-                    {
-                        { "identifier", _organizationInfo.Identifier },
-                        { "provider", _organizationInfo.Provider },
-                        { "button_name", buttonName },
-                        { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
-                        { "docker_params", _optionalDockerParamsInput.value },
-                        { "image_name", imageName },
-                        { "image_tag", tag },
-                        { "succeeded", false.ToString() },
-                        { "error_message", e.Message },
-                        { "stack_trace", e.StackTrace },
-                    };
-                    if (buttonName.Contains("Rebuild from Source"))
-                    {
-                        properties.Add("rebuild_step", "Containerize");
-                    }
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                    { "identifier", _organizationInfo.Identifier },
+                    { "provider", _organizationInfo.Provider },
+                    { "button_name", buttonName },
+                    { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
+                    { "docker_params", _optionalDockerParamsInput.value },
+                    { "image_name", imageName },
+                    { "image_tag", tag },
+                    { "succeeded", false.ToString() },
+                    { "error_message", e.Message },
+                    { "stack_trace", e.StackTrace },
+                };
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 Debug.LogError($"Containerization Error: {e}");
                 ShowErrorDialog(
@@ -1577,12 +1527,9 @@ namespace Edgegap.Editor
                 { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "server_image", _localTestImageInput.value },
                 { "docker_params", _localTestDockerRunInput.value },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             try
             {
@@ -1622,11 +1569,8 @@ namespace Edgegap.Editor
                 );
                 _createAppFoldout.SetValueWithoutNotify(true);
 
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", true.ToString());
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", true.ToString());
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
             catch (Exception e)
             {
@@ -1643,13 +1587,10 @@ namespace Edgegap.Editor
                         "There was an issue while deploying. See more in Docker Desktop or Docker CLI.";
                     Debug.LogError($"OnLocalTestDeploy Error: {e}");
 
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", false.ToString());
-                        properties.Add("error_message", e.Message);
-                        properties.Add("stack_trace", e.StackTrace);
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", e.Message);
+                    properties.Add("stack_trace", e.StackTrace);
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
                 }
 
                 OnLocalDeploymentResult(labelMsg, false);
@@ -1661,18 +1602,13 @@ namespace Edgegap.Editor
             AnalyticsApi analyticsApi = getAnalyticsApi();
             Dictionary<string, string> properties = new Dictionary<string, string>()
             {
-                { "identifier", _organizationInfo.Identifier },
-                { "provider", _organizationInfo.Provider },
                 { "button_name", "4. Test Locally > Terminate" },
                 { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "server_image", _localTestImageInput.value },
                 { "docker_params", _localTestDockerRunInput.value },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             try
             {
@@ -1685,11 +1621,8 @@ namespace Edgegap.Editor
                 OnLocalDeploymentResult("Container terminated successfully.", true);
                 _createAppFoldout.SetValueWithoutNotify(true);
 
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", true.ToString());
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", true.ToString());
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
             catch (Exception e)
             {
@@ -1705,13 +1638,10 @@ namespace Edgegap.Editor
                         false
                     );
 
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", false.ToString());
-                        properties.Add("error_message", e.Message);
-                        properties.Add("stack_trace", e.StackTrace);
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", e.Message);
+                    properties.Add("stack_trace", e.StackTrace);
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
                 }
             }
         }
@@ -1842,16 +1772,9 @@ namespace Edgegap.Editor
                 { "app_name", _createAppNameInput.value },
                 { "image_name", _serverImageNameInput.value },
                 { "image_tag", _serverImageTagInput.value },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (buttonName.Contains("Rebuild from Source"))
-            {
-                properties.Add("rebuild_step", "Upload and Create App");
-            }
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             try
             {
@@ -1892,11 +1815,8 @@ namespace Edgegap.Editor
                     throw new Exception("Unable to push docker image to registry (see logs).");
                 }
 
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", true.ToString());
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", true.ToString());
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 ShowWorkInProgress("Create Application", "Updating server info on Edgegap");
 
@@ -1957,13 +1877,10 @@ namespace Edgegap.Editor
             }
             catch (Exception e)
             {
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", e.Message);
-                    properties.Add("stack_trace", e.StackTrace);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", false.ToString());
+                properties.Add("error_message", e.Message);
+                properties.Add("stack_trace", e.StackTrace);
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 if (
                     e.Message.Contains("Docker authorization failed")
@@ -2012,7 +1929,7 @@ namespace Edgegap.Editor
             hideResultLabels();
 
             //Build
-            await BuildServer("5. Upload to Edgegap > Rebuild from Source");
+            await BuildServer("5. Upload to Edgegap > Rebuild from Source > Build");
 
             if (_serverBuildResultLabel.text.Contains(EdgegapWindowMetadata.FAIL_COLOR_HEX))
             {
@@ -2026,7 +1943,9 @@ namespace Edgegap.Editor
                 _containerizeImageTagInput.SetValueWithoutNotify(_containerizeImageTagInputDefault);
             }
 
-            await ContainerizeServerAsync("5. Upload to Edgegap > Rebuild from Source");
+            await ContainerizeServerAsync(
+                "5. Upload to Edgegap > Rebuild from Source > Containerize"
+            );
 
             if (
                 _containerizeServerResultLabel.text.Contains(EdgegapWindowMetadata.FAIL_COLOR_HEX)
@@ -2040,7 +1959,9 @@ namespace Edgegap.Editor
             }
 
             //Upload
-            await UploadImageCreateAppAsync("5. Upload to Edgegap > Rebuild from Source");
+            await UploadImageCreateAppAsync(
+                "5. Upload to Edgegap > Rebuild from Source > Upload and Create App"
+            );
         }
         #endregion
 
@@ -2246,27 +2167,19 @@ namespace Edgegap.Editor
             AnalyticsApi analyticsApi = getAnalyticsApi();
             Dictionary<string, string> properties = new Dictionary<string, string>()
             {
-                { "identifier", _organizationInfo.Identifier },
-                { "provider", _organizationInfo.Provider },
                 { "button_name", "6. Deploy > Start" },
                 { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "app_name", _deployAppNameInput.value },
                 { "app_version", _deployAppVersionInput.value },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             if (!createDeploymentResponse.IsResultCode202)
             {
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", createDeploymentResponse.Error.ErrorMessage);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", false.ToString());
+                properties.Add("error_message", createDeploymentResponse.Error.ErrorMessage);
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 OnCreateDeploymentStartServerFail(createDeploymentResponse.Error.ErrorMessage);
                 return;
@@ -2299,20 +2212,14 @@ namespace Edgegap.Editor
                 );
                 _deployResultLabel.style.display = DisplayStyle.Flex;
 
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", true.ToString());
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", true.ToString());
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
             }
             else
             {
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", getDeploymentStatusResponse.Error.ErrorMessage);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", false.ToString());
+                properties.Add("error_message", getDeploymentStatusResponse.Error.ErrorMessage);
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 OnCreateDeploymentStartServerFail(getDeploymentStatusResponse.Error.ErrorMessage);
             }
@@ -2344,18 +2251,13 @@ namespace Edgegap.Editor
             AnalyticsApi analyticsApi = getAnalyticsApi();
             Dictionary<string, string> properties = new Dictionary<string, string>()
             {
-                { "identifier", _organizationInfo.Identifier },
-                { "provider", _organizationInfo.Provider },
                 { "button_name", "6. Deploy > Stop" },
                 { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                 { "app_name", _deployAppNameInput.value },
                 { "app_version", _deployAppVersionInput.value },
+                { "identifier", _organizationInfo.Identifier },
+                { "provider", _organizationInfo.Provider },
             };
-            if (_organizationInfo is not null)
-            {
-                properties.Add("identifier", _organizationInfo.Identifier);
-                properties.Add("provider", _organizationInfo.Provider);
-            }
 
             try
             {
@@ -2394,12 +2296,9 @@ namespace Edgegap.Editor
 
                 if (!stopDeploymentResponse.IsResultCode200)
                 {
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", false.ToString());
-                        properties.Add("error_message", stopDeploymentResponse.Error.ErrorMessage);
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", stopDeploymentResponse.Error.ErrorMessage);
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                     OnGetStopLastDeploymentResult(stopDeploymentResponse.Error.ErrorMessage, false);
                     return;
@@ -2417,22 +2316,16 @@ namespace Edgegap.Editor
                 //Process response
                 if (!stopDeploymentResponse.IsResultCode410)
                 {
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", false.ToString());
-                        properties.Add("error_message", stopDeploymentResponse.Error.ErrorMessage);
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", stopDeploymentResponse.Error.ErrorMessage);
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                     OnGetStopLastDeploymentResult(stopDeploymentResponse.Error.ErrorMessage, false);
                 }
                 else
                 {
-                    if (_organizationInfo is not null)
-                    {
-                        properties.Add("succeeded", true.ToString());
-                        await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                    }
+                    properties.Add("succeeded", true.ToString());
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                     OnGetStopLastDeploymentResult("Deployment stopped successfully", true);
                 }
@@ -2441,13 +2334,10 @@ namespace Edgegap.Editor
             }
             catch (Exception e)
             {
-                if (_organizationInfo is not null)
-                {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", e.Message);
-                    properties.Add("stack_trace", e.StackTrace);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
-                }
+                properties.Add("succeeded", false.ToString());
+                properties.Add("error_message", e.Message);
+                properties.Add("stack_trace", e.StackTrace);
+                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
                 OnGetStopLastDeploymentResult(e.Message, false);
                 OpenEdgegapURL(EdgegapWindowMetadata.EDGEGAP_DEPLOY_APP_URL);
