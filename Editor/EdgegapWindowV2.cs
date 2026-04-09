@@ -872,7 +872,6 @@ namespace Edgegap.Editor
                 if (getOrganizationInformationResult.IsResultCode200)
                 {
                     _organizationInfo = getOrganizationInformationResult.Data;
-                    Debug.Log($"DistincId: {_organizationInfo.DistinctId}"); //TODO remove after testing
                 }
             }
             else
@@ -1138,10 +1137,12 @@ namespace Edgegap.Editor
             {
                 error = e.Message;
 
-                properties.Add("succeeded", false.ToString());
-                properties.Add("error_message", e.Message);
-                properties.Add("stack_trace", e.StackTrace);
-                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
+                if (runAnalytics) {
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", e.Message);
+                    properties.Add("stack_trace", e.StackTrace);
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
+                }
             }
             _validateDockerRequirementsBtn.SetEnabled(true);
 
@@ -1179,8 +1180,10 @@ namespace Edgegap.Editor
                     "Docker is running."
                 );
 
-                properties.Add("succeeded", true.ToString());
-                await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
+                if (runAnalytics) {
+                    properties.Add("succeeded", true.ToString());
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
+                }
             }
             return null;
         }
@@ -1317,7 +1320,7 @@ namespace Edgegap.Editor
                     { "button_name", buttonName },
                     { "utm_source", EdgegapWindowMetadata.DEFAULT_UTM_SOURCE_TAG },
                     { "succeeded", false.ToString() },
-                    { "error_message", $"Docker validation failed: {validateDockerError}" }, //TODO test
+                    { "error_message", $"Docker validation failed: {validateDockerError}" },
                 };
                 await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
 
