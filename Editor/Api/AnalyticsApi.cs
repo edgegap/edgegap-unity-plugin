@@ -12,7 +12,7 @@ namespace Edgegap.Editor.Api
     public class AnalyticsApi
     {
         private readonly HttpClient _httpClient = new HttpClient();
-        private string _url = "https://r.edgegap.net/";
+        private string _url = "https://r.edgegap.net/i/v0/e/";
         private string _Key = "phc_sjDOXB5OakYZu0h70u4GLcFR7hZ55XfnnDef5xaeDws";
         private string _Event = "Plugin Button Click";
 
