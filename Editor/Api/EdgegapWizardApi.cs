@@ -10,13 +10,11 @@ namespace Edgegap.Editor.Api
     {
         /// <summary>Extended path after the base uri</summary>
         public EdgegapWizardApi(
-            ApiEnvironment apiEnvironment, 
-            string apiToken, 
-            EdgegapWindowMetadata.LogLevel logLevel = EdgegapWindowMetadata.LogLevel.Error)
-            : base(apiEnvironment, apiToken, logLevel)
-        {
-        }
-
+            ApiEnvironment apiEnvironment,
+            string apiToken,
+            EdgegapWindowMetadata.LogLevel logLevel = EdgegapWindowMetadata.LogLevel.Error
+        )
+            : base(apiEnvironment, apiToken, logLevel) { }
 
         #region API Methods
         /// <summary>POST to v1/wizard/init-quick-start</summary>
@@ -32,7 +30,7 @@ namespace Edgegap.Editor.Api
 
             return result;
         }
-        
+
         /// <summary>GET to v1/wizard/registry-credentials</summary>
         /// <returns>
         /// - Http info with GetRegistryCredentialsResult data model
@@ -43,7 +41,24 @@ namespace Edgegap.Editor.Api
         public async Task<EdgegapHttpResult<GetRegistryCredentialsResult>> GetRegistryCredentials()
         {
             HttpResponseMessage response = await GetAsync("v1/wizard/registry-credentials");
-            EdgegapHttpResult<GetRegistryCredentialsResult> result = new EdgegapHttpResult<GetRegistryCredentialsResult>(response); // MIRROR CHANGE: 'new()' not supported in Unity 2020
+            EdgegapHttpResult<GetRegistryCredentialsResult> result =
+                new EdgegapHttpResult<GetRegistryCredentialsResult>(response); // MIRROR CHANGE: 'new()' not supported in Unity 2020
+
+            return result;
+        }
+
+        /// <summary>GET to /v1/wizard/organization-information</summary>
+        /// <returns>
+        /// - Http info with GetOrganizationInformationResult data model
+        /// - Success: 200
+        /// </returns>
+        public async Task<
+            EdgegapHttpResult<GetOrganizationInformationResult>
+        > GetOrganizationInformation()
+        {
+            HttpResponseMessage response = await GetAsync("/v1/wizard/organization-information");
+            EdgegapHttpResult<GetOrganizationInformationResult> result =
+                new EdgegapHttpResult<GetOrganizationInformationResult>(response); // MIRROR CHANGE: 'new()' not supported in Unity 2020
 
             return result;
         }
