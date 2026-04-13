@@ -1136,18 +1136,21 @@ namespace Edgegap.Editor
             catch (Exception e)
             {
                 error = e.Message;
-
+                
                 if (runAnalytics) {
-                    properties.Add("succeeded", false.ToString());
-                    properties.Add("error_message", e.Message);
                     properties.Add("stack_trace", e.StackTrace);
-                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
                 }
             }
             _validateDockerRequirementsBtn.SetEnabled(true);
 
             if (!string.IsNullOrEmpty(error))
             {
+                if (runAnalytics) {
+                    properties.Add("succeeded", false.ToString());
+                    properties.Add("error_message", error);
+                    await analyticsApi.PostAsync(_organizationInfo.DistinctId, properties);
+                }
+
                 ShowErrorDialog(
                     error.Contains("docker daemon is not running")
                     || error.Contains("dockerDesktop")
