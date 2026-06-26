@@ -125,23 +125,16 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID:
     internalID: 0
     vertices: []
-    indices: 
+    indices:
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable: {}
-  mipmapLimitGroupName: 
+  mipmapLimitGroupName:
   pSDRemoveMatte: 0
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 96.0.1
-  assetPath: Assets/edgegap-unity-plugin/Editor/Images/discord-brands-solid-64px.png
-  uploadId: 736421
+  userData:
+  assetBundleName:
+  assetBundleVariant:
