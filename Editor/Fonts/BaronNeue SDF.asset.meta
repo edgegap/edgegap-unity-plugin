@@ -3,13 +3,6 @@ guid: af70148bee18c584898036462be91b19
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 129321
-  packageName: Mirror
-  packageVersion: 
-  assetPath: Assets/edgegap-unity-plugin/Editor/Fonts/BaronNeue SDF.asset
-  uploadId: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:
