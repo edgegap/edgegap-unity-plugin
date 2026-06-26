@@ -590,7 +590,7 @@ namespace Edgegap.Editor
         /// </summary>
         private void unregisterUICallbacks()
         {
-            _headerLogoImage.UnregisterCallback<ClickEvent>(OpenGettingStartedUrl);
+            _headerLogoImage?.UnregisterCallback<ClickEvent>(OpenGettingStartedUrl);
             _debugBtn.clickable.clicked -= OnDebugBtnClick;
 
             _edgegapSignInBtn.clickable.clicked -= OnEdgegapSignInBtnClick;
@@ -950,7 +950,7 @@ namespace Edgegap.Editor
                 ShowErrorDialog(
                     null,
                     _linuxRequirementsResultLabel,
-                    "Requirements not currently installed."
+                    "Requirements missing."
                 );
                 await Task.Delay(1);
                 OpenEdgegapDocsURL(EdgegapWindowMetadata.EDGEGAP_DOC_PLUGIN_GUIDE_PATH);
