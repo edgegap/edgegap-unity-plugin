@@ -26,20 +26,28 @@ namespace Edgegap
 
         public static BuildReport BuildServer(string folderName)
         {
+            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
+
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.StandaloneLinux64)
+            {
+                EditorUserBuildSettings.SwitchActiveBuildTarget(
+                    BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+            }
+
+#if ADDRESSABLES_PRESENT
+            UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.CleanPlayerContent();
+            UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent();
+#endif
+
             IEnumerable<string> scenes = EditorBuildSettings.scenes
                 .Where(s => s.enabled)
                 .Select(s => s.path);
+
             BuildPlayerOptions options = new BuildPlayerOptions
             {
                 scenes = scenes.ToArray(),
                 target = BuildTarget.StandaloneLinux64,
-                // MIRROR CHANGE
-#if UNITY_2021_3_OR_NEWER
                 subtarget = (int)StandaloneBuildSubtarget.Server, // dedicated server with UNITY_SERVER define
-#else
-                options = BuildOptions.EnableHeadlessMode, // obsolete and missing UNITY_SERVER define
-#endif
-                // END MIRROR CHANGE
                 locationPathName = $"Builds/{folderName}/ServerBuild"
             };
 
