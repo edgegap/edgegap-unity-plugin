@@ -2,7 +2,7 @@
 
 [Follow our Unity Plugin Guide to get your first dedicated server deployed.](https://docs.edgegap.com/docs/tools-and-integrations/unity-plugin-guide)
 
-[![Watch the video](https://img.youtube.com/vi/AIFPkHol1a4/0.jpg)](https://www.youtube.com/watch?v=AIFPkHol1a4)
+[![Watch the video](https://img.youtube.com/vi/4FR04V4YEUk/0.jpg)](https://youtu.be/4FR04V4YEUk)
 
 This plugin has been tested, and supports Unity versions 2021.2+, including all LTS releases, Unity 2023, and Unity 6.
 
